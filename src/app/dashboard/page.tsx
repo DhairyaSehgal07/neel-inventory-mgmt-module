@@ -1,9 +1,11 @@
-import React from 'react'
+import { DashboardPage } from '@/components/dashboard';
 
 const page = () => {
   return (
-    <div className='text-4xl'>This is the dashboard screen</div>
-  )
-}
+    <main>
+      <DashboardPage />
+    </main>
+  );
+};
 
-export default page
+export default page;

@@ -1,9 +1,12 @@
-import React from 'react'
+import React from 'react';
+import { SettingsPage } from '@/components/settings';
 
 const page = () => {
   return (
-    <div>this is settings page</div>
+    <>
+      <SettingsPage/>
+    </>
   )
-}
+};
 
-export default page
+export default page;
