@@ -30,7 +30,7 @@ const navigationItems = [
   },
   {
     name: 'Settings',
-    href: '/dashboard/settings',
+    href: '/settings',
     icon: Settings,
   },
 ];
@@ -41,9 +41,9 @@ const AppSidebar = () => {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-2">
+        <Link href="/dashboard" className="flex items-center gap-2 px-2 py-2">
           <Image src="/neelkanth.webp" alt="Logo" width={120} height={120} />
-        </div>
+        </Link>
       </SidebarHeader>
 
       <SidebarContent>
@@ -57,11 +57,7 @@ const AppSidebar = () => {
 
                 return (
                   <SidebarMenuItem key={item.name}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive}
-                      tooltip={item.name}
-                    >
+                    <SidebarMenuButton asChild isActive={isActive} tooltip={item.name}>
                       <Link href={item.href}>
                         <Icon className="h-4 w-4" />
                         <span>{item.name}</span>

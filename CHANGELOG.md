@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.3.0] - 2026-02-04
+
+### Features
+
+* **Route group (main-app)** – App routes moved under `(main-app)` route group; dashboard, fabric, raw-materials, and settings live under shared layout
+* **Fabric forms** – New and edit fabric forms (`components/forms/fabric/new`, `components/forms/fabric/edit`) with full create/update flows
+* **Raw materials form** – New raw materials form (`components/forms/raw-materials/new`) for creating raw materials
+* **Client-only wrapper** – `ClientOnly` component for hydrating client-only UI (e.g. forms, toasts)
+* **UI components** – Added alert-dialog, calendar, input-group, item, popover, sonner (toast), textarea
+
+### Changed
+
+* **Sidebar** – `app-sidebar` updated for new route structure and navigation
+* **Dashboard** – Dashboard component and page updated for (main-app) layout
+* **Button** – Button component adjustments
+
+### Removed
+
+* **Legacy dashboard routes** – Removed `src/app/dashboard/` (layout, page, settings) in favor of `(main-app)/dashboard` and `(main-app)/settings`
+
 ## [0.2.0] - 2026-02-04
 
 ### Features
