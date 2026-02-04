@@ -5,31 +5,42 @@
  */
 export enum Permission {
   // Belt permissions
-  BELT_VIEW = "belt:view",
-  BELT_CREATE = "belt:create",
-  BELT_UPDATE = "belt:update",
-  BELT_DELETE = "belt:delete",
+  BELT_VIEW = 'belt:view',
+  BELT_CREATE = 'belt:create',
+  BELT_UPDATE = 'belt:update',
+  BELT_DELETE = 'belt:delete',
 
   // User management permissions
-  USER_VIEW = "user:view",
-  USER_CREATE = "user:create",
-  USER_UPDATE = "user:update",
-  USER_DELETE = "user:delete",
-  USER_MANAGE_PERMISSIONS = "user:manage_permissions",
+  USER_VIEW = 'user:view',
+  USER_CREATE = 'user:create',
+  USER_UPDATE = 'user:update',
+  USER_DELETE = 'user:delete',
+  USER_MANAGE_PERMISSIONS = 'user:manage_permissions',
 
   // Dashboard permissions
-  DASHBOARD_VIEW = "dashboard:view",
-  DASHBOARD_REVERSE_TRACKING = "dashboard:reverse_tracking",
+  DASHBOARD_VIEW = 'dashboard:view',
+  DASHBOARD_REVERSE_TRACKING = 'dashboard:reverse_tracking',
 
   // Reports permissions
-  REPORTS_VIEW = "reports:view",
-  REPORTS_EXPORT = "reports:export",
+  REPORTS_VIEW = 'reports:view',
+  REPORTS_EXPORT = 'reports:export',
 
-  // Compound type permissions
-  COMPOUND_TYPE_VIEW = "compound_type:view",
-  COMPOUND_TYPE_CREATE = "compound_type:create",
-  COMPOUND_TYPE_UPDATE = "compound_type:update",
-  COMPOUND_TYPE_DELETE = "compound_type:delete",
+  // Compound master permissions
+  COMPOUND_MASTER_VIEW = 'compound_master:view',
+  COMPOUND_MASTER_CREATE = 'compound_master:create',
+  COMPOUND_MASTER_UPDATE = 'compound_master:update',
+  COMPOUND_MASTER_DELETE = 'compound_master:delete',
+
+  COMPOUND_BATCH_VIEW = 'compound_batch:view',
+  COMPOUND_BATCH_CREATE = 'compound_batch:create',
+  COMPOUND_BATCH_UPDATE = 'compound_batch:update',
+  COMPOUND_BATCH_DELETE = 'compound_batch:delete',
+
+  // Rating permissions
+  RATING_VIEW = 'rating:view',
+  RATING_CREATE = 'rating:create',
+  RATING_UPDATE = 'rating:update',
+  RATING_DELETE = 'rating:delete',
 }
 
 /**
@@ -58,10 +69,22 @@ export const PermissionGroups = {
     Permission.REPORTS_EXPORT,
   ],
   COMPOUND_TYPE: [
-    Permission.COMPOUND_TYPE_VIEW,
-    Permission.COMPOUND_TYPE_CREATE,
-    Permission.COMPOUND_TYPE_UPDATE,
-    Permission.COMPOUND_TYPE_DELETE,
+    Permission.COMPOUND_MASTER_VIEW,
+    Permission.COMPOUND_MASTER_CREATE,
+    Permission.COMPOUND_MASTER_UPDATE,
+    Permission.COMPOUND_MASTER_DELETE,
+  ],
+  COMPOUND_BATCH: [
+    Permission.COMPOUND_BATCH_VIEW,
+    Permission.COMPOUND_BATCH_CREATE,
+    Permission.COMPOUND_BATCH_UPDATE,
+    Permission.COMPOUND_BATCH_DELETE,
+  ],
+  RATING: [
+    Permission.RATING_VIEW,
+    Permission.RATING_CREATE,
+    Permission.RATING_UPDATE,
+    Permission.RATING_DELETE,
   ],
 } as const;
 

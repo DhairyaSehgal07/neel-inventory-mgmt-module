@@ -1,11 +1,12 @@
-import { PrismaClient } from "../src/generated/prisma/client";
-import { PrismaPg } from '@prisma/adapter-pg'
-import 'dotenv/config'
-import bcrypt from 'bcryptjs'
+import { PrismaClient } from '../src/generated/prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import 'dotenv/config';
+import bcrypt from 'bcryptjs';
+import { ALL_PERMISSIONS } from '../src/lib/rbac/permissions';
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL,
-})
+});
 
 const prisma = new PrismaClient({
   adapter,
@@ -13,34 +14,34 @@ const prisma = new PrismaClient({
 
 export async function main() {
   try {
-    // Check if admin user already exists
-    const existingAdmin = await prisma.user.findFirst({
-      where: { mobileNumber: "9877741375" },
+    const mobileNumber = '8437702351';
+
+    const existing = await prisma.user.findFirst({
+      where: { mobileNumber },
     });
 
-    if (existingAdmin) {
-      console.log("✅ Admin user already exists");
+    if (existing) {
+      console.log('✅ User Aseem already exists');
       return;
     }
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash("123456", 10);
+    const hashedPassword = await bcrypt.hash('123456', 10);
+    const permissions = ALL_PERMISSIONS.map((p) => String(p));
 
-    // Create admin user
     await prisma.user.create({
       data: {
-        name: "Admin",
-        mobileNumber: "9877741375",
+        name: 'Aseem',
+        mobileNumber,
         password: hashedPassword,
-        role: "Admin",
+        role: 'Admin',
+        permissions,
         isActive: true,
-        permissions: [],
       },
     });
 
-    console.log("🌱 Admin user seeded successfully");
+    console.log('🌱 User Aseem (Admin) seeded successfully with all permissions');
   } catch (error) {
-    console.error("❌ Error seeding admin user:", error);
+    console.error('❌ Error seeding user:', error);
     throw error;
   }
 }
