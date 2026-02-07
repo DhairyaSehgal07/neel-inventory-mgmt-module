@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.1](///compare/v0.3.0...v0.3.1) (2026-02-07)
+
+
+### Features
+
+* add Fabric model and CRUD APIs for fabric type, strength, width 2784f22
+
 ## [0.3.0] - 2026-02-04
 
 ### Features
