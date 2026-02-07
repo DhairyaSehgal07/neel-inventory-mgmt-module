@@ -19,6 +19,9 @@ export const DEFAULT_PERMISSIONS_BY_ROLE: Record<Exclude<Role, 'Admin'>, Permiss
     ...PermissionGroups.COMPOUND_TYPE,
     ...PermissionGroups.COMPOUND_BATCH,
     ...PermissionGroups.RATING,
+    ...PermissionGroups.FABRIC_TYPE,
+    ...PermissionGroups.FABRIC_STRENGTH,
+    ...PermissionGroups.FABRIC_WIDTH,
   ],
   Supervisor: [
     Permission.USER_VIEW,
@@ -29,6 +32,9 @@ export const DEFAULT_PERMISSIONS_BY_ROLE: Record<Exclude<Role, 'Admin'>, Permiss
     ...PermissionGroups.COMPOUND_TYPE,
     ...PermissionGroups.COMPOUND_BATCH,
     ...PermissionGroups.RATING,
+    ...PermissionGroups.FABRIC_TYPE,
+    ...PermissionGroups.FABRIC_STRENGTH,
+    ...PermissionGroups.FABRIC_WIDTH,
   ],
   Worker: [
     Permission.BELT_VIEW,

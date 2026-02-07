@@ -33,3 +33,57 @@ model User {
 
   @@map("users")
 }
+
+model FabricType {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  fabrics Fabric[]
+
+  @@map("fabric_types")
+}
+
+model FabricStrength {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  fabrics Fabric[]
+
+  @@map("fabric_strengths")
+}
+
+model FabricWidth {
+  id        Int      @id @default(autoincrement())
+  value     Float    // width value (e.g. in meters or inches)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  fabrics Fabric[]
+
+  @@map("fabric_widths")
+}
+
+model Fabric {
+  id               Int             @id @default(autoincrement())
+  date             DateTime
+  fabricTypeId     Int
+  fabricStrengthId Int
+  fabricWidthId    Int
+  fabricLength     Float
+  nameOfVendor     String
+  gsmObserved      Float
+  netWeight        Float
+  gsmCalculated    Float
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  fabricType     FabricType     @relation(fields: [fabricTypeId], references: [id])
+  fabricStrength FabricStrength @relation(fields: [fabricStrengthId], references: [id])
+  fabricWidth    FabricWidth    @relation(fields: [fabricWidthId], references: [id])
+
+  @@map("fabrics")
+}

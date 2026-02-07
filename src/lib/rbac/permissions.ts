@@ -41,6 +41,22 @@ export enum Permission {
   RATING_CREATE = 'rating:create',
   RATING_UPDATE = 'rating:update',
   RATING_DELETE = 'rating:delete',
+
+  // Fabric settings (type, strength, width)
+  FABRIC_TYPE_VIEW = 'fabric_type:view',
+  FABRIC_TYPE_CREATE = 'fabric_type:create',
+  FABRIC_TYPE_UPDATE = 'fabric_type:update',
+  FABRIC_TYPE_DELETE = 'fabric_type:delete',
+
+  FABRIC_STRENGTH_VIEW = 'fabric_strength:view',
+  FABRIC_STRENGTH_CREATE = 'fabric_strength:create',
+  FABRIC_STRENGTH_UPDATE = 'fabric_strength:update',
+  FABRIC_STRENGTH_DELETE = 'fabric_strength:delete',
+
+  FABRIC_WIDTH_VIEW = 'fabric_width:view',
+  FABRIC_WIDTH_CREATE = 'fabric_width:create',
+  FABRIC_WIDTH_UPDATE = 'fabric_width:update',
+  FABRIC_WIDTH_DELETE = 'fabric_width:delete',
 }
 
 /**
@@ -85,6 +101,24 @@ export const PermissionGroups = {
     Permission.RATING_CREATE,
     Permission.RATING_UPDATE,
     Permission.RATING_DELETE,
+  ],
+  FABRIC_TYPE: [
+    Permission.FABRIC_TYPE_VIEW,
+    Permission.FABRIC_TYPE_CREATE,
+    Permission.FABRIC_TYPE_UPDATE,
+    Permission.FABRIC_TYPE_DELETE,
+  ],
+  FABRIC_STRENGTH: [
+    Permission.FABRIC_STRENGTH_VIEW,
+    Permission.FABRIC_STRENGTH_CREATE,
+    Permission.FABRIC_STRENGTH_UPDATE,
+    Permission.FABRIC_STRENGTH_DELETE,
+  ],
+  FABRIC_WIDTH: [
+    Permission.FABRIC_WIDTH_VIEW,
+    Permission.FABRIC_WIDTH_CREATE,
+    Permission.FABRIC_WIDTH_UPDATE,
+    Permission.FABRIC_WIDTH_DELETE,
   ],
 } as const;
 

@@ -33,7 +33,7 @@ export const FabricSettingsPage = () => {
         </Link>
 
         {/* Strength */}
-        <Link href="/dashboard/settings/fabrics/strength" className="group">
+        <Link href="/settings/fabrics/strength" className="group">
           <Card className="h-40 cursor-pointer transition-all group-hover:shadow-md group-hover:border-primary/50">
             <CardHeader className="flex h-full flex-col justify-center space-y-2">
               <CardTitle className="text-xl">Strength</CardTitle>
@@ -45,7 +45,7 @@ export const FabricSettingsPage = () => {
         </Link>
 
         {/* Width */}
-        <Link href="/dashboard/settings/fabrics/width" className="group">
+        <Link href="/settings/fabrics/width" className="group">
           <Card className="h-40 cursor-pointer transition-all group-hover:shadow-md group-hover:border-primary/50">
             <CardHeader className="flex h-full flex-col justify-center space-y-2">
               <CardTitle className="text-xl">Width</CardTitle>
