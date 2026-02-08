@@ -22,6 +22,7 @@ export const DEFAULT_PERMISSIONS_BY_ROLE: Record<Exclude<Role, 'Admin'>, Permiss
     ...PermissionGroups.FABRIC_TYPE,
     ...PermissionGroups.FABRIC_STRENGTH,
     ...PermissionGroups.FABRIC_WIDTH,
+    ...PermissionGroups.FABRIC,
   ],
   Supervisor: [
     Permission.USER_VIEW,
@@ -35,6 +36,7 @@ export const DEFAULT_PERMISSIONS_BY_ROLE: Record<Exclude<Role, 'Admin'>, Permiss
     ...PermissionGroups.FABRIC_TYPE,
     ...PermissionGroups.FABRIC_STRENGTH,
     ...PermissionGroups.FABRIC_WIDTH,
+    ...PermissionGroups.FABRIC,
   ],
   Worker: [
     Permission.BELT_VIEW,
@@ -46,6 +48,7 @@ export const DEFAULT_PERMISSIONS_BY_ROLE: Record<Exclude<Role, 'Admin'>, Permiss
     Permission.RATING_VIEW,
     Permission.RATING_CREATE,
     Permission.RATING_UPDATE,
+    Permission.FABRIC_VIEW,
   ],
 };
 

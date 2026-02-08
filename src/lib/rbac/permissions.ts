@@ -57,6 +57,12 @@ export enum Permission {
   FABRIC_WIDTH_CREATE = 'fabric_width:create',
   FABRIC_WIDTH_UPDATE = 'fabric_width:update',
   FABRIC_WIDTH_DELETE = 'fabric_width:delete',
+
+  // Fabric (inventory item) permissions
+  FABRIC_VIEW = 'fabric:view',
+  FABRIC_CREATE = 'fabric:create',
+  FABRIC_UPDATE = 'fabric:update',
+  FABRIC_DELETE = 'fabric:delete',
 }
 
 /**
@@ -119,6 +125,12 @@ export const PermissionGroups = {
     Permission.FABRIC_WIDTH_CREATE,
     Permission.FABRIC_WIDTH_UPDATE,
     Permission.FABRIC_WIDTH_DELETE,
+  ],
+  FABRIC: [
+    Permission.FABRIC_VIEW,
+    Permission.FABRIC_CREATE,
+    Permission.FABRIC_UPDATE,
+    Permission.FABRIC_DELETE,
   ],
 } as const;
 

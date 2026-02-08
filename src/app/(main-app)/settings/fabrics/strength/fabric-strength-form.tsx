@@ -22,14 +22,14 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
-import { FabricType } from "./columns"
+import { FabricStrength } from "./columns"
 
 const formSchema = z.object({
   name: z
     .string()
-    .min(1, "Fabric type name is required.")
-    .min(2, "Fabric type name must be at least 2 characters.")
-    .max(50, "Fabric type name must be at most 50 characters.")
+    .min(1, "Fabric strength name is required.")
+    .min(2, "Fabric strength name must be at least 2 characters.")
+    .max(50, "Fabric strength name must be at most 50 characters.")
     .transform((s) => {
       const trimmed = s.trim()
       if (!trimmed) return trimmed
@@ -37,21 +37,21 @@ const formSchema = z.object({
     }),
 })
 
-interface FabricTypeFormProps {
+interface FabricStrengthFormProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSubmit: (data: { name: string }) => void | Promise<void>
-  initialData?: FabricType | null
+  initialData?: FabricStrength | null
   isSubmitting?: boolean
 }
 
-export function FabricTypeForm({
+export function FabricStrengthForm({
   open,
   onOpenChange,
   onSubmit,
   initialData,
   isSubmitting = false,
-}: FabricTypeFormProps) {
+}: FabricStrengthFormProps) {
   const form = useForm({
     defaultValues: {
       name: initialData?.name || "",
@@ -84,12 +84,12 @@ export function FabricTypeForm({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {initialData ? "Edit Fabric Type" : "Add Fabric Type"}
+            {initialData ? "Edit Fabric Strength" : "Add Fabric Strength"}
           </DialogTitle>
           <DialogDescription>
             {initialData
-              ? "Update the fabric type information below."
-              : "Add a new fabric type to the system."}
+              ? "Update the fabric strength information below."
+              : "Add a new fabric strength to the system."}
           </DialogDescription>
         </DialogHeader>
         <form
@@ -107,7 +107,7 @@ export function FabricTypeForm({
                   field.state.meta.isTouched && !field.state.meta.isValid
                 return (
                   <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Fabric Type Name</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>Fabric Strength Name</FieldLabel>
                     <Input
                       id={field.name}
                       name={field.name}
@@ -115,11 +115,11 @@ export function FabricTypeForm({
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
                       aria-invalid={isInvalid}
-                      placeholder="e.g., Cotton, Polyester, Silk"
+                      placeholder="e.g., Strong, Medium, Light"
                       autoComplete="off"
                     />
                     <FieldDescription>
-                      Enter the name of the fabric type.
+                      Enter the name of the fabric strength.
                     </FieldDescription>
                     {isInvalid && <FieldError errors={field.state.meta.errors} />}
                   </Field>

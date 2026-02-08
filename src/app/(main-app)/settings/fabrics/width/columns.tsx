@@ -11,12 +11,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-export type FabricType = {
+export type FabricWidth = {
   id: number
-  name: string
+  value: number
 }
 
-export const columns: ColumnDef<FabricType>[] = [
+export const columns: ColumnDef<FabricWidth>[] = [
   {
     id: "serial",
     header: () => <div className="text-center w-full">S.No</div>,
@@ -34,12 +34,12 @@ export const columns: ColumnDef<FabricType>[] = [
     },
   },
   {
-    accessorKey: "name",
-    header: "Fabric Type",
+    accessorKey: "value",
+    header: "Width (value)",
     cell: ({ row }) => {
       return (
         <div className="font-medium text-foreground">
-          {row.getValue("name")}
+          {row.getValue("value")}
         </div>
       )
     },
@@ -48,13 +48,13 @@ export const columns: ColumnDef<FabricType>[] = [
     id: "actions",
     header: () => <div className="text-right w-full">Actions</div>,
     cell: ({ row, table }) => {
-      const fabricType = row.original
+      const fabricWidth = row.original
       const meta = table.options.meta as {
-        onEdit?: (fabricType: FabricType) => void
-        onDelete?: (fabricType: FabricType) => void
+        onEdit?: (fabricWidth: FabricWidth) => void
+        onDelete?: (fabricWidth: FabricWidth) => void
         isDeletingId?: number | null
       }
-      const isDeleting = meta.isDeletingId === fabricType.id
+      const isDeleting = meta.isDeletingId === fabricWidth.id
 
       return (
         <div className="flex items-center justify-end gap-1">
@@ -64,7 +64,7 @@ export const columns: ColumnDef<FabricType>[] = [
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
-                onClick={() => meta.onEdit?.(fabricType)}
+                onClick={() => meta.onEdit?.(fabricWidth)}
                 disabled={isDeleting}
               >
                 <Pencil className="h-4 w-4" />
@@ -72,7 +72,7 @@ export const columns: ColumnDef<FabricType>[] = [
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Edit fabric type</p>
+              <p>Edit fabric width</p>
             </TooltipContent>
           </Tooltip>
           <Tooltip>
@@ -81,7 +81,7 @@ export const columns: ColumnDef<FabricType>[] = [
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                onClick={() => meta.onDelete?.(fabricType)}
+                onClick={() => meta.onDelete?.(fabricWidth)}
                 disabled={isDeleting}
               >
                 {isDeleting ? (
@@ -93,7 +93,7 @@ export const columns: ColumnDef<FabricType>[] = [
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{isDeleting ? "Deleting…" : "Delete fabric type"}</p>
+              <p>{isDeleting ? "Deleting…" : "Delete fabric width"}</p>
             </TooltipContent>
           </Tooltip>
         </div>

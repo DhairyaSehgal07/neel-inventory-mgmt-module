@@ -27,7 +27,6 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   onEdit?: (item: TData) => void
   onDelete?: (item: TData) => void
-  /** Id of the row currently being deleted (e.g. fabricType.id). Used to show loading on that row's delete button. */
   isDeletingId?: number | null
 }
 
@@ -41,17 +40,11 @@ export function DataTable<TData, TValue>({
   const [searchQuery, setSearchQuery] = React.useState("")
 
   const filteredData = React.useMemo(() => {
-    if (!searchQuery.trim()) {
-      return data
-    }
-    
+    if (!searchQuery.trim()) return data
     const query = searchQuery.toLowerCase().trim()
     return data.filter((item) => {
-      // Search through all string values in the item
       return Object.values(item as Record<string, unknown>).some((value) => {
-        if (typeof value === "string") {
-          return value.toLowerCase().includes(query)
-        }
+        if (typeof value === "string") return value.toLowerCase().includes(query)
         return false
       })
     })
@@ -63,16 +56,8 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    initialState: {
-      pagination: {
-        pageSize: 10,
-      },
-    },
-    meta: {
-      onEdit,
-      onDelete,
-      isDeletingId,
-    },
+    initialState: { pagination: { pageSize: 10 } },
+    meta: { onEdit, onDelete, isDeletingId },
   })
 
   const pageCount = table.getPageCount()
@@ -82,7 +67,6 @@ export function DataTable<TData, TValue>({
   const startRow = totalRows > 0 ? (currentPage - 1) * pageSize + 1 : 0
   const endRow = Math.min(currentPage * pageSize, totalRows)
 
-  // Reset to first page when search query changes
   React.useEffect(() => {
     table.setPageIndex(0)
   }, [searchQuery, table])
@@ -93,7 +77,7 @@ export function DataTable<TData, TValue>({
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           type="text"
-          placeholder="Search fabric types..."
+          placeholder="Search fabric strengths..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-9 pr-9"
@@ -119,24 +103,16 @@ export function DataTable<TData, TValue>({
                   const columnId = header.column.id
                   const isSerialColumn = columnId === "serial"
                   const isActionsColumn = columnId === "actions"
-                  
                   return (
-                    <TableHead 
-                      key={header.id} 
+                    <TableHead
+                      key={header.id}
                       className={`h-12 ${
-                        isSerialColumn 
-                          ? "text-center" 
-                          : isActionsColumn 
-                          ? "text-right" 
-                          : "text-left"
+                        isSerialColumn ? "text-center" : isActionsColumn ? "text-right" : "text-left"
                       }`}
                     >
                       {header.isPlaceholder
                         ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                        : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   )
                 })}
@@ -155,22 +131,14 @@ export function DataTable<TData, TValue>({
                     const columnId = cell.column.id
                     const isSerialColumn = columnId === "serial"
                     const isActionsColumn = columnId === "actions"
-                    
                     return (
-                      <TableCell 
-                        key={cell.id} 
+                      <TableCell
+                        key={cell.id}
                         className={`py-4 ${
-                          isSerialColumn 
-                            ? "text-center" 
-                            : isActionsColumn 
-                            ? "text-right" 
-                            : "text-left"
+                          isSerialColumn ? "text-center" : isActionsColumn ? "text-right" : "text-left"
                         }`}
                       >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     )
                   })}
@@ -178,22 +146,19 @@ export function DataTable<TData, TValue>({
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-32 text-center"
-                >
+                <TableCell colSpan={columns.length} className="h-32 text-center">
                   <div className="flex flex-col items-center justify-center gap-3 py-8">
                     <div className="rounded-full bg-muted p-3">
                       <Inbox className="h-6 w-6 text-muted-foreground" />
                     </div>
                     <div className="space-y-1">
                       <p className="text-sm font-medium text-foreground">
-                        {searchQuery ? "No results found" : "No fabric types found"}
+                        {searchQuery ? "No results found" : "No fabric strengths found"}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {searchQuery
-                          ? `No fabric types match "${searchQuery}". Try a different search term.`
-                          : "Get started by adding a new fabric type."}
+                          ? `No fabric strengths match "${searchQuery}". Try a different search term.`
+                          : "Get started by adding a new fabric strength."}
                       </p>
                     </div>
                   </div>
@@ -208,14 +173,15 @@ export function DataTable<TData, TValue>({
           <div className="text-sm text-muted-foreground">
             {searchQuery && (
               <span className="mr-2">
-                Found <span className="font-medium text-foreground">{totalRows}</span> result{totalRows !== 1 ? "s" : ""}
+                Found <span className="font-medium text-foreground">{totalRows}</span> result
+                {totalRows !== 1 ? "s" : ""}
                 {totalRows > 0 && " • "}
               </span>
             )}
             Showing <span className="font-medium text-foreground">{startRow}</span> to{" "}
             <span className="font-medium text-foreground">{endRow}</span> of{" "}
-            <span className="font-medium text-foreground">{totalRows}</span> fabric
-            {totalRows !== 1 ? " types" : " type"}
+            <span className="font-medium text-foreground">{totalRows}</span> fabric strength
+            {totalRows !== 1 ? "s" : ""}
           </div>
           <div className="flex items-center gap-2">
             <Button

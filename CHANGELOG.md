@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.2](///compare/v0.3.1...v0.3.2) (2026-02-08)
+
+### Features
+
+* **Fabric code** – Backend-generated `fabricCode` on fabric create (format: fabricType-fabricStrength-fabricWidth-supplier-netWeight-date). Added `fabricCode` and `fabricDate` to Prisma Fabric model.
+* **Fabric types settings** – Full CRUD with API integration: list (GET), create (POST), update (PATCH), delete (DELETE). Data table with search, pagination, loaders (Spinner), toasts (Sonner), error state with retry. Form with Zod validation and first-letter capitalisation before submit. Delete confirmation via AlertDialog.
+* **Fabric strengths settings** – Full CRUD page: table, form, API integration, loaders, toasts, error handling, AlertDialog delete confirmation. First-letter capitalisation on strength name in form.
+* **Fabric widths settings** – Full CRUD page: table, form (numeric value), API integration, loaders, toasts, error handling, AlertDialog delete confirmation.
+* **Toaster** – Sonner Toaster added to app Providers (richColors, top-right, closeButton) for global toast notifications.
+* **Add Fabric form** – Fabric type, strength, and width dropdowns fetch options from `/api/fabric-types`, `/api/fabric-strengths`, and `/api/fabric-widths`. Loading state and disabled selects while fetching; error toasts on failed load.
+
+### Changed
+
+* **Delete confirmation** – Replaced native `confirm()` with AlertDialog on fabric types, strengths, and widths settings pages.
+* **Fabric API** – POST create now validates and resolves type/strength/width, generates `fabricCode`, and persists `fabricDate`.
+
 ### [0.3.1](///compare/v0.3.0...v0.3.1) (2026-02-07)
 
 

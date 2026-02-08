@@ -21,7 +21,7 @@ export const FabricSettingsPage = () => {
       {/* Fabric Settings Cards */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {/* Fabric Type */}
-        <Link href="/dashboard/settings/fabrics/types" className="group">
+        <Link href="/settings/fabrics/types" className="group">
           <Card className="h-40 cursor-pointer transition-all group-hover:shadow-md group-hover:border-primary/50">
             <CardHeader className="flex h-full flex-col justify-center space-y-2">
               <CardTitle className="text-xl">Fabric Type</CardTitle>

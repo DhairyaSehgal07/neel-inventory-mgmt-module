@@ -70,12 +70,15 @@ model FabricWidth {
 model Fabric {
   id               Int             @id @default(autoincrement())
   date             DateTime
+  fabricDate       String
+  fabricCode       String
   fabricTypeId     Int
   fabricStrengthId Int
   fabricWidthId    Int
   fabricLength     Float
   nameOfVendor     String
   gsmObserved      Float
+  qrCode           String
   netWeight        Float
   gsmCalculated    Float
   createdAt        DateTime       @default(now())

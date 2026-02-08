@@ -22,39 +22,33 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
-import { FabricType } from "./columns"
+import { FabricWidth } from "./columns"
 
 const formSchema = z.object({
-  name: z
-    .string()
-    .min(1, "Fabric type name is required.")
-    .min(2, "Fabric type name must be at least 2 characters.")
-    .max(50, "Fabric type name must be at most 50 characters.")
-    .transform((s) => {
-      const trimmed = s.trim()
-      if (!trimmed) return trimmed
-      return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase()
-    }),
+  value: z
+    .union([z.string(), z.number()])
+    .transform((v) => (typeof v === "string" ? parseFloat(v) : v))
+    .pipe(z.number().positive("Value must be a positive number")),
 })
 
-interface FabricTypeFormProps {
+interface FabricWidthFormProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSubmit: (data: { name: string }) => void | Promise<void>
-  initialData?: FabricType | null
+  onSubmit: (data: { value: number }) => void | Promise<void>
+  initialData?: FabricWidth | null
   isSubmitting?: boolean
 }
 
-export function FabricTypeForm({
+export function FabricWidthForm({
   open,
   onOpenChange,
   onSubmit,
   initialData,
   isSubmitting = false,
-}: FabricTypeFormProps) {
+}: FabricWidthFormProps) {
   const form = useForm({
     defaultValues: {
-      name: initialData?.name || "",
+      value: initialData?.value ?? "",
     },
     validators: {
       onSubmit: formSchema,
@@ -72,8 +66,8 @@ export function FabricTypeForm({
   })
 
   React.useEffect(() => {
-    if (open && initialData) {
-      form.setFieldValue("name", initialData.name)
+    if (open && initialData != null) {
+      form.setFieldValue("value", initialData.value)
     } else if (open && !initialData) {
       form.reset()
     }
@@ -84,12 +78,12 @@ export function FabricTypeForm({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {initialData ? "Edit Fabric Type" : "Add Fabric Type"}
+            {initialData ? "Edit Fabric Width" : "Add Fabric Width"}
           </DialogTitle>
           <DialogDescription>
             {initialData
-              ? "Update the fabric type information below."
-              : "Add a new fabric type to the system."}
+              ? "Update the fabric width value below."
+              : "Add a new fabric width to the system."}
           </DialogDescription>
         </DialogHeader>
         <form
@@ -101,25 +95,33 @@ export function FabricTypeForm({
           <FieldGroup>
             {/* eslint-disable react/no-children-prop */}
             <form.Field
-              name="name"
+              name="value"
               children={(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid
+                const displayValue =
+                  field.state.value === "" ? "" : String(field.state.value)
                 return (
                   <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Fabric Type Name</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>Width (value)</FieldLabel>
                     <Input
                       id={field.name}
                       name={field.name}
-                      value={field.state.value}
+                      type="number"
+                      step="any"
+                      min={0}
+                      value={displayValue}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(e) => {
+                        const v = e.target.value
+                        field.handleChange(v === "" ? "" : parseFloat(v) || v)
+                      }}
                       aria-invalid={isInvalid}
-                      placeholder="e.g., Cotton, Polyester, Silk"
+                      placeholder="e.g., 1.5, 2, 3"
                       autoComplete="off"
                     />
                     <FieldDescription>
-                      Enter the name of the fabric type.
+                      Enter the width value (positive number).
                     </FieldDescription>
                     {isInvalid && <FieldError errors={field.state.meta.errors} />}
                   </Field>
