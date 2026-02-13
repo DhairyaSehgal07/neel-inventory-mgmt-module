@@ -1,8 +1,10 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import prisma from '@/lib/prisma';
 import dbConnect from '@/lib/dbConnect';
 import { format } from 'date-fns';
+import { ArrowLeft } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -10,10 +12,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 type Props = { params: Promise<{ id: string }> };
 
-export default async function ProductPage({ params }: Props) {
+export default async function FabricDetailPage({ params }: Props) {
   const { id } = await params;
   const fabricId = parseInt(id, 10);
   if (Number.isNaN(fabricId)) {
@@ -36,11 +39,18 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Fabric #{fabric.id}</h1>
-        <p className="text-muted-foreground text-sm">
-          Scanned from QR code · Product details
-        </p>
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon" asChild>
+          <Link href="/fabrics" aria-label="Back to fabrics">
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+        </Button>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Fabric #{fabric.id}</h1>
+          <p className="text-muted-foreground text-sm">
+            Scanned from QR code · Product details
+          </p>
+        </div>
       </div>
 
       <Card>
@@ -53,6 +63,10 @@ export default async function ProductPage({ params }: Props) {
             <div>
               <dt className="text-sm font-medium text-muted-foreground">Date</dt>
               <dd className="mt-1 text-sm">{format(new Date(fabric.date), 'PPP')}</dd>
+            </div>
+            <div className="sm:col-span-2">
+              <dt className="text-sm font-medium text-muted-foreground">Fabric code</dt>
+              <dd className="mt-1 text-sm font-mono break-all">{fabric.fabricCode}</dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-muted-foreground">Fabric type</dt>

@@ -7,6 +7,33 @@ import { createFabricSchema } from '@/schemas/fabricSchema';
 import { getBaseUrl } from '@/lib/base-url';
 
 /**
+ * GET /api/fabrics
+ * List all fabrics with type, strength, width. Requires FABRIC_VIEW.
+ */
+export async function GET(request: NextRequest) {
+  return withRBAC(request, Permission.FABRIC_VIEW, async () => {
+    try {
+      await dbConnect();
+      const fabrics = await prisma.fabric.findMany({
+        include: {
+          fabricType: true,
+          fabricStrength: true,
+          fabricWidth: true,
+        },
+        orderBy: { id: 'desc' },
+      });
+      return NextResponse.json({ success: true, data: fabrics });
+    } catch (error) {
+      console.error('GET /api/fabrics error:', error);
+      return NextResponse.json(
+        { success: false, message: 'Failed to list fabrics' },
+        { status: 500 }
+      );
+    }
+  });
+}
+
+/**
  * POST /api/fabrics
  * Create a fabric. Generates product URL and stores it in qrCode (for QR generation).
  * Requires FABRIC_CREATE.
@@ -71,7 +98,7 @@ export async function POST(request: NextRequest) {
       });
 
       const baseUrl = getBaseUrl(request);
-      const productUrl = `${baseUrl}/products/${fabric.id}`;
+      const productUrl = `${baseUrl}/fabrics/${fabric.id}`;
 
       const updated = await prisma.fabric.update({
         where: { id: fabric.id },

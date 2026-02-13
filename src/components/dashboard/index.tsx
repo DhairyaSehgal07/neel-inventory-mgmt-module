@@ -54,7 +54,7 @@ export const DashboardPage = () => {
           </DialogHeader>
 
           <div className="grid gap-3 py-4">
-            <Link href="/fabric/new" onClick={() => setIsOpen(false)}>
+            <Link href="/fabrics/new" onClick={() => setIsOpen(false)}>
               <Button variant="outline" className="h-12 text-base w-full">
                 Fabric
               </Button>

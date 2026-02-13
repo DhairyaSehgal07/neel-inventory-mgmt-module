@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Circle, Settings } from 'lucide-react';
+import { Layers, Package, Settings } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -19,14 +19,14 @@ import Image from 'next/image';
 // ✅ Updated navigation items
 const navigationItems = [
   {
-    name: 'item1',
-    href: '/item1',
-    icon: Circle,
+    name: 'Fabrics',
+    href: '/fabrics',
+    icon: Layers,
   },
   {
-    name: 'item2',
-    href: '/item2',
-    icon: Circle,
+    name: 'Raw Materials',
+    href: '/raw-materials',
+    icon: Package,
   },
   {
     name: 'Settings',

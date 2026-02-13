@@ -144,7 +144,7 @@ export function FabricNewForm() {
           return;
         }
         toast.success('Fabric created. QR code URL saved.');
-        router.push(`/products/${data.data.id}`);
+        router.push(`/fabrics/${data.data.id}`);
       } catch {
         toast.error('Failed to create fabric');
       } finally {
