@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.3](///compare/v0.3.2...v0.3.3) (2026-02-13)
+
+### Features
+
+* **Fabrics list** – New `/fabrics` page with shadcn + TanStack table: search, pagination, view (eye), edit, delete. GET /api/fabrics to list fabrics; PATCH/DELETE /api/fabrics/[id] for update and delete.
+* **Fabric detail** – Detail page at `/fabrics/[id]` with product info and fabric code; back link to list.
+* **Fabric edit** – Edit page at `/fabrics/[id]/edit` with form and PATCH integration.
+* **Fabric code in detail** – Fabric code shown in fabric detail view.
+* **QR code URL** – New fabrics get `qrCode` pointing to `/fabrics/[id]` (was `/products/[id]`). Add-fabric form and dashboard link to `/fabrics/new`; redirect to `/fabrics/[id]` after create.
+
+### Removed
+
+* **Products detail** – Removed `/products/[id]` page in favor of `/fabrics/[id]`.
+* **Serial number column** – Removed S.No column from fabrics table; ID column serves as identifier.
+
 ### [0.3.2](///compare/v0.3.1...v0.3.2) (2026-02-08)
 
 ### Features
