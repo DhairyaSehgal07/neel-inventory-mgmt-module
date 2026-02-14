@@ -339,7 +339,7 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
                         <Calendar
                           mode="single"
                           selected={field.state.value}
-                          onSelect={(date) => field.handleChange(date)}
+                          onSelect={(date) => { if (date != null) field.handleChange(date); }}
                           initialFocus
                         />
                       </PopoverContent>
