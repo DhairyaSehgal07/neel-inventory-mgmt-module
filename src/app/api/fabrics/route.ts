@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      const baseUrl = getBaseUrl(request);
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || getBaseUrl(request)).replace(/\/$/, '');
       const productUrl = `${baseUrl}/fabrics/${fabric.id}`;
 
       const updated = await prisma.fabric.update({

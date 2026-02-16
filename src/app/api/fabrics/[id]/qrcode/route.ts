@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import QRCode from 'qrcode';
 import prisma from '@/lib/prisma';
 import dbConnect from '@/lib/dbConnect';
+import { getBaseUrl } from '@/lib/base-url';
 
 /**
  * GET /api/fabrics/[id]/qrcode
  * Returns a PNG image of the QR code for the fabric's product URL.
- * Public (no auth) so it can be displayed on the product page.
+ * Encodes NEXT_PUBLIC_API_URL/fabrics/[id]. Public (no auth) so it can be displayed on the product page.
  */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -25,17 +26,20 @@ export async function GET(
     await dbConnect();
     const fabric = await prisma.fabric.findUnique({
       where: { id: fabricId },
-      select: { qrCode: true },
+      select: { id: true },
     });
 
-    if (!fabric || !fabric.qrCode) {
+    if (!fabric) {
       return NextResponse.json(
-        { success: false, message: 'Fabric or QR code not found' },
+        { success: false, message: 'Fabric not found' },
         { status: 404 }
       );
     }
 
-    const dataUrl = await QRCode.toDataURL(fabric.qrCode, {
+    const baseUrl = (process.env.NEXT_PUBLIC_API_URL || getBaseUrl(request)).replace(/\/$/, '');
+    const productUrl = `${baseUrl}/fabrics/${fabric.id}`;
+
+    const dataUrl = await QRCode.toDataURL(productUrl, {
       type: 'image/png',
       margin: 2,
       width: 256,

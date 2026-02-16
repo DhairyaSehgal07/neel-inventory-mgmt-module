@@ -101,21 +101,19 @@ export default async function FabricDetailPage({ params }: Props) {
               <dd className="mt-1 text-sm">{fabric.netWeight} kg</dd>
             </div>
           </dl>
-          {fabric.qrCode ? (
-            <div className="mt-6 pt-6 border-t">
-              <dt className="text-sm font-medium text-muted-foreground mb-2">QR code</dt>
-              <p className="text-xs text-muted-foreground mb-2">
-                Scan to open this product page
-              </p>
-              <Image
-                src={`/api/fabrics/${fabric.id}/qrcode`}
-                alt="Product QR code"
-                width={256}
-                height={256}
-                unoptimized
-              />
-            </div>
-          ) : null}
+          <div className="mt-6 pt-6 border-t">
+            <dt className="text-sm font-medium text-muted-foreground mb-2">QR code</dt>
+            <p className="text-xs text-muted-foreground mb-2">
+              Scan to open this product page
+            </p>
+            <Image
+              src={`/api/fabrics/${fabric.id}/qrcode`}
+              alt="Product QR code"
+              width={256}
+              height={256}
+              unoptimized
+            />
+          </div>
         </CardContent>
       </Card>
     </div>
