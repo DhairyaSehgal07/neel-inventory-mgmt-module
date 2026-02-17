@@ -1,29 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 
+// Run on all routes except static assets and API routes
 export const config = {
-  matcher: ['/dashboard/:path*', '/sign-in', '/sign-up', '/', '/verify/:path*'],
+  matcher: [
+    /*
+     * Match all pathnames except:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder files
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
+  ],
 };
 
+/** Only these routes are accessible without authentication (home + sign-in). */
+function isPublicPath(pathname: string): boolean {
+  return pathname === '/' || pathname.startsWith('/sign-in');
+}
+
 export default async function proxy(request: NextRequest) {
-  // auth() automatically reads from request context in proxy
   const session = await auth();
   const url = request.nextUrl;
+  const pathname = url.pathname;
 
-  // If user is authenticated and tries to visit sign-in, sign-up, or home → redirect to dashboard
-  if (
-    session &&
-    (url.pathname.startsWith('/sign-in') ||
-      url.pathname.startsWith('/sign-up') ||
-      url.pathname.startsWith('/verify') ||
-      url.pathname === '/')
-  ) {
+  // If user is authenticated and tries to visit a public page → redirect to dashboard
+  if (session && isPublicPath(pathname)) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  // If user is not authenticated and tries to visit dashboard → redirect to sign-in
-  if (!session && url.pathname.startsWith('/dashboard')) {
-    return NextResponse.redirect(new URL('/sign-in', request.url));
+  // If user is not authenticated and tries to visit a protected page → redirect to sign-in
+  if (!session && !isPublicPath(pathname)) {
+    const signInUrl = new URL('/sign-in', request.url);
+    signInUrl.searchParams.set('callbackUrl', pathname + url.search);
+    return NextResponse.redirect(signInUrl);
   }
 
   return NextResponse.next();
