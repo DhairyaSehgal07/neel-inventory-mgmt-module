@@ -42,7 +42,10 @@ type Fabric = {
   fabricTypeId: number;
   fabricStrengthId: number;
   fabricWidthId: number;
-  fabricLength: number;
+  fabricLengthInitial: number;
+  fabricLengthCurrent: number;
+  fabricWidthInitial: number;
+  fabricWidthCurrent: number;
   nameOfVendor: string;
   gsmObserved: number;
   gsmCalculated: number;
@@ -174,7 +177,10 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
       date,
       gsmObserved: String(fabric.gsmObserved),
       gsmCalculated: String(fabric.gsmCalculated),
-      fabricLength: String(fabric.fabricLength),
+      fabricLengthInitial: String(fabric.fabricLengthInitial),
+      fabricLengthCurrent: String(fabric.fabricLengthCurrent),
+      fabricWidthInitial: String(fabric.fabricWidthInitial),
+      fabricWidthCurrent: String(fabric.fabricWidthCurrent),
       vendorName: fabric.nameOfVendor ?? '',
       netWeight: String(fabric.netWeight),
     };
@@ -196,7 +202,10 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
       }
       const gsmObserved = parseFloat(value.gsmObserved) || 0;
       const gsmCalculated = parseFloat(value.gsmCalculated) || 0;
-      const fabricLength = parseFloat(value.fabricLength) || 0;
+      const fabricLengthInitial = parseFloat(value.fabricLengthInitial) || 0;
+      const fabricLengthCurrent = parseFloat(value.fabricLengthCurrent) || 0;
+      const fabricWidthInitial = parseFloat(value.fabricWidthInitial) || 0;
+      const fabricWidthCurrent = parseFloat(value.fabricWidthCurrent) || 0;
       const netWeight = parseFloat(value.netWeight) || 0;
       setSubmitting(true);
       try {
@@ -208,7 +217,10 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
             fabricTypeId,
             fabricStrengthId,
             fabricWidthId,
-            fabricLength,
+            fabricLengthInitial,
+            fabricLengthCurrent,
+            fabricWidthInitial,
+            fabricWidthCurrent,
             nameOfVendor: value.vendorName || '—',
             gsmObserved,
             gsmCalculated,
@@ -377,10 +389,55 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
                   </Field>
                 )}
               </form.Field>
-              <form.Field name="fabricLength">
+              <form.Field name="fabricLengthInitial">
                 {(field) => (
                   <Field>
-                    <FieldLabel>Fabric length (m)</FieldLabel>
+                    <FieldLabel>Fabric length initial (m)</FieldLabel>
+                    <Input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    />
+                  </Field>
+                )}
+              </form.Field>
+              <form.Field name="fabricLengthCurrent">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>Fabric length current (m)</FieldLabel>
+                    <Input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    />
+                  </Field>
+                )}
+              </form.Field>
+              <form.Field name="fabricWidthInitial">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>Width initial (m)</FieldLabel>
+                    <Input
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    />
+                  </Field>
+                )}
+              </form.Field>
+              <form.Field name="fabricWidthCurrent">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>Width current (m)</FieldLabel>
                     <Input
                       type="number"
                       min={0}

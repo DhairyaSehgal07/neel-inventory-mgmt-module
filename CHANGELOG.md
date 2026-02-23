@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.4](///compare/v0.3.3...v0.3.4) (2026-02-24)
+
+### Features
+
+* **Fabric status** – Added optional `status` field to Fabric model. New fabrics are created with status "READY TO USE". Status is shown in the fabrics list table and on the fabric detail page.
+* **Fabrics list order** – GET /api/fabrics now returns fabrics sorted by id ascending (oldest to latest); list page displays in that order.
+* **Belt code frequency** – Fabric/belt code frequency in generated codes now starts from 1 (was 0) for both create and update.
+* **Truncate fabrics script** – New `pnpm run truncate-fabrics` script and `scripts/truncate-fabrics.ts` to truncate the fabrics table and restart identity.
+
+### Changed
+
+* **Fabric width in API** – Create and update fabric APIs now use `fabricWidthValue` only (find-or-create by value); removed `fabricWidthId` from schema and routes.
+* **Fabric schema** – Create fabric schema uses `fabricWidthValue`; PATCH resolves width by value and find-or-create.
+
 ### [0.3.3](///compare/v0.3.2...v0.3.3) (2026-02-13)
 
 ### Features

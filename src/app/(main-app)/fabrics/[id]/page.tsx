@@ -77,12 +77,16 @@ export default async function FabricDetailPage({ params }: Props) {
               <dd className="mt-1 text-sm">{fabric.fabricStrength.name}</dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-muted-foreground">Width</dt>
+              <dt className="text-sm font-medium text-muted-foreground">Width (nominal)</dt>
               <dd className="mt-1 text-sm">{fabric.fabricWidth.value} m</dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-muted-foreground">Fabric length</dt>
-              <dd className="mt-1 text-sm">{fabric.fabricLength} m</dd>
+              <dt className="text-sm font-medium text-muted-foreground">Width (initial / current)</dt>
+              <dd className="mt-1 text-sm">{fabric.fabricWidthInitial} m / {fabric.fabricWidthCurrent} m</dd>
+            </div>
+            <div>
+              <dt className="text-sm font-medium text-muted-foreground">Fabric length (initial / current)</dt>
+              <dd className="mt-1 text-sm">{fabric.fabricLengthInitial} m / {fabric.fabricLengthCurrent} m</dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-muted-foreground">Vendor</dt>
@@ -99,6 +103,10 @@ export default async function FabricDetailPage({ params }: Props) {
             <div>
               <dt className="text-sm font-medium text-muted-foreground">Net weight</dt>
               <dd className="mt-1 text-sm">{fabric.netWeight} kg</dd>
+            </div>
+            <div>
+              <dt className="text-sm font-medium text-muted-foreground">Status</dt>
+              <dd className="mt-1 text-sm">{(fabric as { status?: string | null }).status ?? "—"}</dd>
             </div>
           </dl>
           <div className="mt-6 pt-6 border-t">

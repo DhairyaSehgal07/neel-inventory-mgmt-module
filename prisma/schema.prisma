@@ -71,16 +71,20 @@ model Fabric {
   id               Int             @id @default(autoincrement())
   date             DateTime
   fabricDate       String
-  fabricCode       String
+  fabricCode       String   @unique
   fabricTypeId     Int
   fabricStrengthId Int
-  fabricWidthId    Int
-  fabricLength     Float
-  nameOfVendor     String
+  fabricWidthId       Int
+  fabricLengthInitial Float
+  fabricLengthCurrent Float
+  fabricWidthInitial  Float
+  fabricWidthCurrent  Float
+  nameOfVendor        String
   gsmObserved      Float
   qrCode           String
   netWeight        Float
   gsmCalculated    Float
+  status           String?
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 

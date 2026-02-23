@@ -20,7 +20,10 @@ export type FabricRow = {
   fabricTypeId: number
   fabricStrengthId: number
   fabricWidthId: number
-  fabricLength: number
+  fabricLengthInitial: number
+  fabricLengthCurrent: number
+  fabricWidthInitial: number
+  fabricWidthCurrent: number
   nameOfVendor: string
   gsmObserved: number
   gsmCalculated: number
@@ -28,6 +31,7 @@ export type FabricRow = {
   fabricType: { id: number; name: string }
   fabricStrength: { id: number; name: string }
   fabricWidth: { id: number; value: number }
+  status?: string | null
 }
 
 export const columns: ColumnDef<FabricRow>[] = [
@@ -57,17 +61,24 @@ export const columns: ColumnDef<FabricRow>[] = [
   },
   {
     id: "fabricWidth",
-    header: "Width",
-    cell: ({ row }) =>
-      row.original.fabricWidth != null
-        ? `${row.original.fabricWidth.value} m`
-        : "—",
+    header: "Width (m)",
+    cell: ({ row }) => (
+      <span className="text-foreground">
+        {row.original.fabricWidthInitial != null && row.original.fabricWidthCurrent != null
+          ? `${row.original.fabricWidthCurrent} / ${row.original.fabricWidthInitial}`
+          : row.original.fabricWidth != null
+            ? `${row.original.fabricWidth.value} m`
+            : "—"}
+      </span>
+    ),
   },
   {
-    accessorKey: "fabricLength",
+    id: "fabricLength",
     header: "Length (m)",
     cell: ({ row }) => (
-      <span className="text-foreground">{row.original.fabricLength}</span>
+      <span className="text-foreground">
+        {row.original.fabricLengthCurrent} / {row.original.fabricLengthInitial}
+      </span>
     ),
   },
   {
@@ -91,6 +102,15 @@ export const columns: ColumnDef<FabricRow>[] = [
     header: "Net (kg)",
     cell: ({ row }) => (
       <span className="text-foreground">{row.original.netWeight}</span>
+    ),
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => (
+      <span className="text-muted-foreground">
+        {row.original.status ?? "—"}
+      </span>
     ),
   },
   {

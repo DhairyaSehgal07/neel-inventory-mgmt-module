@@ -39,7 +39,6 @@ export function FabricNewForm() {
   const router = useRouter();
   const [fabricTypes, setFabricTypes] = React.useState<Option[]>([]);
   const [fabricStrengths, setFabricStrengths] = React.useState<Option[]>([]);
-  const [fabricWidths, setFabricWidths] = React.useState<Option[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [submitting, setSubmitting] = React.useState(false);
 
@@ -48,16 +47,14 @@ export function FabricNewForm() {
     const load = async () => {
       setLoading(true);
       try {
-        const [typesRes, strengthsRes, widthsRes] = await Promise.all([
+        const [typesRes, strengthsRes] = await Promise.all([
           fetch('/api/fabric-types'),
           fetch('/api/fabric-strengths'),
-          fetch('/api/fabric-widths'),
         ]);
         if (cancelled) return;
 
         const typesJson = await typesRes.json().catch(() => ({}));
         const strengthsJson = await strengthsRes.json().catch(() => ({}));
-        const widthsJson = await widthsRes.json().catch(() => ({}));
 
         if (typesRes.ok && Array.isArray(typesJson?.data)) {
           setFabricTypes(typesJson.data);
@@ -68,17 +65,6 @@ export function FabricNewForm() {
           setFabricStrengths(strengthsJson.data);
         } else if (!strengthsRes.ok) {
           toast.error(strengthsJson?.message ?? 'Failed to load fabric strengths');
-        }
-        if (widthsRes.ok && Array.isArray(widthsJson?.data)) {
-          setFabricWidths(
-            widthsJson.data.map((w: { id: number; value: number }) => ({
-              id: w.id,
-              name: `${w.value} cm`,
-              value: w.value,
-            }))
-          );
-        } else if (!widthsRes.ok) {
-          toast.error(widthsJson?.message ?? 'Failed to load fabric widths');
         }
       } catch {
         if (!cancelled) toast.error('Failed to load options. Please refresh.');
@@ -96,11 +82,11 @@ export function FabricNewForm() {
     defaultValues: {
       fabricType: '',
       fabricStrength: '',
-      fabricWidth: '',
+      widthValue: '',
       date: undefined as Date | undefined,
       gsmObserved: '',
       gsmCalculated: '',
-      fabricLength: '',
+      fabricLengthInitial: '',
       vendorName: '',
       netWeight: '',
       quantity: 1,
@@ -112,17 +98,24 @@ export function FabricNewForm() {
       }
       const fabricTypeId = parseInt(value.fabricType, 10);
       const fabricStrengthId = parseInt(value.fabricStrength, 10);
-      const fabricWidthId = parseInt(value.fabricWidth, 10);
-      if (Number.isNaN(fabricTypeId) || Number.isNaN(fabricStrengthId) || Number.isNaN(fabricWidthId)) {
-        toast.error('Please select fabric type, strength, and width');
+      const widthValueNum = value.widthValue ? parseFloat(value.widthValue) : NaN;
+
+      if (Number.isNaN(fabricTypeId) || Number.isNaN(fabricStrengthId)) {
+        toast.error('Please select fabric type and strength');
         return;
       }
+      if (Number.isNaN(widthValueNum) || widthValueNum < 0) {
+        toast.error('Please enter a valid width (m)');
+        return;
+      }
+
       const gsmObserved = parseFloat(value.gsmObserved) || 0;
       const gsmCalculated = parseFloat(value.gsmCalculated) || 0;
-      const fabricLength = parseFloat(value.fabricLength) || 0;
+      const fabricLengthInitial = parseFloat(value.fabricLengthInitial) || 0;
       const netWeight = parseFloat(value.netWeight) || 0;
       setSubmitting(true);
       try {
+        const quantity = Math.max(1, parseInt(String(value.quantity), 10) || 1);
         const res = await fetch('/api/fabrics', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -130,12 +123,13 @@ export function FabricNewForm() {
             date: format(value.date, 'yyyy-MM-dd'),
             fabricTypeId,
             fabricStrengthId,
-            fabricWidthId,
-            fabricLength,
+            fabricWidthValue: widthValueNum,
+            fabricLengthInitial,
             nameOfVendor: value.vendorName || '—',
             gsmObserved,
             gsmCalculated,
             netWeight,
+            quantity,
           }),
         });
         const data = await res.json();
@@ -143,8 +137,13 @@ export function FabricNewForm() {
           toast.error(data.message ?? 'Failed to create fabric');
           return;
         }
-        toast.success('Fabric created. QR code URL saved.');
-        router.push(`/fabrics/${data.data.id}`);
+        const created = Array.isArray(data.data) ? data.data : [data.data];
+        toast.success(
+          created.length === 1
+            ? 'Fabric created. QR code URL saved.'
+            : `${created.length} fabrics created. QR code URLs saved.`
+        );
+        router.push(`/fabrics/${created[0].id}`);
       } catch {
         toast.error('Failed to create fabric');
       } finally {
@@ -232,27 +231,20 @@ export function FabricNewForm() {
           )}
         </form.Field>
 
-        {/* Width */}
-        <form.Field name="fabricWidth">
+        {/* Width (m) — manual entry */}
+        <form.Field name="widthValue">
           {(field) => (
             <Field data-invalid={field.state.meta.isTouched && !field.state.value}>
-              <FieldLabel>Width</FieldLabel>
-              <Select
+              <FieldLabel>Width (m)</FieldLabel>
+              <Input
+                type="number"
+                min={0}
+                step={0.01}
+                placeholder="e.g. 1.6"
                 value={field.state.value}
-                onValueChange={(v) => field.handleChange(v)}
-                disabled={loading}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder={loading ? 'Loading…' : 'Select width'} />
-                </SelectTrigger>
-                <SelectContent>
-                  {fabricWidths.map((opt) => (
-                    <SelectItem key={opt.id} value={String(opt.id)}>
-                      {opt.name ?? `${opt.value} m`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+              />
               {field.state.meta.isTouched && !field.state.value && (
                 <FieldError errors={[{ message: 'Required' }]} />
               )}
@@ -330,11 +322,11 @@ export function FabricNewForm() {
           )}
         </form.Field>
 
-        {/* Fabric length */}
-        <form.Field name="fabricLength">
+        {/* Fabric length (initial) — current will match until consumed */}
+        <form.Field name="fabricLengthInitial">
           {(field) => (
             <Field>
-              <FieldLabel>Fabric length</FieldLabel>
+              <FieldLabel>Fabric length initial (m)</FieldLabel>
               <Input
                 type="number"
                 min={0}

@@ -20,13 +20,19 @@ export async function GET(request: NextRequest) {
           fabricStrength: true,
           fabricWidth: true,
         },
-        orderBy: { id: 'desc' },
+        orderBy: { id: 'asc' },
       });
       return NextResponse.json({ success: true, data: fabrics });
     } catch (error) {
-      console.error('GET /api/fabrics error:', error);
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error('GET /api/fabrics error:', err.message, err);
+      const isDev = process.env.NODE_ENV === 'development';
+      const message =
+        isDev && err.message
+          ? `Failed to list fabrics: ${err.message}`
+          : 'Failed to list fabrics';
       return NextResponse.json(
-        { success: false, message: 'Failed to list fabrics' },
+        { success: false, message },
         { status: 500 }
       );
     }
@@ -56,64 +62,89 @@ export async function POST(request: NextRequest) {
       const data = parsed.data;
       await dbConnect();
 
-      // Resolve type, strength, width for fabric code
-      const [fabricType, fabricStrength, fabricWidth] = await Promise.all([
+      // Resolve type and strength
+      const [fabricType, fabricStrength] = await Promise.all([
         prisma.fabricType.findUnique({ where: { id: data.fabricTypeId } }),
         prisma.fabricStrength.findUnique({ where: { id: data.fabricStrengthId } }),
-        prisma.fabricWidth.findUnique({ where: { id: data.fabricWidthId } }),
       ]);
 
-      if (!fabricType || !fabricStrength || !fabricWidth) {
+      if (!fabricType || !fabricStrength) {
         return NextResponse.json(
-          { success: false, message: 'Invalid fabric type, strength, or width' },
+          { success: false, message: 'Invalid fabric type or strength' },
           { status: 400 }
         );
       }
 
+      // Resolve width: find-or-create by fabricWidthValue
+      let fabricWidth = await prisma.fabricWidth.findFirst({
+        where: { value: data.fabricWidthValue },
+      });
+      if (!fabricWidth) {
+        fabricWidth = await prisma.fabricWidth.create({
+          data: { value: data.fabricWidthValue },
+        });
+      }
+
       const dateStr = new Date(data.date).toISOString().slice(0, 10);
-      const fabricCode = [
-        fabricType.name,
-        fabricStrength.name,
-        String(fabricWidth.value),
-        data.nameOfVendor,
-        String(data.netWeight),
-        dateStr,
-      ].join('-');
-
-      const fabric = await prisma.fabric.create({
-        data: {
-          date: new Date(data.date),
-          fabricDate: dateStr,
-          fabricCode,
-          fabricTypeId: data.fabricTypeId,
-          fabricStrengthId: data.fabricStrengthId,
-          fabricWidthId: data.fabricWidthId,
-          fabricLength: data.fabricLength,
-          nameOfVendor: data.nameOfVendor,
-          gsmObserved: data.gsmObserved,
-          netWeight: data.netWeight,
-          gsmCalculated: data.gsmCalculated,
-          qrCode: '', // set below after we have id
-        },
-      });
-
+      const quantity = data.quantity ?? 1;
       const baseUrl = (process.env.NEXT_PUBLIC_API_URL || getBaseUrl(request)).replace(/\/$/, '');
-      const productUrl = `${baseUrl}/fabrics/${fabric.id}`;
 
-      const updated = await prisma.fabric.update({
-        where: { id: fabric.id },
-        data: { qrCode: productUrl },
-        include: {
-          fabricType: true,
-          fabricStrength: true,
-          fabricWidth: true,
-        },
-      });
+      const created: Awaited<ReturnType<typeof prisma.fabric.create>>[] = [];
+
+      for (let frequency = 1; frequency <= quantity; frequency++) {
+        const fabricCode = [
+          fabricType.name,
+          fabricStrength.name,
+          String(fabricWidth.value),
+          data.nameOfVendor,
+          String(frequency),
+          dateStr,
+        ].join('-');
+
+        const fabricLengthCurrent = data.fabricLengthCurrent ?? data.fabricLengthInitial;
+        const fabricWidthInitialVal = data.fabricWidthInitial ?? fabricWidth.value;
+        const fabricWidthCurrentVal = data.fabricWidthCurrent ?? fabricWidthInitialVal;
+
+        const fabric = await prisma.fabric.create({
+          data: {
+            date: new Date(data.date),
+            fabricDate: dateStr,
+            fabricCode,
+            fabricTypeId: data.fabricTypeId,
+            fabricStrengthId: data.fabricStrengthId,
+            fabricWidthId: fabricWidth.id,
+            fabricLengthInitial: data.fabricLengthInitial,
+            fabricLengthCurrent,
+            fabricWidthInitial: fabricWidthInitialVal,
+            fabricWidthCurrent: fabricWidthCurrentVal,
+            nameOfVendor: data.nameOfVendor,
+            gsmObserved: data.gsmObserved,
+            netWeight: data.netWeight,
+            gsmCalculated: data.gsmCalculated,
+            status: 'READY TO USE',
+            qrCode: '', // set below after we have id
+          },
+        });
+
+        const productUrl = `${baseUrl}/fabrics/${fabric.id}`;
+
+        const updated = await prisma.fabric.update({
+          where: { id: fabric.id },
+          data: { qrCode: productUrl },
+          include: {
+            fabricType: true,
+            fabricStrength: true,
+            fabricWidth: true,
+          },
+        });
+
+        created.push(updated);
+      }
 
       return NextResponse.json({
         success: true,
-        data: updated,
-        message: 'Fabric created',
+        data: created.length === 1 ? created[0] : created,
+        message: created.length === 1 ? 'Fabric created' : `${created.length} fabrics created`,
       });
     } catch (error) {
       console.error('POST /api/fabrics error:', error);

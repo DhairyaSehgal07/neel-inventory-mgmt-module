@@ -94,43 +94,54 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         );
       }
 
-      const [fabricType, fabricStrength, fabricWidth] = await Promise.all([
+      const [fabricType, fabricStrength, fabricWidthRow] = await Promise.all([
         prisma.fabricType.findUnique({ where: { id: parsed.data.fabricTypeId } }),
         prisma.fabricStrength.findUnique({ where: { id: parsed.data.fabricStrengthId } }),
-        prisma.fabricWidth.findUnique({ where: { id: parsed.data.fabricWidthId } }),
+        prisma.fabricWidth.findFirst({ where: { value: parsed.data.fabricWidthValue } }),
       ]);
-      if (!fabricType || !fabricStrength || !fabricWidth) {
+      if (!fabricType || !fabricStrength) {
         return NextResponse.json(
-          { success: false, message: 'Invalid fabric type, strength, or width' },
+          { success: false, message: 'Invalid fabric type or strength' },
           { status: 400 }
         );
       }
+      const fabricWidth =
+        fabricWidthRow ??
+        (await prisma.fabricWidth.create({ data: { value: parsed.data.fabricWidthValue } }));
 
       const dateStr = new Date(parsed.data.date).toISOString().slice(0, 10);
+      // Preserve frequency from existing code (format: ...-frequency-date) so fabricCode stays unique
+      const parts = existing.fabricCode.split('-');
+      const frequency = parts.length >= 2 ? parts[parts.length - 2] : '1';
       const fabricCode = [
         fabricType.name,
         fabricStrength.name,
         String(fabricWidth.value),
         parsed.data.nameOfVendor,
-        String(parsed.data.netWeight),
+        frequency,
         dateStr,
       ].join('-');
 
+      const updateData: Parameters<typeof prisma.fabric.update>[0]['data'] = {
+        date: new Date(parsed.data.date),
+        fabricDate: dateStr,
+        fabricCode,
+        fabricTypeId: parsed.data.fabricTypeId,
+        fabricStrengthId: parsed.data.fabricStrengthId,
+        fabricWidthId: fabricWidth.id,
+        fabricLengthInitial: parsed.data.fabricLengthInitial,
+        fabricLengthCurrent: parsed.data.fabricLengthCurrent ?? existing.fabricLengthCurrent,
+        fabricWidthInitial: parsed.data.fabricWidthInitial ?? existing.fabricWidthInitial,
+        fabricWidthCurrent: parsed.data.fabricWidthCurrent ?? existing.fabricWidthCurrent,
+        nameOfVendor: parsed.data.nameOfVendor,
+        gsmObserved: parsed.data.gsmObserved,
+        netWeight: parsed.data.netWeight,
+        gsmCalculated: parsed.data.gsmCalculated,
+      };
+
       const updated = await prisma.fabric.update({
         where: { id: fabricId },
-        data: {
-          date: new Date(parsed.data.date),
-          fabricDate: dateStr,
-          fabricCode,
-          fabricTypeId: parsed.data.fabricTypeId,
-          fabricStrengthId: parsed.data.fabricStrengthId,
-          fabricWidthId: parsed.data.fabricWidthId,
-          fabricLength: parsed.data.fabricLength,
-          nameOfVendor: parsed.data.nameOfVendor,
-          gsmObserved: parsed.data.gsmObserved,
-          netWeight: parsed.data.netWeight,
-          gsmCalculated: parsed.data.gsmCalculated,
-        },
+        data: updateData,
         include: {
           fabricType: true,
           fabricStrength: true,

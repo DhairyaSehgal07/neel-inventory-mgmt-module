@@ -37,12 +37,16 @@ function searchableString(row: FabricRow): string {
     row.fabricDate,
     row.fabricCode,
     row.nameOfVendor,
-    row.fabricLength,
+    row.fabricLengthInitial,
+    row.fabricLengthCurrent,
+    row.fabricWidthInitial,
+    row.fabricWidthCurrent,
     row.gsmObserved,
     row.netWeight,
     row.fabricType?.name,
     row.fabricStrength?.name,
     row.fabricWidth?.value,
+    row.status,
   ]
   return parts.filter(Boolean).join(" ").toLowerCase()
 }
