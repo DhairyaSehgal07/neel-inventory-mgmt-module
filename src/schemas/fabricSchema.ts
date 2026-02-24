@@ -17,3 +17,10 @@ export const createFabricSchema = z.object({
 });
 
 export type CreateFabricInput = z.infer<typeof createFabricSchema>;
+
+/** Schema for PATCH: same as create plus optional assignTo (string or null to clear). */
+export const updateFabricSchema = createFabricSchema.extend({
+  assignTo: z.string().nullable().optional(),
+});
+
+export type UpdateFabricInput = z.infer<typeof updateFabricSchema>;

@@ -20,6 +20,15 @@ enum Role {
   Worker
 }
 
+enum FabricStatus {
+  PACKED
+  IN_USE
+  CLOSED
+  OPEN
+  REJECTED
+  TRADED
+}
+
 model User {
   id           Int       @id @default(autoincrement())
   name         String
@@ -86,7 +95,8 @@ model Fabric {
   qrCode           String
   netWeight        Float
   gsmCalculated    Float
-  status           String?
+  status           FabricStatus?
+  assignTo         String?
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 

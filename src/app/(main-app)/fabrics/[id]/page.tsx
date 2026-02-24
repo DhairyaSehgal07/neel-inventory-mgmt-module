@@ -15,7 +15,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getStatusBadgeVariant } from '../utils';
-import { IssueFabricDialog } from './issue-fabric-dialog';
+import { AssignFabricDialog } from './assign-fabric-dialog';
+import { UpdateBalanceDialog } from './update-balance-dialog';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -56,11 +57,18 @@ export default async function FabricDetailPage({ params }: Props) {
             </p>
           </div>
         </div>
-        <IssueFabricDialog
-          fabricId={fabric.id}
-          fabricLengthCurrent={fabric.fabricLengthCurrent}
-          fabricWidthCurrent={fabric.fabricWidthCurrent}
-        />
+        {fabric.status !== 'REJECTED' && fabric.status !== 'TRADED' &&
+          (fabric.assignTo != null && fabric.assignTo !== '' ? (
+            <UpdateBalanceDialog
+              fabricId={fabric.id}
+              currentBalance={fabric.fabricLengthCurrent}
+            />
+          ) : (
+            <AssignFabricDialog
+              fabricId={fabric.id}
+              assignTo={(fabric as { assignTo?: string | null }).assignTo}
+            />
+          ))}
       </div>
 
       <Card>
@@ -122,6 +130,12 @@ export default async function FabricDetailPage({ params }: Props) {
                 </Badge>
               </dd>
             </div>
+            {fabric.assignTo != null && fabric.assignTo !== '' && (
+              <div>
+                <dt className="text-sm font-medium text-muted-foreground">Assigned to</dt>
+                <dd className="mt-1 text-sm">{fabric.assignTo}</dd>
+              </div>
+            )}
           </dl>
           <div className="mt-6 pt-6 border-t">
             <dt className="text-sm font-medium text-muted-foreground mb-2">QR code</dt>

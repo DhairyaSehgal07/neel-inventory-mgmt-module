@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 import dbConnect from '@/lib/dbConnect';
 import { withRBAC } from '@/lib/rbac';
 import { Permission } from '@/lib/rbac/permissions';
-import { createFabricSchema } from '@/schemas/fabricSchema';
+import { updateFabricSchema } from '@/schemas/fabricSchema';
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -70,7 +70,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       }
 
       const body = await request.json();
-      const parsed = createFabricSchema.safeParse(body);
+      const parsed = updateFabricSchema.safeParse(body);
       if (!parsed.success) {
         const message = parsed.error.flatten().fieldErrors
           ? Object.values(parsed.error.flatten().fieldErrors).flat().join(', ')
@@ -137,6 +137,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         gsmObserved: parsed.data.gsmObserved,
         netWeight: parsed.data.netWeight,
         gsmCalculated: parsed.data.gsmCalculated,
+        ...(parsed.data.assignTo !== undefined && { assignTo: parsed.data.assignTo }),
       };
 
       const updated = await prisma.fabric.update({

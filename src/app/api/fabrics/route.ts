@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
             gsmObserved: data.gsmObserved,
             netWeight: data.netWeight,
             gsmCalculated: data.gsmCalculated,
-            status: 'READY TO USE',
+            status: 'PACKED',
             qrCode: '', // set below after we have id
           },
         });

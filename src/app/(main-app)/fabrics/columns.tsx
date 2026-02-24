@@ -180,6 +180,7 @@ export type FabricRow = {
   fabricStrength: { id: number; name: string }
   fabricWidth: { id: number; value: number }
   status?: string | null
+  assignTo?: string | null
 }
 
 export const columns: ColumnDef<FabricRow>[] = [
@@ -212,11 +213,8 @@ export const columns: ColumnDef<FabricRow>[] = [
     header: "Width (m)",
     cell: ({ row }) => (
       <span className="text-foreground">
-        {row.original.fabricWidthInitial != null && row.original.fabricWidthCurrent != null
-          ? `${row.original.fabricWidthCurrent} / ${row.original.fabricWidthInitial}`
-          : row.original.fabricWidth != null
-            ? `${row.original.fabricWidth.value} m`
-            : "—"}
+
+            {row.original.fabricWidthInitial}
       </span>
     ),
   },
@@ -260,6 +258,15 @@ export const columns: ColumnDef<FabricRow>[] = [
       const variant = getStatusBadgeVariant(row.original.status)
       return <Badge variant={variant}>{status}</Badge>
     },
+  },
+  {
+    accessorKey: "assignTo",
+    header: "Assigned To",
+    cell: ({ row }) => (
+      <span className="text-muted-foreground">
+        {row.original.assignTo ?? "—"}
+      </span>
+    ),
   },
   {
     id: "actions",

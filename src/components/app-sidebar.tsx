@@ -23,11 +23,7 @@ const navigationItems = [
     href: '/fabrics',
     icon: Layers,
   },
-  {
-    name: 'Raw Materials',
-    href: '/raw-materials',
-    icon: Package,
-  },
+
   {
     name: 'Settings',
     href: '/settings',

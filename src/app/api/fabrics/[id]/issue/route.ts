@@ -110,7 +110,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
           data: {
             fabricLengthCurrent: newLengthCurrent,
             fabricWidthCurrent: newWidthCurrent,
-            status: 'IN USE',
+            status: 'IN_USE',
           },
         }),
       ]);
