@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.7](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.6...v0.3.7) (2026-02-24)
+
+### Features
+
+* **Assign fabric** – Optional `assignTo` field on Fabric model. Assign-fabric dialog on fabric detail page: select process (e.g. Calendaring 1–4, Rejection, Trading) and POST `/api/fabrics/[id]/assign`. Requires FABRIC_UPDATE.
+* **Update fabric balance** – Update-balance dialog on fabric detail page: set closing balance (quantity). POST `/api/fabrics/[id]/update-fabric-quantity` updates `fabricLengthCurrent` and sets status to OPEN if quantity > 0, CLOSED if 0. Requires FABRIC_UPDATE.
+
+### Changed
+
+* **Fabric detail** – Assign fabric and Update balance actions on fabric detail page.
+* **Fabrics list** – Columns and filters updated for assign/balance flows.
+
+### Fixed
+
+* **Issue route** – Fabric status on issue now uses `IN_USE` enum value (was `'IN USE'`).
+* **Update fabric quantity API** – Zod 4: use `message` for `z.coerce.number()` validation (replaced `required_error` / `invalid_type_error`).
+
 ### [0.3.6](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.5...v0.3.6) (2026-02-24)
 
 ### Features
