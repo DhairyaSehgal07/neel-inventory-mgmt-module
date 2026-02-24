@@ -77,10 +77,26 @@ export default function FabricsPage() {
   const [deleteTarget, setDeleteTarget] = React.useState<FabricRow | null>(null)
   const [isDeletingId, setIsDeletingId] = React.useState<number | null>(null)
   const [strengthFilter, setStrengthFilter] = React.useState<string>("all")
+  const [widthFilter, setWidthFilter] = React.useState<string>("all")
+  const [vendorFilter, setVendorFilter] = React.useState<string>("all")
 
   const strengthOptions = React.useMemo(() => {
     const names = data
       .map((f) => f.fabricStrength?.name)
+      .filter((n): n is string => Boolean(n))
+    return [...new Set(names)].sort()
+  }, [data])
+
+  const widthOptions = React.useMemo(() => {
+    const values = data
+      .map((f) => f.fabricWidth?.value)
+      .filter((v): v is number => v != null && !Number.isNaN(v))
+    return [...new Set(values)].sort((a, b) => a - b)
+  }, [data])
+
+  const vendorOptions = React.useMemo(() => {
+    const names = data
+      .map((f) => f.nameOfVendor?.trim())
       .filter((n): n is string => Boolean(n))
     return [...new Set(names)].sort()
   }, [data])
@@ -93,8 +109,30 @@ export default function FabricsPage() {
     if (strengthFilter !== "all") {
       result = result.filter((f) => f.fabricStrength?.name === strengthFilter)
     }
+    if (widthFilter !== "all") {
+      const widthValue = Number(widthFilter)
+      result = result.filter(
+        (f) => f.fabricWidth?.value != null && f.fabricWidth.value === widthValue
+      )
+    }
+    if (vendorFilter !== "all") {
+      result = result.filter(
+        (f) => (f.nameOfVendor?.trim() ?? "") === vendorFilter
+      )
+    }
     return result
-  }, [data, statusTab, strengthFilter])
+  }, [data, statusTab, strengthFilter, widthFilter, vendorFilter])
+
+  const hasActiveFilters =
+    strengthFilter !== "all" ||
+    widthFilter !== "all" ||
+    vendorFilter !== "all"
+
+  const clearAllFilters = () => {
+    setStrengthFilter("all")
+    setWidthFilter("all")
+    setVendorFilter("all")
+  }
 
   const fetchFabrics = React.useCallback(async () => {
     setFetchError(null)
@@ -249,14 +287,50 @@ export default function FabricsPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                {strengthFilter !== "all" && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">
+                    Width
+                  </span>
+                  <Select value={widthFilter} onValueChange={setWidthFilter}>
+                    <SelectTrigger className="w-[180px]" size="sm">
+                      <SelectValue placeholder="All widths" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All widths</SelectItem>
+                      {widthOptions.map((value) => (
+                        <SelectItem key={value} value={String(value)}>
+                          {value} m
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">
+                    Vendor
+                  </span>
+                  <Select value={vendorFilter} onValueChange={setVendorFilter}>
+                    <SelectTrigger className="w-[180px]" size="sm">
+                      <SelectValue placeholder="All vendors" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All vendors</SelectItem>
+                      {vendorOptions.map((name) => (
+                        <SelectItem key={name} value={name}>
+                          {name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {hasActiveFilters && (
                   <Button
                     variant="ghost"
                     size="sm"
                     className="text-muted-foreground"
-                    onClick={() => setStrengthFilter("all")}
+                    onClick={clearAllFilters}
                   >
-                    Clear strength filter
+                    Clear all filters
                   </Button>
                 )}
               </div>

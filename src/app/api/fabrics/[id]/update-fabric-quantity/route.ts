@@ -55,6 +55,16 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       }
 
       const quantity = parsed.data.quantity;
+      if (quantity > existing.fabricLengthInitial) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: `Quantity must be less than or equal to initial quantity (${existing.fabricLengthInitial} m)`,
+          },
+          { status: 400 }
+        );
+      }
+
       const status = quantity > 0 ? 'OPEN' : 'CLOSED';
 
       const updated = await prisma.fabric.update({

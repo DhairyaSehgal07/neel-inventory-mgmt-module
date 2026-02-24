@@ -99,12 +99,12 @@ export default async function FabricDetailPage({ params }: Props) {
               <dd className="mt-1 text-sm">{fabric.fabricWidth.value} m</dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-muted-foreground">Width (initial / current)</dt>
-              <dd className="mt-1 text-sm">{fabric.fabricWidthInitial} m / {fabric.fabricWidthCurrent} m</dd>
+              <dt className="text-sm font-medium text-muted-foreground">Width </dt>
+              <dd className="mt-1 text-sm"> {fabric.fabricWidthCurrent} cm</dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-muted-foreground">Fabric length (initial / current)</dt>
-              <dd className="mt-1 text-sm">{fabric.fabricLengthInitial} m / {fabric.fabricLengthCurrent} m</dd>
+              <dt className="text-sm font-medium text-muted-foreground">Fabric length (current/initial)</dt>
+              <dd className="mt-1 text-sm">{fabric.fabricLengthCurrent} m / {fabric.fabricLengthInitial} m</dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-muted-foreground">Vendor</dt>
