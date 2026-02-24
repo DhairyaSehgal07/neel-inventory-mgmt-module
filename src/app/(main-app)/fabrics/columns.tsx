@@ -1,18 +1,138 @@
 "use client"
 
+import * as React from "react"
 import { ColumnDef } from "@tanstack/react-table"
 import Link from "next/link"
-import { Eye, Pencil, Trash2 } from "lucide-react"
+import { Eye, Pencil, Printer, Trash2 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { getStatusBadgeVariant } from "./utils"
 import { Spinner } from "@/components/ui/spinner"
+import { getSingleFabricPdfBlob } from "@/components/pdf/Single-Fabric-Roll-Pdf"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+
+type FabricRowActionsMeta = {
+  onEdit?: (fabric: FabricRow) => void
+  onDelete?: (fabric: FabricRow) => void
+  isDeletingId?: number | null
+}
+
+function FabricRowActions({
+  fabric,
+  meta,
+}: {
+  fabric: FabricRow
+  meta: FabricRowActionsMeta
+}) {
+  const [isPrinting, setIsPrinting] = React.useState(false)
+  const isDeleting = meta.isDeletingId === fabric.id
+
+  const handlePrint = React.useCallback(async () => {
+    setIsPrinting(true)
+    try {
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL ?? window.location.origin).replace(
+        /\/$/,
+        ""
+      )
+      const productUrl = `${baseUrl}/fabrics/${fabric.id}`
+      const blob = await getSingleFabricPdfBlob({
+        fabricCode: fabric.fabricCode,
+        productUrl,
+      })
+      const url = URL.createObjectURL(blob)
+      window.open(url, "_blank")
+      setTimeout(() => URL.revokeObjectURL(url), 60_000)
+    } finally {
+      setIsPrinting(false)
+    }
+  }, [fabric.id, fabric.fabricCode])
+
+  return (
+    <div className="flex items-center justify-end gap-1">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+            asChild
+          >
+            <Link href={`/fabrics/${fabric.id}`} aria-label="View fabric">
+              <Eye className="h-4 w-4" />
+            </Link>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>View fabric</p>
+        </TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+            onClick={handlePrint}
+            disabled={isDeleting || isPrinting}
+            aria-label="Print fabric"
+          >
+            {isPrinting ? (
+              <Spinner className="h-4 w-4" />
+            ) : (
+              <Printer className="h-4 w-4" />
+            )}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Print fabric</p>
+        </TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+            onClick={() => meta.onEdit?.(fabric)}
+            disabled={isDeleting}
+          >
+            <Pencil className="h-4 w-4" />
+            <span className="sr-only">Edit</span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Edit fabric</p>
+        </TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            onClick={() => meta.onDelete?.(fabric)}
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <Spinner className="h-4 w-4" />
+            ) : (
+              <Trash2 className="h-4 w-4" />
+            )}
+            <span className="sr-only">Delete</span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{isDeleting ? "Deleting…" : "Delete fabric"}</p>
+        </TooltipContent>
+      </Tooltip>
+    </div>
+  )
+}
 
 export type FabricRow = {
   id: number
@@ -120,72 +240,8 @@ export const columns: ColumnDef<FabricRow>[] = [
     header: () => <div className="text-right w-full">Actions</div>,
     cell: ({ row, table }) => {
       const fabric = row.original
-      const meta = table.options.meta as {
-        onEdit?: (fabric: FabricRow) => void
-        onDelete?: (fabric: FabricRow) => void
-        isDeletingId?: number | null
-      }
-      const isDeleting = meta.isDeletingId === fabric.id
-
-      return (
-        <div className="flex items-center justify-end gap-1">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
-                asChild
-              >
-                <Link href={`/fabrics/${fabric.id}`} aria-label="View fabric">
-                  <Eye className="h-4 w-4" />
-                </Link>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>View fabric</p>
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
-                onClick={() => meta.onEdit?.(fabric)}
-                disabled={isDeleting}
-              >
-                <Pencil className="h-4 w-4" />
-                <span className="sr-only">Edit</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Edit fabric</p>
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                onClick={() => meta.onDelete?.(fabric)}
-                disabled={isDeleting}
-              >
-                {isDeleting ? (
-                  <Spinner className="h-4 w-4" />
-                ) : (
-                  <Trash2 className="h-4 w-4" />
-                )}
-                <span className="sr-only">Delete</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{isDeleting ? "Deleting…" : "Delete fabric"}</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
-      )
+      const meta = table.options.meta as FabricRowActionsMeta
+      return <FabricRowActions fabric={fabric} meta={meta} />
     },
   },
 ]

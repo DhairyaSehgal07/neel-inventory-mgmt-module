@@ -235,7 +235,7 @@ export function FabricNewForm() {
         <form.Field name="widthValue">
           {(field) => (
             <Field data-invalid={field.state.meta.isTouched && !field.state.value}>
-              <FieldLabel>Width (m)</FieldLabel>
+              <FieldLabel>Width (cm)</FieldLabel>
               <Input
                 type="number"
                 min={0}
@@ -290,7 +290,7 @@ export function FabricNewForm() {
         <form.Field name="gsmObserved">
           {(field) => (
             <Field>
-              <FieldLabel>GSM (observed)</FieldLabel>
+              <FieldLabel>GSM (observed Kg)</FieldLabel>
               <Input
                 type="number"
                 min={0}
@@ -308,7 +308,7 @@ export function FabricNewForm() {
         <form.Field name="gsmCalculated">
           {(field) => (
             <Field>
-              <FieldLabel>GSM (calculated)</FieldLabel>
+              <FieldLabel>GSM (calculated Kg)</FieldLabel>
               <Input
                 type="number"
                 min={0}

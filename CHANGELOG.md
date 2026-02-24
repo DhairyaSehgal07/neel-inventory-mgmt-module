@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.6](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.5...v0.3.6) (2026-02-24)
+
+### Features
+
+* **Single-fabric PDF** – New `Single-Fabric-Roll-Pdf` component using `@react-pdf/renderer`: generates A4 PDF with QR code (product URL) and fabric code for a fabric roll. `getSingleFabricPdfBlob()` builds the PDF client-side for download or print.
+* **Print fabric** – Fabrics table row actions: added Print button (Printer icon) that opens the single-fabric PDF in a new tab. Row actions refactored into `FabricRowActions` with tooltips (View, Print, Edit, Delete) and loading state while generating PDF.
+
+### Changed
+
+* **Fabric form labels** – New fabric form: Width label "Width (m)" → "Width (cm)"; GSM labels "GSM (observed)" → "GSM (observed Kg)", "GSM (calculated)" → "GSM (calculated Kg)".
+* **Dependencies** – Added `@react-pdf/renderer` for PDF generation.
+
 ### [0.3.5](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.4...v0.3.5) (2026-02-24)
 
 ### Features
