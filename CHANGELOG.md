@@ -4,13 +4,6 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [0.3.5](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.4...v0.3.5) (2026-02-24)
 
-
-### Features
-
-* **fabrics:** issue fabric flow and issued list ([c142ede](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/commit/c142ede379c487fbc052181c12e6f8d78df6084f))
-
-### [0.3.5](///compare/v0.3.4...v0.3.5) (2026-02-24)
-
 ### Features
 
 * **Issue fabric** – Issue fabric from fabric detail page: dialog to enter length/width issued and purpose. POST `/api/fabrics/[id]/issue` creates `IssueFabric` record, decrements fabric current length/width, sets status to IN USE. Stores `createdById`, `fabricLengthBeforeIssuance`/`fabricWidthBeforeIssuance`, and `fabricLengthRemaining`/`fabricWidthRemaining` for traceability. Requires FABRIC_UPDATE.
