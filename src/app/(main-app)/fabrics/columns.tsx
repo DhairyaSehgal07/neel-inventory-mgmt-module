@@ -3,13 +3,18 @@
 import * as React from "react"
 import { ColumnDef } from "@tanstack/react-table"
 import Link from "next/link"
+import { format } from "date-fns"
+import QRCode from "qrcode"
 import { Eye, Pencil, Printer, Trash2 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { getStatusBadgeVariant } from "./utils"
 import { Spinner } from "@/components/ui/spinner"
-import { getSingleFabricPdfBlob } from "@/components/pdf/Single-Fabric-Roll-Pdf"
+import {
+  getSingleFabricPdfBlob,
+  type SingleFabricPdfParams,
+} from "@/components/pdf/Single-Fabric-Roll-Pdf"
 import {
   Tooltip,
   TooltipContent,
@@ -40,17 +45,38 @@ function FabricRowActions({
         ""
       )
       const productUrl = `${baseUrl}/fabrics/${fabric.id}`
-      const blob = await getSingleFabricPdfBlob({
-        fabricCode: fabric.fabricCode,
-        productUrl,
+      const qrDataUrl = await QRCode.toDataURL(productUrl, {
+        type: "image/png",
+        margin: 2,
+        width: 256,
       })
+      const params: SingleFabricPdfParams = {
+        productUrl,
+        qrDataUrl,
+        id: fabric.id,
+        dateDisplay: format(new Date(fabric.date), "PPP"),
+        fabricCode: fabric.fabricCode,
+        fabricTypeName: fabric.fabricType?.name ?? "",
+        fabricStrengthName: fabric.fabricStrength?.name ?? "",
+        fabricWidthValue: fabric.fabricWidth?.value ?? 0,
+        fabricWidthInitial: fabric.fabricWidthInitial,
+        fabricWidthCurrent: fabric.fabricWidthCurrent,
+        fabricLengthInitial: fabric.fabricLengthInitial,
+        fabricLengthCurrent: fabric.fabricLengthCurrent,
+        nameOfVendor: fabric.nameOfVendor ?? "",
+        gsmObserved: fabric.gsmObserved,
+        gsmCalculated: fabric.gsmCalculated,
+        netWeight: fabric.netWeight,
+        status: fabric.status ?? null,
+      }
+      const blob = await getSingleFabricPdfBlob(params)
       const url = URL.createObjectURL(blob)
       window.open(url, "_blank")
       setTimeout(() => URL.revokeObjectURL(url), 60_000)
     } finally {
       setIsPrinting(false)
     }
-  }, [fabric.id, fabric.fabricCode])
+  }, [fabric])
 
   return (
     <div className="flex items-center justify-end gap-1">
