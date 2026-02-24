@@ -143,7 +143,7 @@ export function FabricNewForm() {
             ? 'Fabric created. QR code URL saved.'
             : `${created.length} fabrics created. QR code URLs saved.`
         );
-        router.push(`/fabrics/${created[0].id}`);
+        router.push('/fabrics');
       } catch {
         toast.error('Failed to create fabric');
       } finally {

@@ -12,7 +12,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { getStatusBadgeVariant } from '../utils';
+import { IssueFabricDialog } from './issue-fabric-dialog';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -39,18 +42,25 @@ export default async function FabricDetailPage({ params }: Props) {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/fabrics" aria-label="Back to fabrics">
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Fabric #{fabric.id}</h1>
-          <p className="text-muted-foreground text-sm">
-            Scanned from QR code · Product details
-          </p>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/fabrics" aria-label="Back to fabrics">
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+          </Button>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">Fabric #{fabric.id}</h1>
+            <p className="text-muted-foreground text-sm">
+              Scanned from QR code · Product details
+            </p>
+          </div>
         </div>
+        <IssueFabricDialog
+          fabricId={fabric.id}
+          fabricLengthCurrent={fabric.fabricLengthCurrent}
+          fabricWidthCurrent={fabric.fabricWidthCurrent}
+        />
       </div>
 
       <Card>
@@ -106,7 +116,11 @@ export default async function FabricDetailPage({ params }: Props) {
             </div>
             <div>
               <dt className="text-sm font-medium text-muted-foreground">Status</dt>
-              <dd className="mt-1 text-sm">{(fabric as { status?: string | null }).status ?? "—"}</dd>
+              <dd className="mt-1">
+                <Badge variant={getStatusBadgeVariant((fabric as { status?: string | null }).status)}>
+                  {(fabric as { status?: string | null }).status ?? "—"}
+                </Badge>
+              </dd>
             </div>
           </dl>
           <div className="mt-6 pt-6 border-t">

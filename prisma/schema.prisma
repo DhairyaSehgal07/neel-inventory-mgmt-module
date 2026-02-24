@@ -31,6 +31,8 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
+  issueFabrics IssueFabric[]
+
   @@map("users")
 }
 
@@ -91,6 +93,27 @@ model Fabric {
   fabricType     FabricType     @relation(fields: [fabricTypeId], references: [id])
   fabricStrength FabricStrength @relation(fields: [fabricStrengthId], references: [id])
   fabricWidth    FabricWidth    @relation(fields: [fabricWidthId], references: [id])
+  issueFabrics   IssueFabric[]
 
   @@map("fabrics")
+}
+
+model IssueFabric {
+  id                    Int      @id @default(autoincrement())
+  fabricId              Int
+  lengthIssued          Float
+  widthIssued           Float
+  purpose               String
+  createdById           Int
+  createdAt             DateTime @default(now())
+  // Snapshot of fabric stock before this issuance (client can compute remaining = before - issued)
+  fabricLengthBeforeIssuance Float
+  fabricWidthBeforeIssuance  Float
+  fabricLengthRemaining      Float
+  fabricWidthRemaining       Float
+
+  fabric Fabric @relation(fields: [fabricId], references: [id])
+  createdBy User @relation(fields: [createdById], references: [id])
+
+  @@map("issue_fabrics")
 }

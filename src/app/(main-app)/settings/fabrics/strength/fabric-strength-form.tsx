@@ -28,12 +28,11 @@ const formSchema = z.object({
   name: z
     .string()
     .min(1, "Fabric strength name is required.")
-    .min(2, "Fabric strength name must be at least 2 characters.")
     .max(50, "Fabric strength name must be at most 50 characters.")
     .transform((s) => {
       const trimmed = s.trim()
       if (!trimmed) return trimmed
-      return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase()
+      return trimmed.charAt(0).toUpperCase() + trimmed.slice(1)
     }),
 })
 

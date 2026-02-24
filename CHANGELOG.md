@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.5](///compare/v0.3.4...v0.3.5) (2026-02-24)
+
+### Features
+
+* **Issue fabric** – Issue fabric from fabric detail page: dialog to enter length/width issued and purpose. POST `/api/fabrics/[id]/issue` creates `IssueFabric` record, decrements fabric current length/width, sets status to IN USE. Stores `createdById`, `fabricLengthBeforeIssuance`/`fabricWidthBeforeIssuance`, and `fabricLengthRemaining`/`fabricWidthRemaining` for traceability. Requires FABRIC_UPDATE.
+* **Issued fabrics list** – New "Issued" tab on `/fabrics` page with data table of all issuances (GET `/api/fabrics/issued`). Columns: fabric code, length/width issued, purpose, issued by, date. Search and pagination.
+* **Issue fabric schema** – Zod `issueFabricSchema` for validating issue payload (lengthIssued, widthIssued, purpose).
+* **Badge component** – New `Badge` UI component (shadcn-style) for status and labels.
+
+### Changed
+
+* **Fabric detail** – "Issue fabric" button and issue dialog on fabric detail page; shows current length/width and validates issued amounts against remaining stock.
+* **Fabrics page** – Tabs for "Inventory" and "Issued"; strength and status filters apply to inventory tab.
+* **Fabric type/strength forms** – First-letter capitalisation on name fields in settings forms (fabric type, fabric strength).
+
 ### [0.3.4](///compare/v0.3.3...v0.3.4) (2026-02-24)
 
 ### Features

@@ -4,7 +4,9 @@ import { ColumnDef } from "@tanstack/react-table"
 import Link from "next/link"
 import { Eye, Pencil, Trash2 } from "lucide-react"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { getStatusBadgeVariant } from "./utils"
 import { Spinner } from "@/components/ui/spinner"
 import {
   Tooltip,
@@ -107,11 +109,11 @@ export const columns: ColumnDef<FabricRow>[] = [
   {
     accessorKey: "status",
     header: "Status",
-    cell: ({ row }) => (
-      <span className="text-muted-foreground">
-        {row.original.status ?? "—"}
-      </span>
-    ),
+    cell: ({ row }) => {
+      const status = row.original.status ?? "—"
+      const variant = getStatusBadgeVariant(row.original.status)
+      return <Badge variant={variant}>{status}</Badge>
+    },
   },
   {
     id: "actions",
