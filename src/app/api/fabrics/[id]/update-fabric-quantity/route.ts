@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
 import prisma from '@/lib/prisma';
 import dbConnect from '@/lib/dbConnect';
 import { withRBAC } from '@/lib/rbac';
@@ -42,6 +43,22 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         );
       }
 
+      const session = await auth();
+      const userIdStr = session?.user?.id;
+      if (!userIdStr) {
+        return NextResponse.json(
+          { success: false, message: 'Unauthorized: user not found in session' },
+          { status: 401 }
+        );
+      }
+      const performedById = parseInt(String(userIdStr), 10);
+      if (Number.isNaN(performedById)) {
+        return NextResponse.json(
+          { success: false, message: 'Invalid user id in session' },
+          { status: 401 }
+        );
+      }
+
       await dbConnect();
 
       const existing = await prisma.fabric.findUnique({
@@ -67,19 +84,32 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
       const status = quantity > 0 ? 'OPEN' : 'CLOSED';
 
-      const updated = await prisma.fabric.update({
-        where: { id: fabricId },
-        data: {
-          fabricLengthCurrent: quantity,
-          status,
-          ...(status === 'OPEN' && { assignTo: null }),
-        },
-        include: {
-          fabricType: true,
-          fabricStrength: true,
-          fabricWidth: true,
-        },
-      });
+      const [updated] = await prisma.$transaction([
+        prisma.fabric.update({
+          where: { id: fabricId },
+          data: {
+            fabricLengthCurrent: quantity,
+            status,
+            ...(status === 'OPEN' && { assignTo: null }),
+          },
+          include: {
+            fabricType: true,
+            fabricStrength: true,
+            fabricWidth: true,
+          },
+        }),
+        prisma.fabricHistory.create({
+          data: {
+            fabricId,
+            actionType: 'BALANCE_UPDATE',
+            performedById,
+            lengthBefore: existing.fabricLengthCurrent,
+            lengthAfter: quantity,
+            statusBefore: existing.status ?? undefined,
+            statusAfter: status,
+          },
+        }),
+      ]);
 
       return NextResponse.json({
         success: true,

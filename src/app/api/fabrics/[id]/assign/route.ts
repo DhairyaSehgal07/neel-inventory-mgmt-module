@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
 import prisma from '@/lib/prisma';
 import dbConnect from '@/lib/dbConnect';
 import { withRBAC } from '@/lib/rbac';
@@ -37,6 +38,22 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         );
       }
 
+      const session = await auth();
+      const userIdStr = session?.user?.id;
+      if (!userIdStr) {
+        return NextResponse.json(
+          { success: false, message: 'Unauthorized: user not found in session' },
+          { status: 401 }
+        );
+      }
+      const performedById = parseInt(String(userIdStr), 10);
+      if (Number.isNaN(performedById)) {
+        return NextResponse.json(
+          { success: false, message: 'Invalid user id in session' },
+          { status: 401 }
+        );
+      }
+
       await dbConnect();
 
       const existing = await prisma.fabric.findUnique({
@@ -60,15 +77,45 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             ? { status: 'TRADED', assignTo: null }
             : { assignTo: value, status: 'IN_USE' };
 
-      const updated = await prisma.fabric.update({
-        where: { id: fabricId },
-        data: updateData,
-        include: {
-          fabricType: true,
-          fabricStrength: true,
-          fabricWidth: true,
-        },
-      });
+      const statusAfter = updateData.status ?? existing.status;
+
+      const fabricHistoryDelegate = prisma.fabricHistory;
+      if (!fabricHistoryDelegate?.create) {
+        console.error(
+          'Prisma client missing fabricHistory delegate. Run: npx prisma generate && restart the dev server.'
+        );
+        return NextResponse.json(
+          {
+            success: false,
+            message:
+              'Server configuration error: database client out of date. Run "npx prisma generate" and restart the server.',
+          },
+          { status: 500 }
+        );
+      }
+
+      const [updated] = await prisma.$transaction([
+        prisma.fabric.update({
+          where: { id: fabricId },
+          data: updateData,
+          include: {
+            fabricType: true,
+            fabricStrength: true,
+            fabricWidth: true,
+          },
+        }),
+        fabricHistoryDelegate.create({
+          data: {
+            fabricId,
+            actionType: 'ASSIGN',
+            performedById,
+            assignToBefore: existing.assignTo ?? undefined,
+            assignToAfter: updateData.assignTo ?? undefined,
+            statusBefore: existing.status ?? undefined,
+            statusAfter: statusAfter ?? undefined,
+          },
+        }),
+      ]);
 
       const message = isRejection
         ? 'Fabric marked as rejected'

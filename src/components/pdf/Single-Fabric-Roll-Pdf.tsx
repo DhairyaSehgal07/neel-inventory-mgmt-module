@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
   },
 
   fabricCodeBold: {
-    fontSize: 11,
+    fontSize: 14,
     fontWeight: 700,
     color: "#111827",
   },
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
 
   infoSection: {
     width: "100%",
-    textAlign: 'center', 
+    textAlign: 'center',
   },
 
   grid: {
@@ -78,14 +78,14 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    fontSize: 8,
+    fontSize: 14,
     color: "#6b7280",
     letterSpacing: 0.5,
     marginBottom: 3,
   },
 
   value: {
-    fontSize: 11,
+    fontSize: 16,
     fontWeight: 600,
     color: "#111827",
   },

@@ -29,6 +29,11 @@ enum FabricStatus {
   TRADED
 }
 
+enum FabricHistoryAction {
+  ASSIGN
+  BALANCE_UPDATE
+}
+
 model User {
   id           Int       @id @default(autoincrement())
   name         String
@@ -40,7 +45,7 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  issueFabrics IssueFabric[]
+  fabricHistories FabricHistory[]
 
   @@map("users")
 }
@@ -103,27 +108,32 @@ model Fabric {
   fabricType     FabricType     @relation(fields: [fabricTypeId], references: [id])
   fabricStrength FabricStrength @relation(fields: [fabricStrengthId], references: [id])
   fabricWidth    FabricWidth    @relation(fields: [fabricWidthId], references: [id])
-  issueFabrics   IssueFabric[]
+  history       FabricHistory[]
 
   @@map("fabrics")
 }
 
-model IssueFabric {
-  id                    Int      @id @default(autoincrement())
-  fabricId              Int
-  lengthIssued          Float
-  widthIssued           Float
-  purpose               String
-  createdById           Int
-  createdAt             DateTime @default(now())
-  // Snapshot of fabric stock before this issuance (client can compute remaining = before - issued)
-  fabricLengthBeforeIssuance Float
-  fabricWidthBeforeIssuance  Float
-  fabricLengthRemaining      Float
-  fabricWidthRemaining       Float
+model FabricHistory {
+  id            Int                 @id @default(autoincrement())
+  fabricId      Int
+  actionType    FabricHistoryAction
+  performedById Int
+  createdAt     DateTime            @default(now())
 
-  fabric Fabric @relation(fields: [fabricId], references: [id])
-  createdBy User @relation(fields: [createdById], references: [id])
+  // Assign: who/what it was assigned to (before/after)
+  assignToBefore String?
+  assignToAfter  String?
 
-  @@map("issue_fabrics")
+  // Status before/after (for both assign and balance update)
+  statusBefore String?
+  statusAfter  String?
+
+  // Balance update: length (m) before/after
+  lengthBefore Float?
+  lengthAfter  Float?
+
+  fabric    Fabric @relation(fields: [fabricId], references: [id], onDelete: Cascade)
+  performedBy User  @relation(fields: [performedById], references: [id])
+
+  @@map("fabric_histories")
 }
