@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
           fabricType: true,
           fabricStrength: true,
           fabricWidth: true,
+          locations: true,
         },
         orderBy: { id: 'asc' },
       });
@@ -135,10 +136,37 @@ export async function POST(request: NextRequest) {
             fabricType: true,
             fabricStrength: true,
             fabricWidth: true,
+            locations: true,
           },
         });
 
-        created.push(updated);
+        const locationsForThis =
+          data.locationsPerFabric?.[frequency - 1] ?? data.locations ?? [];
+        const validLocations = locationsForThis.filter(
+          (loc) => (loc.area ?? '').trim() && (loc.floor ?? '').trim()
+        );
+        if (validLocations.length) {
+          await prisma.location.createMany({
+            data: validLocations.map((loc) => ({
+              fabricId: updated.id,
+              area: (loc.area ?? '').trim(),
+              floor: (loc.floor ?? '').trim(),
+            })),
+          });
+          const withLocations = await prisma.fabric.findUnique({
+            where: { id: updated.id },
+            include: {
+              fabricType: true,
+              fabricStrength: true,
+              fabricWidth: true,
+              locations: true,
+            },
+          });
+          if (withLocations) created.push(withLocations);
+          else created.push(updated);
+        } else {
+          created.push(updated);
+        }
       }
 
       return NextResponse.json({

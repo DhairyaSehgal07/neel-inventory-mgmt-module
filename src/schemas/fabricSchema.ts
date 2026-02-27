@@ -1,5 +1,11 @@
 import { z } from 'zod';
 
+export const locationSchema = z.object({
+  area: z.string(),
+  floor: z.string(),
+});
+
+/** One set of locations per fabric when creating multiple; index i = locations for i-th fabric. */
 export const createFabricSchema = z.object({
   date: z.string().min(1, 'Date is required'),
   fabricTypeId: z.number().int().positive('Fabric type is required'),
@@ -14,6 +20,10 @@ export const createFabricSchema = z.object({
   netWeight: z.number().min(0, 'Net weight must be non-negative'),
   gsmCalculated: z.number().min(0, 'GSM calculated must be non-negative'),
   quantity: z.number().int().min(1, 'Quantity must be at least 1').default(1),
+  /** Per-fabric locations: locationsPerFabric[i] = locations for the i-th fabric. Optional. */
+  locationsPerFabric: z.array(z.array(locationSchema)).optional().default([]),
+  /** @deprecated Use locationsPerFabric. If provided, same locations applied to every fabric. */
+  locations: z.array(locationSchema).optional().default([]),
 });
 
 export type CreateFabricInput = z.infer<typeof createFabricSchema>;

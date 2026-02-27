@@ -35,6 +35,8 @@ import { cn } from '@/lib/utils';
 
 type Option = { id: number; name?: string; value?: number };
 
+type LocationEntry = { area: string; floor: string };
+
 export function FabricNewForm() {
   const router = useRouter();
   const [fabricTypes, setFabricTypes] = React.useState<Option[]>([]);
@@ -90,6 +92,7 @@ export function FabricNewForm() {
       vendorName: '',
       netWeight: '',
       quantity: 1,
+      fabricLocations: [[{ area: '', floor: '' }]] as LocationEntry[][],
     },
     onSubmit: async ({ value }) => {
       if (!value.date) {
@@ -116,6 +119,14 @@ export function FabricNewForm() {
       setSubmitting(true);
       try {
         const quantity = Math.max(1, parseInt(String(value.quantity), 10) || 1);
+        const rawPerFabric = (value.fabricLocations ?? [[{ area: '', floor: '' }]]).slice(0, quantity);
+        const locationsPerFabric = rawPerFabric.map((locs) =>
+          (locs ?? [])
+            .filter((l) => (l.area ?? '').trim() && (l.floor ?? '').trim())
+            .map((l) => ({ area: (l.area ?? '').trim(), floor: (l.floor ?? '').trim() }))
+        );
+        const hasAnyLocations = locationsPerFabric.some((arr) => arr.length > 0);
+
         const res = await fetch('/api/fabrics', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -130,6 +141,7 @@ export function FabricNewForm() {
             gsmCalculated,
             netWeight,
             quantity,
+            ...(hasAnyLocations ? { locationsPerFabric } : {}),
           }),
         });
         const data = await res.json();
@@ -375,25 +387,102 @@ export function FabricNewForm() {
 
         {/* Quantity */}
         <form.Field name="quantity">
-          {(field) => (
-            <Field>
-              <FieldLabel>Quantity</FieldLabel>
-              <Input
-                type="number"
-                min={1}
-                step={1}
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(e) =>
-                  field.handleChange(
-                    Math.max(1, parseInt(e.target.value, 10) || 1)
-                  )
-                }
-              />
-            </Field>
-          )}
+          {(field) => {
+            const quantity = field.state.value ?? 1;
+            return (
+              <Field>
+                <FieldLabel>Quantity</FieldLabel>
+                <Input
+                  type="number"
+                  min={1}
+                  step={1}
+                  value={quantity}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => {
+                    const newQ = Math.max(1, parseInt(e.target.value, 10) || 1);
+                    field.handleChange(newQ);
+                    const current =
+                      form.state.values.fabricLocations ?? [[{ area: '', floor: '' }]];
+                    let next = [...current];
+                    if (next.length < newQ) {
+                      while (next.length < newQ) {
+                        next = [...next, [{ area: '', floor: '' }]];
+                      }
+                    } else if (next.length > newQ) {
+                      next = next.slice(0, newQ);
+                    }
+                    form.setFieldValue('fabricLocations', next);
+                  }}
+                />
+              </Field>
+            );
+          }}
         </form.Field>
       </FieldGroup>
+
+      {/* Per-fabric locations (one row per fabric, driven by quantity) */}
+      <form.Field name="fabricLocations">
+        {(field) => {
+          const quantity = Math.max(1, form.state.values.quantity ?? 1);
+          const fabricLocations = field.state.value ?? [[{ area: '', floor: '' }]];
+          return (
+            <div className="space-y-4">
+              <FieldLabel>Locations (optional)</FieldLabel>
+              <p className="text-sm text-muted-foreground">
+                Area and floor for each fabric. Leave empty to skip.
+              </p>
+              {Array.from({ length: quantity }, (_, fabricIndex) => {
+                const locs = fabricLocations[fabricIndex] ?? [{ area: '', floor: '' }];
+                const loc = locs[0] ?? { area: '', floor: '' };
+                return (
+                  <div
+                    key={fabricIndex}
+                    className="grid grid-cols-1 gap-3 rounded-lg border border-muted/50 bg-muted/20 p-4 sm:grid-cols-2"
+                  >
+                    <span className="text-sm font-medium sm:col-span-2">
+                      Fabric {fabricIndex + 1} location
+                    </span>
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium text-muted-foreground">
+                        Area
+                      </label>
+                      <Input
+                        placeholder="e.g. Warehouse A"
+                        value={loc.area ?? ''}
+                        onChange={(e) => {
+                          const next = [...fabricLocations];
+                          while (next.length <= fabricIndex) {
+                            next.push([{ area: '', floor: '' }]);
+                          }
+                          next[fabricIndex] = [{ ...(next[fabricIndex]?.[0] ?? { area: '', floor: '' }), area: e.target.value }];
+                          field.handleChange(next);
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-sm font-medium text-muted-foreground">
+                        Floor
+                      </label>
+                      <Input
+                        placeholder="e.g. Floor 1"
+                        value={loc.floor ?? ''}
+                        onChange={(e) => {
+                          const next = [...fabricLocations];
+                          while (next.length <= fabricIndex) {
+                            next.push([{ area: '', floor: '' }]);
+                          }
+                          next[fabricIndex] = [{ ...(next[fabricIndex]?.[0] ?? { area: '', floor: '' }), floor: e.target.value }];
+                          field.handleChange(next);
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        }}
+      </form.Field>
     </form>
   </CardContent>
 
