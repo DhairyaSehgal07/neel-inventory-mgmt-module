@@ -185,10 +185,10 @@ export type FabricRow = {
 
 export const columns: ColumnDef<FabricRow>[] = [
   {
-    accessorKey: "id",
-    header: "ID",
+    accessorKey: "fabricCode",
+    header: "Fabric Code",
     cell: ({ row }) => (
-      <span className="font-mono text-sm">{row.original.id}</span>
+      <span className="font-mono text-sm">{row.original.fabricCode}</span>
     ),
   },
   {

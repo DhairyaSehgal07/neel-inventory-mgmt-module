@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
   },
 
   fabricCodeBold: {
-    fontSize: 14,
+    fontSize: 22,
     fontWeight: 700,
     color: "#111827",
   },
@@ -78,26 +78,26 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    fontSize: 14,
+    fontSize: 22,
     color: "#6b7280",
     letterSpacing: 0.5,
     marginBottom: 3,
   },
 
   value: {
-    fontSize: 16,
+    fontSize: 24,
     fontWeight: 600,
     color: "#111827",
   },
 
   valueMono: {
-    fontSize: 10,
+    fontSize: 18,
     fontWeight: 500,
     color: "#111827",
   },
 
   statusBadge: {
-    fontSize: 9,
+    fontSize: 19,
     paddingVertical: 4,
     paddingHorizontal: 10,
     backgroundColor: "#f3f4f6",
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   },
 
   placeholder: {
-    fontSize: 14,
+    fontSize: 22,
     textAlign: "center",
     color: "#666",
   },
@@ -168,7 +168,7 @@ const SingleFabricPdfDocument = (props: SingleFabricPdfParams) => (
             </View>
 
             <View style={styles.gridCell}>
-              <Text style={styles.label}>FABRIC LENGTH</Text>
+              <Text style={styles.label}>LENGTH</Text>
               <Text style={styles.value}>
                 {props.fabricLengthCurrent} m
               </Text>

@@ -21,7 +21,16 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import type { FabricRow } from "./columns"
+
+const PAGE_SIZE_OPTIONS = [10, 50, 100] as const
 
 interface FabricsDataTableProps {
   columns: ColumnDef<FabricRow>[]
@@ -72,7 +81,7 @@ export function FabricsDataTable({
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    initialState: { pagination: { pageSize: 10 } },
+    initialState: { pagination: { pageSize: 50 } },
     meta: { onEdit, onDelete, isDeletingId },
   })
 
@@ -202,20 +211,46 @@ export function FabricsDataTable({
       </div>
       {totalRows > 0 && (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-muted-foreground">
-            {searchQuery && (
-              <span className="mr-2">
-                Found{" "}
-                <span className="font-medium text-foreground">{totalRows}</span>{" "}
-                result{totalRows !== 1 ? "s" : ""}
-                {totalRows > 0 && " • "}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="text-sm text-muted-foreground">
+              {searchQuery && (
+                <span className="mr-2">
+                  Found{" "}
+                  <span className="font-medium text-foreground">{totalRows}</span>{" "}
+                  result{totalRows !== 1 ? "s" : ""}
+                  {totalRows > 0 && " • "}
+                </span>
+              )}
+              Showing{" "}
+              <span className="font-medium text-foreground">{startRow}</span> to{" "}
+              <span className="font-medium text-foreground">{endRow}</span> of{" "}
+              <span className="font-medium text-foreground">{totalRows}</span>{" "}
+              fabric{totalRows !== 1 ? "s" : ""}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground whitespace-nowrap">
+                Rows per page
               </span>
-            )}
-            Showing{" "}
-            <span className="font-medium text-foreground">{startRow}</span> to{" "}
-            <span className="font-medium text-foreground">{endRow}</span> of{" "}
-            <span className="font-medium text-foreground">{totalRows}</span>{" "}
-            fabric{totalRows !== 1 ? "s" : ""}
+              <Select
+                value={String(pageSize)}
+                onValueChange={(value) => {
+                  const size = Number(value)
+                  table.setPageSize(size)
+                  table.setPageIndex(0)
+                }}
+              >
+                <SelectTrigger className="w-[72px]" size="sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PAGE_SIZE_OPTIONS.map((size) => (
+                    <SelectItem key={size} value={String(size)}>
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <Button

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.9](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.8...v0.3.9) (2026-03-02)
+
+### Changed
+
+* **Fabrics table** – First column shows Fabric Code instead of ID. Pagination: default page size 50, "Rows per page" selector (10, 50, 100) and clearer "Showing X to Y of Z fabrics" in the footer.
+* **Single-fabric PDF** – Larger font sizes for fabric code, labels, values, and status badge; label "FABRIC LENGTH" shortened to "LENGTH" for layout.
+
 ### [0.3.8](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.7...v0.3.8) (2026-03-02)
 
 ### Changed
