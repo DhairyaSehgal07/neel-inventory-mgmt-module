@@ -1,6 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import dbConnect from '@/lib/dbConnect';
+
+/** Prisma known request error shape (code P2002 = unique constraint, etc.) */
+function isPrismaKnownRequestError(
+  err: unknown
+): err is { code: string; meta?: { target?: string[] }; message: string } {
+  return (
+    typeof err === 'object' &&
+    err !== null &&
+    'code' in err &&
+    typeof (err as { code: string }).code === 'string' &&
+    (err as { code: string }).code.startsWith('P')
+  );
+}
+import { generateFabricCode } from '@/lib/fabricCode';
 import { withRBAC } from '@/lib/rbac';
 import { Permission } from '@/lib/rbac/permissions';
 import { createFabricSchema } from '@/schemas/fabricSchema';
@@ -93,14 +107,14 @@ export async function POST(request: NextRequest) {
       const created: Awaited<ReturnType<typeof prisma.fabric.create>>[] = [];
 
       for (let frequency = 1; frequency <= quantity; frequency++) {
-        const fabricCode = [
-          fabricType.name,
-          fabricStrength.name,
-          String(fabricWidth.value),
-          data.nameOfVendor,
-          String(frequency),
+        const fabricCode = generateFabricCode({
+          fabricTypeName: fabricType.name,
+          fabricStrengthName: fabricStrength.name,
+          fabricWidthValue: fabricWidth.value,
+          nameOfVendor: data.nameOfVendor,
+          sequenceNumber: frequency,
           dateStr,
-        ].join('-');
+        });
 
         const fabricLengthCurrent = data.fabricLengthCurrent ?? data.fabricLengthInitial;
         const fabricWidthInitialVal = data.fabricWidthInitial ?? fabricWidth.value;
@@ -174,11 +188,40 @@ export async function POST(request: NextRequest) {
         data: created.length === 1 ? created[0] : created,
         message: created.length === 1 ? 'Fabric created' : `${created.length} fabrics created`,
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('POST /api/fabrics error:', error);
+
+      let message = 'Failed to create fabric';
+      let status = 500;
+
+      if (isPrismaKnownRequestError(error)) {
+        switch (error.code) {
+          case 'P2002': {
+            const target = error.meta?.target;
+            const field = Array.isArray(target) ? target.join(', ') : 'fabricCode';
+            message =
+              field === 'fabricCode'
+                ? 'A fabric with this code already exists. Please use a different combination or check for duplicates.'
+                : `A record with this value already exists (${field}).`;
+            status = 409;
+            break;
+          }
+          case 'P2003':
+            message = 'Invalid reference: linked fabric type, strength, or width does not exist.';
+            status = 400;
+            break;
+          default:
+            if (process.env.NODE_ENV === 'development' && error.message) {
+              message = `Database error: ${error.message}`;
+            }
+        }
+      } else if (error instanceof Error && process.env.NODE_ENV === 'development') {
+        message = error.message;
+      }
+
       return NextResponse.json(
-        { success: false, message: 'Failed to create fabric' },
-        { status: 500 }
+        { success: false, message },
+        { status }
       );
     }
   });
