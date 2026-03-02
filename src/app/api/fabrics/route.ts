@@ -107,24 +107,16 @@ export async function POST(request: NextRequest) {
       const created: Awaited<ReturnType<typeof prisma.fabric.create>>[] = [];
 
       for (let frequency = 1; frequency <= quantity; frequency++) {
-        const fabricCode = generateFabricCode({
-          fabricTypeName: fabricType.name,
-          fabricStrengthName: fabricStrength.name,
-          fabricWidthValue: fabricWidth.value,
-          nameOfVendor: data.nameOfVendor,
-          sequenceNumber: frequency,
-          dateStr,
-        });
-
         const fabricLengthCurrent = data.fabricLengthCurrent ?? data.fabricLengthInitial;
         const fabricWidthInitialVal = data.fabricWidthInitial ?? fabricWidth.value;
         const fabricWidthCurrentVal = data.fabricWidthCurrent ?? fabricWidthInitialVal;
 
+        const tempCode = `pending-${Date.now()}-${frequency}-${Math.random().toString(36).slice(2)}`;
         const fabric = await prisma.fabric.create({
           data: {
             date: new Date(data.date),
             fabricDate: dateStr,
-            fabricCode,
+            fabricCode: tempCode,
             fabricTypeId: data.fabricTypeId,
             fabricStrengthId: data.fabricStrengthId,
             fabricWidthId: fabricWidth.id,
@@ -142,10 +134,19 @@ export async function POST(request: NextRequest) {
         });
 
         const productUrl = `${baseUrl}/fabrics/${fabric.id}`;
+        const fabricCode = generateFabricCode({
+          id: String(fabric.id),
+          fabricTypeName: fabricType.name,
+          fabricStrengthName: fabricStrength.name,
+          fabricWidthValue: fabricWidth.value,
+          nameOfVendor: data.nameOfVendor,
+          sequenceNumber: frequency,
+          dateStr,
+        });
 
         const updated = await prisma.fabric.update({
           where: { id: fabric.id },
-          data: { qrCode: productUrl },
+          data: { fabricCode, qrCode: productUrl },
           include: {
             fabricType: true,
             fabricStrength: true,

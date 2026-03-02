@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.8](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.7...v0.3.8) (2026-03-02)
+
+### Changed
+
+* **Fabric code format** – Fabric codes now include fabric id and sequence for uniqueness: format is `{id}-{typeName}-{strengthName}-{widthValue}-{vendor}-{sequence}-{dateStr}`. Create flow uses a temporary code on insert, then updates with the final fabric code and product URL after the record exists.
+
 ### [0.3.7](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.6...v0.3.7) (2026-02-24)
 
 ### Features
