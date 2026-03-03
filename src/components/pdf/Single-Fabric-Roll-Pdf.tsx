@@ -131,66 +131,80 @@ export type SingleFabricPdfParams = {
   status: string | null | undefined;
 };
 
+/** Single page content (one fabric roll). Reused by single and multi-roll PDFs. */
+export const SingleFabricPdfPageContent = (props: SingleFabricPdfParams) => (
+  <View style={styles.contentColumn}>
+    <View style={styles.qrSection}>
+      {/* eslint-disable-next-line jsx-a11y/alt-text -- PDF Image has no alt prop */}
+      <Image src={props.qrDataUrl} style={styles.qrImage} />
+    </View>
+
+    <View style={styles.fabricCodeText}>
+      <Text style={styles.fabricCodeBold}>{props.fabricCode || "—"}</Text>
+    </View>
+
+    <View style={styles.divider} />
+
+    <View style={styles.infoSection}>
+      <View style={styles.grid}>
+        <View style={styles.gridCell}>
+          <Text style={styles.label}>FABRIC TYPE</Text>
+          <Text style={styles.value}>{props.fabricTypeName || "—"}</Text>
+        </View>
+
+        <View style={styles.gridCell}>
+          <Text style={styles.label}>STRENGTH</Text>
+          <Text style={styles.value}>{props.fabricStrengthName || "—"}</Text>
+        </View>
+
+        <View style={styles.gridCell}>
+          <Text style={styles.label}>WIDTH</Text>
+          <Text style={styles.value}>
+            {props.fabricWidthInitial} cm
+          </Text>
+        </View>
+
+        <View style={styles.gridCell}>
+          <Text style={styles.label}>LENGTH</Text>
+          <Text style={styles.value}>
+            {props.fabricLengthCurrent} m
+          </Text>
+        </View>
+
+        <View style={styles.gridCell}>
+          <Text style={styles.label}>VENDOR</Text>
+          <Text style={styles.value}>
+            {props.nameOfVendor || "—"}
+          </Text>
+        </View>
+
+        <View style={styles.gridCell}>
+          <Text style={styles.label}>STATUS</Text>
+          <Text style={styles.statusBadge}>
+            {props.status ?? "—"}
+          </Text>
+        </View>
+      </View>
+    </View>
+  </View>
+);
+
 const SingleFabricPdfDocument = (props: SingleFabricPdfParams) => (
   <Document>
     <Page size={PAGE_SIZE} style={styles.page}>
-      <View style={styles.contentColumn}>
-        <View style={styles.qrSection}>
-          {/* eslint-disable-next-line jsx-a11y/alt-text -- PDF Image has no alt prop */}
-          <Image src={props.qrDataUrl} style={styles.qrImage} />
-        </View>
-
-        <View style={styles.fabricCodeText}>
-          <Text style={styles.fabricCodeBold}>{props.fabricCode || "—"}</Text>
-        </View>
-
-        <View style={styles.divider} />
-
-        <View style={styles.infoSection}>
-          <View style={styles.grid}>
-            <View style={styles.gridCell}>
-              <Text style={styles.label}>FABRIC TYPE</Text>
-              <Text style={styles.value}>{props.fabricTypeName || "—"}</Text>
-            </View>
-
-            <View style={styles.gridCell}>
-              <Text style={styles.label}>STRENGTH</Text>
-              <Text style={styles.value}>{props.fabricStrengthName || "—"}</Text>
-            </View>
-
-
-
-            <View style={styles.gridCell}>
-              <Text style={styles.label}>WIDTH</Text>
-              <Text style={styles.value}>
-                {props.fabricWidthInitial} cm
-              </Text>
-            </View>
-
-            <View style={styles.gridCell}>
-              <Text style={styles.label}>LENGTH</Text>
-              <Text style={styles.value}>
-                {props.fabricLengthCurrent} m
-              </Text>
-            </View>
-
-            <View style={styles.gridCell}>
-              <Text style={styles.label}>VENDOR</Text>
-              <Text style={styles.value}>
-                {props.nameOfVendor || "—"}
-              </Text>
-            </View>
-
-            <View style={styles.gridCell}>
-              <Text style={styles.label}>STATUS</Text>
-              <Text style={styles.statusBadge}>
-                {props.status ?? "—"}
-              </Text>
-            </View>
-          </View>
-        </View>
-      </View>
+      <SingleFabricPdfPageContent {...props} />
     </Page>
+  </Document>
+);
+
+/** Multi-roll PDF: one page per fabric roll (same layout as single). */
+const MultiFabricRollPdfDocument = ({ rolls }: { rolls: SingleFabricPdfParams[] }) => (
+  <Document>
+    {rolls.map((params) => (
+      <Page key={params.id} size={PAGE_SIZE} style={styles.page}>
+        <SingleFabricPdfPageContent {...params} />
+      </Page>
+    ))}
   </Document>
 );
 
@@ -202,6 +216,27 @@ export async function getSingleFabricPdfBlob(
   params: SingleFabricPdfParams
 ): Promise<Blob> {
   return pdf(<SingleFabricPdfDocument {...params} />).toBlob();
+}
+
+/**
+ * Generate a multi-page PDF with one page per fabric roll (same layout as single).
+ * Caller should provide an array of SingleFabricPdfParams with qrDataUrl for each.
+ */
+export async function getMultiFabricPdfBlob(
+  rolls: SingleFabricPdfParams[]
+): Promise<Blob> {
+  if (rolls.length === 0) {
+    return pdf(
+      <Document>
+        <Page size={PAGE_SIZE} style={styles.page}>
+          <View style={styles.contentColumn}>
+            <Text style={styles.placeholder}>No fabric rolls to print.</Text>
+          </View>
+        </Page>
+      </Document>
+    ).toBlob();
+  }
+  return pdf(<MultiFabricRollPdfDocument rolls={rolls} />).toBlob();
 }
 
 const SingleFabricPdf = () => (

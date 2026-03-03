@@ -6,8 +6,11 @@ import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import QRCode from 'qrcode';
 
 import { Button } from '@/components/ui/button';
+import { getMultiFabricPdfBlob } from '@/components/pdf/Single-Fabric-Roll-Pdf';
+import type { SingleFabricPdfParams } from '@/components/pdf/Single-Fabric-Roll-Pdf';
 import {
   Card,
   CardContent,
@@ -37,12 +40,33 @@ type Option = { id: number; name?: string; value?: number };
 
 type LocationEntry = { area: string; floor: string };
 
+type CreatedFabric = {
+  id: number;
+  date: string;
+  fabricCode: string;
+  fabricType: { name: string };
+  fabricStrength: { name: string };
+  fabricWidth: { value: number };
+  fabricWidthInitial: number;
+  fabricWidthCurrent: number;
+  fabricLengthInitial: number;
+  fabricLengthCurrent: number;
+  nameOfVendor: string | null;
+  gsmObserved: number;
+  gsmCalculated: number;
+  netWeight: number;
+  status: string | null;
+};
+
+type SubmitAction = 'submit' | 'submitAndPrint' | null;
+
 export function FabricNewForm() {
   const router = useRouter();
   const [fabricTypes, setFabricTypes] = React.useState<Option[]>([]);
   const [fabricStrengths, setFabricStrengths] = React.useState<Option[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [submitting, setSubmitting] = React.useState(false);
+  const submitActionRef = React.useRef<SubmitAction>(null);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -149,12 +173,66 @@ export function FabricNewForm() {
           toast.error(data.message ?? 'Failed to create fabric');
           return;
         }
-        const created = Array.isArray(data.data) ? data.data : [data.data];
+        const created: CreatedFabric[] = Array.isArray(data.data) ? data.data : [data.data];
         toast.success(
           created.length === 1
             ? 'Fabric created. QR code URL saved.'
             : `${created.length} fabrics created. QR code URLs saved.`
         );
+
+        const action = submitActionRef.current;
+        submitActionRef.current = null;
+        if (action && created.length > 0) {
+          try {
+            const baseUrl = (process.env.NEXT_PUBLIC_API_URL ?? window.location.origin).replace(/\/$/, '');
+            const pdfParams: SingleFabricPdfParams[] = await Promise.all(
+              created.map(async (fabric) => {
+                const productUrl = `${baseUrl}/fabrics/${fabric.id}`;
+                const qrDataUrl = await QRCode.toDataURL(productUrl, {
+                  type: 'image/png',
+                  margin: 2,
+                  width: 256,
+                });
+                return {
+                  productUrl,
+                  qrDataUrl,
+                  id: fabric.id,
+                  dateDisplay: format(new Date(fabric.date), 'PPP'),
+                  fabricCode: fabric.fabricCode,
+                  fabricTypeName: fabric.fabricType?.name ?? '',
+                  fabricStrengthName: fabric.fabricStrength?.name ?? '',
+                  fabricWidthValue: fabric.fabricWidth?.value ?? 0,
+                  fabricWidthInitial: fabric.fabricWidthInitial,
+                  fabricWidthCurrent: fabric.fabricWidthCurrent,
+                  fabricLengthInitial: fabric.fabricLengthInitial,
+                  fabricLengthCurrent: fabric.fabricLengthCurrent,
+                  nameOfVendor: fabric.nameOfVendor ?? '',
+                  gsmObserved: fabric.gsmObserved,
+                  gsmCalculated: fabric.gsmCalculated,
+                  netWeight: fabric.netWeight,
+                  status: fabric.status ?? undefined,
+                };
+              })
+            );
+            const blob = await getMultiFabricPdfBlob(pdfParams);
+            const url = URL.createObjectURL(blob);
+            const win = window.open(url, '_blank');
+            if (action === 'submitAndPrint' && win) {
+              setTimeout(() => {
+                try {
+                  win.print();
+                } catch {
+                  // PDF viewer may not support print(); user can print manually from the opened tab
+                }
+              }, 1200);
+            }
+            setTimeout(() => URL.revokeObjectURL(url), 60_000);
+          } catch (err) {
+            console.error('Failed to generate PDF:', err);
+            toast.error('Could not open PDF. You can print from the fabrics list.');
+          }
+        }
+
         router.push('/fabrics');
       } catch {
         toast.error('Failed to create fabric');
@@ -487,7 +565,7 @@ export function FabricNewForm() {
   </CardContent>
 
   {/* Footer */}
-  <CardFooter className="flex justify-between border-t bg-background px-6 py-4">
+  <CardFooter className="flex flex-wrap justify-between gap-2 border-t bg-background px-6 py-4">
     <Button
       type="button"
       variant="ghost"
@@ -496,14 +574,32 @@ export function FabricNewForm() {
       Reset
     </Button>
 
-    <Button
-      type="submit"
-      form="add-fabric-form"
-      className="px-8"
-      disabled={submitting || loading}
-    >
-      {submitting ? 'Creating…' : 'Submit'}
-    </Button>
+    <div className="flex gap-2">
+      <Button
+        type="button"
+        variant="secondary"
+        disabled={submitting || loading}
+        onClick={() => {
+          submitActionRef.current = 'submit';
+          form.handleSubmit();
+        }}
+        className="px-6"
+      >
+        {submitting ? 'Creating…' : 'Submit'}
+      </Button>
+      <Button
+        type="button"
+        variant="default"
+        disabled={submitting || loading}
+        onClick={() => {
+          submitActionRef.current = 'submitAndPrint';
+          form.handleSubmit();
+        }}
+        className="px-6"
+      >
+        {submitting ? 'Creating…' : 'Submit and Print'}
+      </Button>
+    </div>
   </CardFooter>
 </Card>
   );
