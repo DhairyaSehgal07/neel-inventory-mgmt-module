@@ -62,7 +62,6 @@ export default function FabricEditPage() {
   const [fabric, setFabric] = React.useState<Fabric | null>(null);
   const [fabricTypes, setFabricTypes] = React.useState<Option[]>([]);
   const [fabricStrengths, setFabricStrengths] = React.useState<Option[]>([]);
-  const [fabricWidths, setFabricWidths] = React.useState<Option[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [submitting, setSubmitting] = React.useState(false);
 
@@ -72,30 +71,19 @@ export default function FabricEditPage() {
     const load = async () => {
       setLoading(true);
       try {
-        const [fabricRes, typesRes, strengthsRes, widthsRes] = await Promise.all([
+        const [fabricRes, typesRes, strengthsRes] = await Promise.all([
           fetch(`/api/fabrics/${id}`),
           fetch('/api/fabric-types'),
           fetch('/api/fabric-strengths'),
-          fetch('/api/fabric-widths'),
         ]);
         if (cancelled) return;
         const fabricJson = await fabricRes.json();
         const typesJson = await typesRes.json().catch(() => ({}));
         const strengthsJson = await strengthsRes.json().catch(() => ({}));
-        const widthsJson = await widthsRes.json().catch(() => ({}));
         if (fabricRes.ok && fabricJson?.data) setFabric(fabricJson.data);
         else toast.error(fabricJson?.message ?? 'Fabric not found');
         if (typesRes.ok && Array.isArray(typesJson?.data)) setFabricTypes(typesJson.data);
         if (strengthsRes.ok && Array.isArray(strengthsJson?.data)) setFabricStrengths(strengthsJson.data);
-        if (widthsRes.ok && Array.isArray(widthsJson?.data)) {
-          setFabricWidths(
-            widthsJson.data.map((w: { id: number; value: number }) => ({
-              id: w.id,
-              name: `${w.value} m`,
-              value: w.value,
-            }))
-          );
-        }
       } catch {
         if (!cancelled) toast.error('Failed to load data');
       } finally {
@@ -147,7 +135,6 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
   const [submitting, setSubmitting] = React.useState(false);
   const [fabricTypes, setFabricTypes] = React.useState<Option[]>([]);
   const [fabricStrengths, setFabricStrengths] = React.useState<Option[]>([]);
-  const [fabricWidths, setFabricWidths] = React.useState<Option[]>([]);
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -155,14 +142,10 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
     Promise.all([
       fetch('/api/fabric-types'),
       fetch('/api/fabric-strengths'),
-      fetch('/api/fabric-widths'),
-    ]).then(([typesRes, strengthsRes, widthsRes]) => {
+    ]).then(([typesRes, strengthsRes]) => {
       if (cancelled) return;
       typesRes.json().then((j: { data?: Option[] }) => j?.data && setFabricTypes(j.data));
       strengthsRes.json().then((j: { data?: Option[] }) => j?.data && setFabricStrengths(j.data));
-      widthsRes.json().then((j: { data?: { id: number; value: number }[] }) => {
-        if (j?.data) setFabricWidths(j.data.map((w) => ({ id: w.id, name: `${w.value} m`, value: w.value })));
-      });
       setLoading(false);
     });
     return () => { cancelled = true; };
@@ -170,10 +153,12 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
 
   const defaultValues = React.useMemo(() => {
     const date = typeof fabric.date === 'string' ? parseISO(fabric.date) : new Date(fabric.date);
+    // Width is stored in meters in DB; display and edit in cm
+    const widthCm = fabric.fabricWidth?.value != null ? fabric.fabricWidth.value * 100 : '';
     return {
       fabricType: String(fabric.fabricTypeId),
       fabricStrength: String(fabric.fabricStrengthId),
-      fabricWidth: String(fabric.fabricWidthId),
+      fabricWidthCm: String(widthCm),
       date,
       gsmObserved: String(fabric.gsmObserved),
       gsmCalculated: String(fabric.gsmCalculated),
@@ -195,9 +180,13 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
       }
       const fabricTypeId = parseInt(value.fabricType, 10);
       const fabricStrengthId = parseInt(value.fabricStrength, 10);
-      const fabricWidthId = parseInt(value.fabricWidth, 10);
-      if (Number.isNaN(fabricTypeId) || Number.isNaN(fabricStrengthId) || Number.isNaN(fabricWidthId)) {
-        toast.error('Please select fabric type, strength, and width');
+      const fabricWidthValueM = parseFloat(value.fabricWidthCm) / 100;
+      if (Number.isNaN(fabricTypeId) || Number.isNaN(fabricStrengthId)) {
+        toast.error('Please select fabric type and strength');
+        return;
+      }
+      if (Number.isNaN(fabricWidthValueM) || fabricWidthValueM < 0) {
+        toast.error('Please enter a valid width (cm)');
         return;
       }
       const gsmObserved = parseFloat(value.gsmObserved) || 0;
@@ -216,7 +205,7 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
             date: format(value.date, 'yyyy-MM-dd'),
             fabricTypeId,
             fabricStrengthId,
-            fabricWidthId,
+            fabricWidthValue: fabricWidthValueM,
             fabricLengthInitial,
             fabricLengthCurrent,
             fabricWidthInitial,
@@ -304,26 +293,19 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
                   </Field>
                 )}
               </form.Field>
-              <form.Field name="fabricWidth">
+              <form.Field name="fabricWidthCm">
                 {(field) => (
                   <Field>
-                    <FieldLabel>Width</FieldLabel>
-                    <Select
+                    <FieldLabel>Width (cm)</FieldLabel>
+                    <Input
+                      type="number"
+                      min={0}
+                      step={0.1}
+                      placeholder="e.g. 140"
                       value={field.state.value}
-                      onValueChange={(v) => field.handleChange(v)}
-                      disabled={loading}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select width" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {fabricWidths.map((opt) => (
-                          <SelectItem key={opt.id} value={String(opt.id)}>
-                            {opt.name ?? `${opt.value} m`}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    />
                   </Field>
                 )}
               </form.Field>

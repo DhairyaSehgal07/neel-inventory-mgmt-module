@@ -45,13 +45,6 @@ const FABRIC_STRENGTHS = [
   { value: 'heavy', label: 'Heavy' },
 ];
 
-const FABRIC_WIDTHS_CM = [
-  { value: '90', label: '90 cm' },
-  { value: '110', label: '110 cm' },
-  { value: '140', label: '140 cm' },
-  { value: '160', label: '160 cm' },
-];
-
 export function FabricEditForm() {
   const form = useForm({
     defaultValues: {
@@ -162,21 +155,15 @@ export function FabricEditForm() {
           {(field) => (
             <Field data-invalid={field.state.meta.isTouched && !field.state.value}>
               <FieldLabel>Width (cm)</FieldLabel>
-              <Select
+              <Input
+                type="number"
+                min={0}
+                step={0.1}
+                placeholder="e.g. 140"
                 value={field.state.value}
-                onValueChange={(v) => field.handleChange(v)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select width" />
-                </SelectTrigger>
-                <SelectContent>
-                  {FABRIC_WIDTHS_CM.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+              />
               {field.state.meta.isTouched && !field.state.value && (
                 <FieldError errors={[{ message: 'Required' }]} />
               )}

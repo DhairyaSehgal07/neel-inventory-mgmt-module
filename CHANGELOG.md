@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.10](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.9...v0.3.10) (2026-03-05)
+
+### Changed
+
+* **Fabric edit form** – Width field is now a free numeric input in cm instead of a width dropdown. Edit page no longer fetches fabric widths; submit sends `fabricWidthValue` (meters) for find-or-create. Width (cm) label and validation (required, valid number) retained.
+
+### Added
+
+* **Seed** – New "Stores" user (Supervisor role, mobile 9876902360) seeded with full permissions.
+
 ### [0.3.9](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.8...v0.3.9) (2026-03-02)
 
 ### Changed

@@ -60,6 +60,28 @@ export async function main() {
       });
       console.log('🌱 User office (Manager) seeded successfully with all permissions');
     }
+
+    // Seed Stores (Supervisor - below Manager)
+    const storesMobile = '9876902360';
+    const existingStores = await prisma.user.findFirst({
+      where: { mobileNumber: storesMobile },
+    });
+
+    if (existingStores) {
+      console.log('✅ User Stores already exists');
+    } else {
+      await prisma.user.create({
+        data: {
+          name: 'Stores',
+          mobileNumber: storesMobile,
+          password: hashedPassword,
+          role: 'Supervisor',
+          permissions,
+          isActive: true,
+        },
+      });
+      console.log('🌱 User Stores (Supervisor) seeded successfully with all permissions');
+    }
   } catch (error) {
     console.error('❌ Error seeding user:', error);
     throw error;
