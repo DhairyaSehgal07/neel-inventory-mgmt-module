@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.12](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.11...v0.3.12) (2026-03-12)
+
+### Added
+
+* **Fabric edit – location** – Optional Location (Area, Floor) fields on the fabric edit form. PATCH `/api/fabrics/[id]` accepts `locations` (or `locationsPerFabric`); existing fabric locations are replaced with the payload. GET fabric includes `locations`.
+
+### Changed
+
+* **New fabric form** – Always sends `locationsPerFabric` in the create payload (no conditional omit).
+* **dbConnect** – Removed admin user seeding from `dbConnect()`. Connection only ensures DB connect and throws on failure. Seeding is done via `npx prisma db seed` only.
+
 ### [0.3.11](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.9...v0.3.11) (2026-03-05)
 
 ### Changed

@@ -33,6 +33,7 @@ export async function GET(
         fabricType: true,
         fabricStrength: true,
         fabricWidth: true,
+        locations: true,
       },
     });
 
@@ -147,12 +148,40 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
           fabricType: true,
           fabricStrength: true,
           fabricWidth: true,
+          locations: true,
+        },
+      });
+
+      // Replace locations: delete existing and create from payload
+      const locationsPayload =
+        parsed.data.locationsPerFabric?.[0] ?? parsed.data.locations ?? [];
+      const validLocations = locationsPayload.filter(
+        (loc) => (loc.area ?? '').trim() && (loc.floor ?? '').trim()
+      );
+      await prisma.location.deleteMany({ where: { fabricId } });
+      if (validLocations.length > 0) {
+        await prisma.location.createMany({
+          data: validLocations.map((loc) => ({
+            fabricId,
+            area: (loc.area ?? '').trim(),
+            floor: (loc.floor ?? '').trim(),
+          })),
+        });
+      }
+
+      const withLocations = await prisma.fabric.findUnique({
+        where: { id: fabricId },
+        include: {
+          fabricType: true,
+          fabricStrength: true,
+          fabricWidth: true,
+          locations: true,
         },
       });
 
       return NextResponse.json({
         success: true,
-        data: updated,
+        data: withLocations ?? updated,
         message: 'Fabric updated',
       });
     } catch (error) {

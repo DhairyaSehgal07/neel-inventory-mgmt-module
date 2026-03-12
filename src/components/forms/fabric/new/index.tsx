@@ -149,8 +149,6 @@ export function FabricNewForm() {
             .filter((l) => (l.area ?? '').trim() && (l.floor ?? '').trim())
             .map((l) => ({ area: (l.area ?? '').trim(), floor: (l.floor ?? '').trim() }))
         );
-        const hasAnyLocations = locationsPerFabric.some((arr) => arr.length > 0);
-
         const res = await fetch('/api/fabrics', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -165,7 +163,7 @@ export function FabricNewForm() {
             gsmCalculated,
             netWeight,
             quantity,
-            ...(hasAnyLocations ? { locationsPerFabric } : {}),
+            locationsPerFabric,
           }),
         });
         const data = await res.json();

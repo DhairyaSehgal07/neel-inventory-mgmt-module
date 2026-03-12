@@ -36,6 +36,8 @@ import { cn } from '@/lib/utils';
 
 type Option = { id: number; name?: string; value?: number };
 
+type LocationEntry = { id?: number; area: string; floor: string };
+
 type Fabric = {
   id: number;
   date: string;
@@ -53,6 +55,7 @@ type Fabric = {
   fabricType: { id: number; name: string };
   fabricStrength: { id: number; name: string };
   fabricWidth: { id: number; value: number };
+  locations?: LocationEntry[];
 };
 
 export default function FabricEditPage() {
@@ -155,6 +158,7 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
     const date = typeof fabric.date === 'string' ? parseISO(fabric.date) : new Date(fabric.date);
     // Width is stored in meters in DB; display and edit in cm
     const widthCm = fabric.fabricWidth?.value != null ? fabric.fabricWidth.value * 100 : '';
+    const firstLocation = fabric.locations?.[0];
     return {
       fabricType: String(fabric.fabricTypeId),
       fabricStrength: String(fabric.fabricStrengthId),
@@ -168,6 +172,8 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
       fabricWidthCurrent: String(fabric.fabricWidthCurrent),
       vendorName: fabric.nameOfVendor ?? '',
       netWeight: String(fabric.netWeight),
+      locationArea: firstLocation?.area ?? '',
+      locationFloor: firstLocation?.floor ?? '',
     };
   }, [fabric]);
 
@@ -196,6 +202,12 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
       const fabricWidthInitial = parseFloat(value.fabricWidthInitial) || 0;
       const fabricWidthCurrent = parseFloat(value.fabricWidthCurrent) || 0;
       const netWeight = parseFloat(value.netWeight) || 0;
+      const locationArea = (value.locationArea ?? '').trim();
+      const locationFloor = (value.locationFloor ?? '').trim();
+      const locations =
+        locationArea && locationFloor
+          ? [{ area: locationArea, floor: locationFloor }]
+          : [];
       setSubmitting(true);
       try {
         const res = await fetch(`/api/fabrics/${fabricId}`, {
@@ -214,6 +226,7 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
             gsmObserved,
             gsmCalculated,
             netWeight,
+            locations,
           }),
         });
         const data = await res.json();
@@ -451,6 +464,32 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
                       type="number"
                       min={0}
                       step={0.01}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    />
+                  </Field>
+                )}
+              </form.Field>
+              <form.Field name="locationArea">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>Location – Area (optional)</FieldLabel>
+                    <Input
+                      placeholder="e.g. Warehouse A"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    />
+                  </Field>
+                )}
+              </form.Field>
+              <form.Field name="locationFloor">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>Location – Floor (optional)</FieldLabel>
+                    <Input
+                      placeholder="e.g. Floor 1"
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
