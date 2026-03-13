@@ -1,16 +1,7 @@
-import { PrismaClient } from '../src/generated/prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
 import 'dotenv/config';
 import bcrypt from 'bcryptjs';
+import { prisma } from '../src/lib/prisma';
 import { ALL_PERMISSIONS } from '../src/lib/rbac/permissions';
-
-const adapter = new PrismaPg({
-  connectionString: process.env.DATABASE_URL,
-});
-
-const prisma = new PrismaClient({
-  adapter,
-});
 
 export async function main() {
   try {
