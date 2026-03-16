@@ -79,6 +79,7 @@ export default function FabricsPage() {
   const [strengthFilter, setStrengthFilter] = React.useState<string>("all")
   const [widthFilter, setWidthFilter] = React.useState<string>("all")
   const [vendorFilter, setVendorFilter] = React.useState<string>("all")
+  const [locationFilter, setLocationFilter] = React.useState<string>("all")
 
   const strengthOptions = React.useMemo(() => {
     const names = data
@@ -101,6 +102,23 @@ export default function FabricsPage() {
     return [...new Set(names)].sort()
   }, [data])
 
+  const locationOptions = React.useMemo(() => {
+    const keys = new Map<string, string>()
+    data.forEach((f) => {
+      (f.locations ?? []).forEach((loc) => {
+        const key = `${loc.area}|${loc.floor ?? ""}`
+        const label =
+          loc.floor != null && loc.floor !== ""
+            ? `${loc.area}, ${loc.floor}`
+            : loc.area
+        if (key && !keys.has(key)) keys.set(key, label)
+      })
+    })
+    return Array.from(keys.entries())
+      .sort((a, b) => a[1].localeCompare(b[1]))
+      .map(([value, label]) => ({ value, label }))
+  }, [data])
+
   const filteredData = React.useMemo(() => {
     let result = data
     if (statusTab !== "all") {
@@ -120,18 +138,27 @@ export default function FabricsPage() {
         (f) => (f.nameOfVendor?.trim() ?? "") === vendorFilter
       )
     }
+    if (locationFilter !== "all") {
+      result = result.filter((f) =>
+        (f.locations ?? []).some(
+          (loc) => `${loc.area}|${loc.floor ?? ""}` === locationFilter
+        )
+      )
+    }
     return result
-  }, [data, statusTab, strengthFilter, widthFilter, vendorFilter])
+  }, [data, statusTab, strengthFilter, widthFilter, vendorFilter, locationFilter])
 
   const hasActiveFilters =
     strengthFilter !== "all" ||
     widthFilter !== "all" ||
-    vendorFilter !== "all"
+    vendorFilter !== "all" ||
+    locationFilter !== "all"
 
   const clearAllFilters = () => {
     setStrengthFilter("all")
     setWidthFilter("all")
     setVendorFilter("all")
+    setLocationFilter("all")
   }
 
   const fetchFabrics = React.useCallback(async () => {
@@ -318,6 +345,27 @@ export default function FabricsPage() {
                       {vendorOptions.map((name) => (
                         <SelectItem key={name} value={name}>
                           {name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">
+                    Location
+                  </span>
+                  <Select
+                    value={locationFilter}
+                    onValueChange={setLocationFilter}
+                  >
+                    <SelectTrigger className="w-[180px]" size="sm">
+                      <SelectValue placeholder="All locations" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All locations</SelectItem>
+                      {locationOptions.map(({ value, label }) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
                         </SelectItem>
                       ))}
                     </SelectContent>
