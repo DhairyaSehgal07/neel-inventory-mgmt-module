@@ -179,6 +179,7 @@ export type FabricRow = {
   fabricType: { id: number; name: string }
   fabricStrength: { id: number; name: string }
   fabricWidth: { id: number; value: number }
+  locations?: { id: number; area: string; floor: string | null }[]
   status?: string | null
   assignTo?: string | null
 }
@@ -235,6 +236,22 @@ export const columns: ColumnDef<FabricRow>[] = [
         {row.original.nameOfVendor || "—"}
       </span>
     ),
+  },
+  {
+    id: "location",
+    header: "Location",
+    cell: ({ row }) => {
+      const locations = row.original.locations ?? []
+      if (!locations.length) return <span className="text-muted-foreground">—</span>
+      const first = locations[0]
+      const parts = [first.area, first.floor].filter(Boolean)
+      return (
+        <span className="text-muted-foreground truncate max-w-[160px] block">
+          {parts.join(", ")}
+          {locations.length > 1 ? ` (+${locations.length - 1} more)` : ""}
+        </span>
+      )
+    },
   },
   {
     accessorKey: "gsmObserved",

@@ -36,6 +36,7 @@ export default async function FabricDetailPage({ params }: Props) {
       fabricType: true,
       fabricStrength: true,
       fabricWidth: true,
+      locations: true,
       history: {
         include: {
           performedBy: { select: { id: true, name: true } },
@@ -118,6 +119,28 @@ export default async function FabricDetailPage({ params }: Props) {
               <dt className="text-sm font-medium text-muted-foreground">Vendor</dt>
               <dd className="mt-1 text-sm">{fabric.nameOfVendor}</dd>
             </div>
+            {fabric.locations && fabric.locations.length > 0 && (
+              <div className="sm:col-span-2">
+                <dt className="text-sm font-medium text-muted-foreground">Location</dt>
+                <dd className="mt-1 text-sm">
+                  <ul className="space-y-2">
+                    {fabric.locations.map((loc) => (
+                      <li key={loc.id}>
+                        <span className="text-muted-foreground">Area:</span>{' '}
+                        <span>{loc.area}</span>
+                        {loc.floor && (
+                          <>
+                            <span className="text-muted-foreground mx-1">,</span>
+                            <span className="text-muted-foreground">Floor:</span>{' '}
+                            <span>{loc.floor}</span>
+                          </>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </dd>
+              </div>
+            )}
             <div>
               <dt className="text-sm font-medium text-muted-foreground">GSM (observed)</dt>
               <dd className="mt-1 text-sm">{fabric.gsmObserved}</dd>
