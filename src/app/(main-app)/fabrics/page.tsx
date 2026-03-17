@@ -326,7 +326,7 @@ export default function FabricsPage() {
                       <SelectItem value="all">All widths</SelectItem>
                       {widthOptions.map((value) => (
                         <SelectItem key={value} value={String(value)}>
-                          {value} m
+                          {value} cm
                         </SelectItem>
                       ))}
                     </SelectContent>

@@ -105,7 +105,7 @@ export default async function FabricDetailPage({ params }: Props) {
             </div>
             <div>
               <dt className="text-sm font-medium text-muted-foreground">Width (nominal)</dt>
-              <dd className="mt-1 text-sm">{fabric.fabricWidth.value} m</dd>
+              <dd className="mt-1 text-sm">{fabric.fabricWidth.value} cm</dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-muted-foreground">Width </dt>

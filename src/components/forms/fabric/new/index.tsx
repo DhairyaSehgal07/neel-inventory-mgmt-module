@@ -132,7 +132,7 @@ export function FabricNewForm() {
         return;
       }
       if (Number.isNaN(widthValueNum) || widthValueNum < 0) {
-        toast.error('Please enter a valid width (m)');
+        toast.error('Please enter a valid width (cm)');
         return;
       }
 
@@ -319,7 +319,7 @@ export function FabricNewForm() {
           )}
         </form.Field>
 
-        {/* Width (m) — manual entry */}
+        {/* Width (cm) — manual entry */}
         <form.Field name="widthValue">
           {(field) => (
             <Field data-invalid={field.state.meta.isTouched && !field.state.value}>

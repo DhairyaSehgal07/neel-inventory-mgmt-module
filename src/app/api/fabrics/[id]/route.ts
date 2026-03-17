@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import dbConnect from '@/lib/dbConnect';
+import { generateFabricCode } from '@/lib/fabricCode';
 import { withRBAC } from '@/lib/rbac';
 import { Permission } from '@/lib/rbac/permissions';
 import { updateFabricSchema } from '@/schemas/fabricSchema';
@@ -111,17 +112,20 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         (await prisma.fabricWidth.create({ data: { value: parsed.data.fabricWidthValue } }));
 
       const dateStr = new Date(parsed.data.date).toISOString().slice(0, 10);
-      // Preserve frequency from existing code (format: ...-frequency-date) so fabricCode stays unique
+      // Preserve sequence (frequency) from existing code so fabricCode stays unique; same logic as create
       const parts = existing.fabricCode.split('-');
-      const frequency = parts.length >= 2 ? parts[parts.length - 2] : '1';
-      const fabricCode = [
-        fabricType.name,
-        fabricStrength.name,
-        String(fabricWidth.value),
-        parsed.data.nameOfVendor,
-        frequency,
+      const sequenceFromCode =
+        parts.length >= 2 ? parseInt(parts[parts.length - 2], 10) : 1;
+      const sequenceNumber = Number.isNaN(sequenceFromCode) ? 1 : sequenceFromCode;
+      const fabricCode = generateFabricCode({
+        id: String(fabricId),
+        fabricTypeName: fabricType.name,
+        fabricStrengthName: fabricStrength.name,
+        fabricWidthValue: fabricWidth.value,
+        nameOfVendor: parsed.data.nameOfVendor,
+        sequenceNumber,
         dateStr,
-      ].join('-');
+      });
 
       const updateData: Parameters<typeof prisma.fabric.update>[0]['data'] = {
         date: new Date(parsed.data.date),

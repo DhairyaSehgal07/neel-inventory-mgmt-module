@@ -211,11 +211,10 @@ export const columns: ColumnDef<FabricRow>[] = [
   },
   {
     id: "fabricWidth",
-    header: "Width (m)",
+    header: "Width (cm)",
     cell: ({ row }) => (
       <span className="text-foreground">
-
-            {row.original.fabricWidthInitial}
+        {row.original.fabricWidthInitial} cm
       </span>
     ),
   },

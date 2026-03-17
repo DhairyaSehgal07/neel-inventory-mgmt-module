@@ -417,7 +417,7 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
               <form.Field name="fabricWidthInitial">
                 {(field) => (
                   <Field>
-                    <FieldLabel>Width initial (m)</FieldLabel>
+                    <FieldLabel>Width initial (cm)</FieldLabel>
                     <Input
                       type="number"
                       min={0}
@@ -432,7 +432,7 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
               <form.Field name="fabricWidthCurrent">
                 {(field) => (
                   <Field>
-                    <FieldLabel>Width current (m)</FieldLabel>
+                    <FieldLabel>Width current (cm)</FieldLabel>
                     <Input
                       type="number"
                       min={0}
