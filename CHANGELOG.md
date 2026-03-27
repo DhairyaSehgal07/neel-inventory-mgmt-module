@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.14](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.13...v0.3.14) (2026-03-28)
+
+### Added
+
+* **Fabrics – Get reports** – Fabrics list toolbar includes a "Get reports" control that opens a dialog to download a **PDF** or **Excel** report per status category (All, Packed, In Use, Closed, Open, Rejected, Traded).
+* **Fabric list PDF** – Client-side PDF (`@react-pdf/renderer`) with the same columns as the fabrics table (excluding actions): fabric code (full code), date, type, strength, width, length, vendor, location, GSM, net weight, status, assigned to. Rows match the selected category and are sorted like the list. PDF opens in a new tab.
+* **Fabric list Excel** – `.xlsx` export via `xlsx` (SheetJS) with the same dataset and columns as the PDF; title and generated timestamp rows; file downloads as `Fabric-report-{category}-{date}.xlsx`.
+* **`fabric-list-report-shared.ts`** – Shared column definitions and `prepareFabricsForCategoryReport` / `buildFabricReportCellValues` so PDF and Excel stay aligned.
+
+### Changed
+
+* **Dependencies** – Added `xlsx` for spreadsheet export.
+
 ### [0.3.13](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.12...v0.3.13) (2026-03-18)
 
 ### Changed

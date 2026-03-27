@@ -33,6 +33,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { FabricsDataTable } from "./data-table"
+import { GetReportsDialog } from "./get-reports-dialog"
 import { columns, type FabricRow } from "./columns"
 import { filterFabricsBySearch } from "./search-utils"
 
@@ -92,6 +93,7 @@ export default function FabricsPage() {
   const [vendorFilter, setVendorFilter] = React.useState<string>("all")
   const [locationFilter, setLocationFilter] = React.useState<string>("all")
   const [searchQuery, setSearchQuery] = React.useState("")
+  const [reportsOpen, setReportsOpen] = React.useState(false)
 
   const strengthOptions = React.useMemo(() => {
     const names = data
@@ -431,11 +433,18 @@ export default function FabricsPage() {
                 onEdit={handleEdit}
                 onDelete={handleDeleteClick}
                 isDeletingId={isDeletingId}
+                onGetReports={() => setReportsOpen(true)}
               />
             </>
           )}
         </CardContent>
       </Card>
+
+      <GetReportsDialog
+        open={reportsOpen}
+        onOpenChange={setReportsOpen}
+        fabrics={data}
+      />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
