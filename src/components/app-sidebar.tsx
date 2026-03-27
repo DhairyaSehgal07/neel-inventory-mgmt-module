@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Layers, Package, Settings } from 'lucide-react';
+import { BarChart2, FileText, Layers, Settings } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -23,7 +23,16 @@ const navigationItems = [
     href: '/fabrics',
     icon: Layers,
   },
-
+  {
+    name: 'Analytics',
+    href: '/analytics',
+    icon: BarChart2,
+  },
+  {
+    name: 'Reports',
+    href: '/reports',
+    icon: FileText,
+  },
   {
     name: 'Settings',
     href: '/settings',

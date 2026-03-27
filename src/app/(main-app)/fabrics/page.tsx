@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { FabricsDataTable } from "./data-table"
 import { columns, type FabricRow } from "./columns"
+import { filterFabricsBySearch } from "./search-utils"
 
 function getErrorMessage(
   res: Response,
@@ -68,6 +69,16 @@ function statusTabLabel(id: StatusTabId): string {
     .join(" ")
 }
 
+function getFabricTimestamp(fabric: FabricRow): number {
+  const primary = Date.parse(fabric.date)
+  if (!Number.isNaN(primary)) return primary
+
+  const fallback = Date.parse(fabric.fabricDate)
+  if (!Number.isNaN(fallback)) return fallback
+
+  return Number.MAX_SAFE_INTEGER
+}
+
 export default function FabricsPage() {
   const router = useRouter()
   const [statusTab, setStatusTab] = React.useState<StatusTabId>("all")
@@ -80,6 +91,7 @@ export default function FabricsPage() {
   const [widthFilter, setWidthFilter] = React.useState<string>("all")
   const [vendorFilter, setVendorFilter] = React.useState<string>("all")
   const [locationFilter, setLocationFilter] = React.useState<string>("all")
+  const [searchQuery, setSearchQuery] = React.useState("")
 
   const strengthOptions = React.useMemo(() => {
     const names = data
@@ -145,8 +157,26 @@ export default function FabricsPage() {
         )
       )
     }
-    return result
+    return [...result].sort((a, b) => {
+      const timeDiff = getFabricTimestamp(a) - getFabricTimestamp(b)
+      if (timeDiff !== 0) return timeDiff
+      return a.id - b.id
+    })
   }, [data, statusTab, strengthFilter, widthFilter, vendorFilter, locationFilter])
+
+  const searchFilteredData = React.useMemo(
+    () => filterFabricsBySearch(filteredData, searchQuery),
+    [filteredData, searchQuery]
+  )
+
+  const totalVisibleLength = React.useMemo(
+    () =>
+      searchFilteredData.reduce((sum, fabric) => {
+        const length = fabric.fabricLengthCurrent
+        return sum + (Number.isFinite(length) ? length : 0)
+      }, 0),
+    [searchFilteredData]
+  )
 
   const hasActiveFilters =
     strengthFilter !== "all" ||
@@ -292,99 +322,112 @@ export default function FabricsPage() {
                   ))}
                 </nav>
               </div>
-              <div className="flex flex-wrap items-center gap-3 mb-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground whitespace-nowrap">
-                    Strength
-                  </span>
-                  <Select
-                    value={strengthFilter}
-                    onValueChange={setStrengthFilter}
-                  >
-                    <SelectTrigger className="w-[180px]" size="sm">
-                      <SelectValue placeholder="All strengths" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All strengths</SelectItem>
-                      {strengthOptions.map((name) => (
-                        <SelectItem key={name} value={name}>
-                          {name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">
+                      Strength
+                    </span>
+                    <Select
+                      value={strengthFilter}
+                      onValueChange={setStrengthFilter}
+                    >
+                      <SelectTrigger className="w-[180px]" size="sm">
+                        <SelectValue placeholder="All strengths" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All strengths</SelectItem>
+                        {strengthOptions.map((name) => (
+                          <SelectItem key={name} value={name}>
+                            {name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">
+                      Width
+                    </span>
+                    <Select value={widthFilter} onValueChange={setWidthFilter}>
+                      <SelectTrigger className="w-[180px]" size="sm">
+                        <SelectValue placeholder="All widths" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All widths</SelectItem>
+                        {widthOptions.map((value) => (
+                          <SelectItem key={value} value={String(value)}>
+                            {value} cm
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">
+                      Vendor
+                    </span>
+                    <Select value={vendorFilter} onValueChange={setVendorFilter}>
+                      <SelectTrigger className="w-[180px]" size="sm">
+                        <SelectValue placeholder="All vendors" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All vendors</SelectItem>
+                        {vendorOptions.map((name) => (
+                          <SelectItem key={name} value={name}>
+                            {name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">
+                      Location
+                    </span>
+                    <Select
+                      value={locationFilter}
+                      onValueChange={setLocationFilter}
+                    >
+                      <SelectTrigger className="w-[180px]" size="sm">
+                        <SelectValue placeholder="All locations" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All locations</SelectItem>
+                        {locationOptions.map(({ value, label }) => (
+                          <SelectItem key={value} value={value}>
+                            {label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {hasActiveFilters && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-muted-foreground"
+                      onClick={clearAllFilters}
+                    >
+                      Clear all filters
+                    </Button>
+                  )}
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground whitespace-nowrap">
-                    Width
+                <div className="rounded-full border border-border bg-muted/40 px-6 py-1.5 text-sm">
+                  <span className="text-muted-foreground">Total length: </span>
+                  <span className="font-semibold text-foreground">
+                    {totalVisibleLength.toLocaleString(undefined, {
+                      maximumFractionDigits: 2,
+                    })}{" "}
+                    m
                   </span>
-                  <Select value={widthFilter} onValueChange={setWidthFilter}>
-                    <SelectTrigger className="w-[180px]" size="sm">
-                      <SelectValue placeholder="All widths" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All widths</SelectItem>
-                      {widthOptions.map((value) => (
-                        <SelectItem key={value} value={String(value)}>
-                          {value} cm
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground whitespace-nowrap">
-                    Vendor
-                  </span>
-                  <Select value={vendorFilter} onValueChange={setVendorFilter}>
-                    <SelectTrigger className="w-[180px]" size="sm">
-                      <SelectValue placeholder="All vendors" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All vendors</SelectItem>
-                      {vendorOptions.map((name) => (
-                        <SelectItem key={name} value={name}>
-                          {name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground whitespace-nowrap">
-                    Location
-                  </span>
-                  <Select
-                    value={locationFilter}
-                    onValueChange={setLocationFilter}
-                  >
-                    <SelectTrigger className="w-[180px]" size="sm">
-                      <SelectValue placeholder="All locations" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All locations</SelectItem>
-                      {locationOptions.map(({ value, label }) => (
-                        <SelectItem key={value} value={value}>
-                          {label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                {hasActiveFilters && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-muted-foreground"
-                    onClick={clearAllFilters}
-                  >
-                    Clear all filters
-                  </Button>
-                )}
               </div>
               <FabricsDataTable
                 columns={columns}
-                data={filteredData}
+                data={searchFilteredData}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
                 onEdit={handleEdit}
                 onDelete={handleDeleteClick}
                 isDeletingId={isDeletingId}

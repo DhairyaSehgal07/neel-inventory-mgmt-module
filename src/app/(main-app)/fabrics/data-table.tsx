@@ -34,49 +34,26 @@ const PAGE_SIZE_OPTIONS = [10, 50, 100] as const
 
 interface FabricsDataTableProps {
   columns: ColumnDef<FabricRow>[]
+  /** Rows after all filters including search; pagination applies only to display. */
   data: FabricRow[]
+  searchQuery: string
+  onSearchChange: (value: string) => void
   onEdit?: (item: FabricRow) => void
   onDelete?: (item: FabricRow) => void
   isDeletingId?: number | null
 }
 
-function searchableString(row: FabricRow): string {
-  const parts = [
-    row.id,
-    row.fabricDate,
-    row.fabricCode,
-    row.nameOfVendor,
-    row.fabricLengthInitial,
-    row.fabricLengthCurrent,
-    row.fabricWidthInitial,
-    row.fabricWidthCurrent,
-    row.gsmObserved,
-    row.netWeight,
-    row.fabricType?.name,
-    row.fabricStrength?.name,
-    row.fabricWidth?.value,
-    row.status,
-  ]
-  return parts.filter(Boolean).join(" ").toLowerCase()
-}
-
 export function FabricsDataTable({
   columns,
   data,
+  searchQuery,
+  onSearchChange,
   onEdit,
   onDelete,
   isDeletingId = null,
 }: FabricsDataTableProps) {
-  const [searchQuery, setSearchQuery] = React.useState("")
-
-  const filteredData = React.useMemo(() => {
-    if (!searchQuery.trim()) return data
-    const query = searchQuery.toLowerCase().trim()
-    return data.filter((row) => searchableString(row).includes(query))
-  }, [data, searchQuery])
-
   const table = useReactTable({
-    data: filteredData,
+    data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -88,7 +65,7 @@ export function FabricsDataTable({
   const pageCount = table.getPageCount()
   const currentPage = table.getState().pagination.pageIndex + 1
   const pageSize = table.getState().pagination.pageSize
-  const totalRows = filteredData.length
+  const totalRows = data.length
   const startRow = totalRows > 0 ? (currentPage - 1) * pageSize + 1 : 0
   const endRow = Math.min(currentPage * pageSize, totalRows)
 
@@ -104,7 +81,7 @@ export function FabricsDataTable({
           type="text"
           placeholder="Search fabrics..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => onSearchChange(e.target.value)}
           className="pl-9 pr-9"
         />
         {searchQuery && (
@@ -112,7 +89,7 @@ export function FabricsDataTable({
             variant="ghost"
             size="icon"
             className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
-            onClick={() => setSearchQuery("")}
+            onClick={() => onSearchChange("")}
           >
             <X className="h-4 w-4" />
             <span className="sr-only">Clear search</span>

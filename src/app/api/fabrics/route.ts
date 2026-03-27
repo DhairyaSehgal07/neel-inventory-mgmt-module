@@ -28,16 +28,30 @@ export async function GET(request: NextRequest) {
   return withRBAC(request, Permission.FABRIC_VIEW, async () => {
     try {
       await dbConnect();
-      const fabrics = await prisma.fabric.findMany({
-        include: {
-          fabricType: true,
-          fabricStrength: true,
-          fabricWidth: true,
-          locations: true,
+      const [fabrics, lengthSum] = await Promise.all([
+        prisma.fabric.findMany({
+          include: {
+            fabricType: true,
+            fabricStrength: true,
+            fabricWidth: true,
+            locations: true,
+          },
+          orderBy: { id: 'asc' },
+        }),
+        prisma.fabric.aggregate({
+          _sum: { fabricLengthCurrent: true },
+        }),
+      ]);
+      const totalFabricLengthCurrent =
+        lengthSum._sum.fabricLengthCurrent ?? 0;
+      return NextResponse.json({
+        success: true,
+        data: fabrics,
+        meta: {
+          /** Sum of `fabricLengthCurrent` for all rows returned (full list, not paginated). */
+          totalFabricLengthCurrent,
         },
-        orderBy: { id: 'asc' },
       });
-      return NextResponse.json({ success: true, data: fabrics });
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       console.error('GET /api/fabrics error:', err.message, err);

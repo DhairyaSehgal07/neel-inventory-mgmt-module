@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "truncate-fabrics": "tsx scripts/truncate-fabrics.ts",
+    "normalize-fabric-codes": "tsx scripts/normalize-fabric-codes.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

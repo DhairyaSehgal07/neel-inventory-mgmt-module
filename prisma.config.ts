@@ -12,4 +12,6 @@ export default defineConfig({
   datasource: {
     url: process.env["DATABASE_URL"],
   },
+  // Normalize all fabric codes to id-typeName-strengthName-... format (see src/lib/fabricCode.ts):
+  // pnpm run normalize-fabric-codes
 });
