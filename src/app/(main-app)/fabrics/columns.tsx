@@ -20,6 +20,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import {
+  formatGsm,
+  getGsmCalculatedDisplay,
+} from "./gsm-utils"
 
 type FabricRowActionsMeta = {
   onEdit?: (fabric: FabricRow) => void
@@ -253,10 +257,56 @@ export const columns: ColumnDef<FabricRow>[] = [
     },
   },
   {
+    id: "gsmCalculated",
+    header: () => (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="cursor-help border-b border-dotted border-muted-foreground">
+            GSM (calc.)
+          </span>
+        </TooltipTrigger>
+        <TooltipContent className="max-w-xs">
+          <p className="text-xs">
+            Stored value when set; otherwise GSM (g/m²) = net weight (kg) × 1000 ÷
+            (width (m) × current length (m)), for comparison with Neelkanth strength
+            references.
+          </p>
+        </TooltipContent>
+      </Tooltip>
+    ),
+    cell: ({ row }) => {
+      const display = getGsmCalculatedDisplay(row.original)
+      if (!display) {
+        return <span className="text-muted-foreground">—</span>
+      }
+      return (
+        <span className="text-foreground">
+          {formatGsm(display.value)}
+          {display.source === "derived" ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-muted-foreground ml-1 cursor-help text-xs">
+                  (auto)
+                </span>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">
+                <p className="text-xs">
+                  Derived from net weight and dimensions; no stored calculated GSM.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          ) : null}
+        </span>
+      )
+    },
+  },
+  {
     accessorKey: "gsmObserved",
-    header: "GSM",
+    header: "GSM (obs.)",
     cell: ({ row }) => (
-      <span className="text-foreground">{row.original.gsmObserved}</span>
+      <span className="text-foreground">
+        {formatGsm(row.original.gsmObserved)}
+      </span>
     ),
   },
   {

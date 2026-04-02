@@ -11,6 +11,7 @@ export function fabricSearchableString(row: FabricRow): string {
     row.fabricWidthInitial,
     row.fabricWidthCurrent,
     row.gsmObserved,
+    row.gsmCalculated,
     row.netWeight,
     row.fabricType?.name,
     row.fabricStrength?.name,
