@@ -111,6 +111,7 @@ model Fabric {
   history        FabricHistory[]
   locations      Location[]
 
+  @@index([fabricWidthId, fabricStrengthId])
   @@map("fabrics")
 }
 
