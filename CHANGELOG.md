@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.15](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.14...v0.3.15) (2026-04-06)
+
+### Added
+
+* **Fabrics table – GSM calculated** – Column for calculated GSM (Kg) on the fabrics list.
+* **Analytics – width × strength stock matrix** – Matrix of total remaining length (m) and roll counts by fabric width × strength (`GET /api/fabrics/analytics/width-strength-matrix`); `WidthStrengthStockMatrix` on the analytics page.
+* **Analytics – stock cover, aging, consumption, remnants** – Charts on `/analytics` backed by:
+  * `GET /api/fabrics/analytics/stock-cover-by-sku` – months of cover per roll from balance history over a configurable window (lowest cover first).
+  * `GET /api/fabrics/analytics/open-in-use-aging` – calendar aging for OPEN and IN_USE rolls from last fabric history (or `updatedAt` fallback).
+  * `GET /api/fabrics/analytics/consumption-trend` – consumption by day/week/month with optional split by width, strength, or assignee.
+  * `GET /api/fabrics/analytics/partial-roll-remnant` – histogram of partial rolls (remnants) by remaining length buckets.
+* **`fabricAnalytics.ts`** – `liveFabricStockWhere()` for live-inventory scope (positive length, not rejected/traded) and shared types for analytics payloads.
+
+### Changed
+
+* **Analytics UI** – Shadcn chart components and Recharts for analytics visualizations (consumption trend, aging, stock cover, remnants, width × strength matrix).
+
 ### [0.3.14](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.13...v0.3.14) (2026-03-28)
 
 ### Added
