@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.16](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.15...v0.3.16) (2026-04-18)
+
+### Added
+
+* **Compounds – data model** – Prisma models `Compound` and `CompoundHistory` with `CompoundStatus`, `CompoundHistoryAction`, and `CompoundMachinery` enums; batch weight fields, consumed/remaining kg, and audit history (assign, balance, status) with performer relation.
+* **Raw materials** – `RawMaterial` model mapped to `raw_materials` for future raw-material inventory.
+* **Compounds API** – `GET` / `POST` `/api/compounds` and `GET` / `PATCH` / `DELETE` `/api/compounds/[id]` with RBAC (`COMPOUND_BATCH_*`), Zod validation (`compoundSchema`), and consistent totals (`batchCount` × `weightPerBatchKg`).
+* **Compounds UI** – `/compounds` list (search, status tabs, data table), `/compounds/new`, `/compounds/[id]`, `/compounds/[id]/edit` with new/edit forms.
+* **Analytics routes** – Fabric analytics live at `/analytics/fabrics`; placeholder compound analytics at `/analytics/compounds`. `/analytics` redirects to `/analytics/fabrics`.
+* **Navigation** – Sidebar **Compounds** section with Overview, Analytics, and Settings; **Analytics** entry targets fabric analytics.
+
+### Changed
+
+* **Analytics index** – Former single analytics page replaced by a redirect to fabric analytics (charts unchanged, only route layout).
+
 ### [0.3.15](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.14...v0.3.15) (2026-04-06)
 
 ### Added

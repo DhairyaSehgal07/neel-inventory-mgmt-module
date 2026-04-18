@@ -34,6 +34,28 @@ enum FabricHistoryAction {
   BALANCE_UPDATE
 }
 
+enum CompoundStatus {
+  IN_USE
+  PACKED
+  ASSIGNED
+  CONSUMED
+  TRADED
+  REJECTED
+}
+
+enum CompoundHistoryAction {
+  ASSIGN
+  BALANCE_UPDATE
+  STATUS_CHANGE
+}
+
+enum CompoundMachinery {
+  CAL_1
+  CAL_2
+  CAL_3
+  CAL_4
+}
+
 model User {
   id           Int       @id @default(autoincrement())
   name         String
@@ -45,7 +67,8 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  fabricHistories FabricHistory[]
+  fabricHistories  FabricHistory[]
+  compoundHistories CompoundHistory[]
 
   @@map("users")
 }
@@ -151,4 +174,80 @@ model FabricHistory {
   performedBy User  @relation(fields: [performedById], references: [id])
 
   @@map("fabric_histories")
+}
+
+model RawMaterial {
+  id           Int      @id @default(autoincrement())
+  materialCode String
+  date         DateTime
+  createdBy    String
+  material     String
+  grade        String
+  vendor       String
+  quantity     Float
+  units        String
+  weight       Float
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("raw_materials")
+}
+
+model Compound {
+  id     Int    @id @default(autoincrement())
+  compoundCode String @unique
+  /// Date of production
+  dateOfProduction DateTime
+  createdBy        String
+  compoundName     String
+  /// Batch / lot identifier (label)
+  batch            String
+  /// Number of batches used to compute total produced weight (total = batchCount × weightPerBatchKg)
+  batchCount       Float
+  /// Weight per batch (kg), weight produced
+  weightPerBatchKg Float
+  /// batchCount × weightPerBatchKg — set by application on create/update (same as DB-side generated total)
+  totalWeightProducedKg Float
+  /// Cumulative weight consumed (kg)
+  weightConsumedKg      Float @default(0)
+  /// totalWeightProducedKg − weightConsumedKg — maintain in app when consuming (for analytics/queries)
+  weightRemainingKg     Float
+  location              String
+  status                CompoundStatus?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  history CompoundHistory[]
+
+  @@map("compounds")
+}
+
+model CompoundHistory {
+  id            Int                   @id @default(autoincrement())
+  compoundId    Int
+  actionType    CompoundHistoryAction
+  performedById Int
+  createdAt     DateTime              @default(now())
+
+  // Assign (machinery step): qty, cal line, belt#
+  assignedQtyKg    Float?
+  assignedMachinery CompoundMachinery?
+  beltNumber       String?
+
+  assignToBefore String?
+  assignToAfter  String?
+
+  statusBefore CompoundStatus?
+  statusAfter  CompoundStatus?
+
+  // Balance: weight (kg) before/after consumption updates
+  weightRemainingBeforeKg Float?
+  weightRemainingAfterKg  Float?
+  weightConsumedBeforeKg  Float?
+  weightConsumedAfterKg   Float?
+
+  compound    Compound @relation(fields: [compoundId], references: [id], onDelete: Cascade)
+  performedBy User     @relation(fields: [performedById], references: [id])
+
+  @@map("compound_histories")
 }

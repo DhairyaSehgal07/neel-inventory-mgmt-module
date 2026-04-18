@@ -1,0 +1,24 @@
+import type { CompoundRow } from './columns';
+
+function normalize(s: string): string {
+  return s.trim().toLowerCase();
+}
+
+export function filterCompoundsBySearch(rows: CompoundRow[], query: string): CompoundRow[] {
+  const q = normalize(query);
+  if (!q) return rows;
+  return rows.filter((row) => {
+    const hay = [
+      row.compoundCode,
+      row.compoundName,
+      row.batch,
+      row.location,
+      row.createdBy,
+      row.status ?? '',
+      String(row.id),
+    ]
+      .join(' ')
+      .toLowerCase();
+    return hay.includes(q);
+  });
+}
