@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import prisma from '@/lib/prisma';
@@ -16,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { getCompoundStatusBadgeVariant } from '../utils';
+import { AssignCompoundDialog } from './assign-compound-dialog';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -54,12 +56,24 @@ export default async function CompoundDetailPage({ params }: Props) {
           </Button>
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Compound #{compound.id}</h1>
-            <p className="text-muted-foreground text-sm">{compound.compoundName}</p>
+            <p className="text-muted-foreground text-sm">
+              Scanned from QR code · {compound.compoundName}
+            </p>
           </div>
         </div>
-        <Button variant="outline" size="sm" asChild>
-          <Link href={`/compounds/${compound.id}/edit`}>Edit</Link>
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          {compound.status !== 'REJECTED' &&
+            compound.status !== 'TRADED' &&
+            (compound.assignTo != null && compound.assignTo !== '' ? null : (
+              <AssignCompoundDialog
+                compoundId={compound.id}
+                assignTo={compound.assignTo}
+              />
+            ))}
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/compounds/${compound.id}/edit`}>Edit</Link>
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -120,7 +134,24 @@ export default async function CompoundDetailPage({ params }: Props) {
                 </Badge>
               </dd>
             </div>
+            {compound.assignTo != null && compound.assignTo !== '' && (
+              <div>
+                <dt className="text-sm font-medium text-muted-foreground">Assigned to</dt>
+                <dd className="mt-1 text-sm">{compound.assignTo}</dd>
+              </div>
+            )}
           </dl>
+          <div className="mt-6 pt-6 border-t">
+            <p className="text-sm font-medium text-muted-foreground mb-2">QR code</p>
+            <p className="text-xs text-muted-foreground mb-2">Scan to open this compound page</p>
+            <Image
+              src={`/api/compounds/${compound.id}/qrcode`}
+              alt="Compound QR code"
+              width={256}
+              height={256}
+              unoptimized
+            />
+          </div>
         </CardContent>
       </Card>
 
@@ -207,6 +238,13 @@ export default async function CompoundDetailPage({ params }: Props) {
                         )}
                         {isAssign && (
                           <div className="mt-3 rounded-md bg-muted/50 px-3 py-2 text-sm space-y-1">
+                            {(entry.assignToAfter != null && entry.assignToAfter !== '') ||
+                            (entry.assignToBefore != null && entry.assignToBefore !== '') ? (
+                              <p>
+                                <span className="text-muted-foreground">Assign to: </span>
+                                {entry.assignToBefore ?? '—'} → {entry.assignToAfter ?? '—'}
+                              </p>
+                            ) : null}
                             {entry.assignedQtyKg != null && (
                               <p>
                                 <span className="text-muted-foreground">Assigned qty: </span>

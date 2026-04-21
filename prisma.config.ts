@@ -10,7 +10,7 @@ export default defineConfig({
     seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    url: process.env["DIRECT_DATABASE_URL"],
   },
   // Normalize all fabric codes to id-typeName-strengthName-... format (see src/lib/fabricCode.ts):
   // pnpm run normalize-fabric-codes

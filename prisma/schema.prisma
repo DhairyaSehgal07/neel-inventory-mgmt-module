@@ -200,8 +200,10 @@ model Compound {
   dateOfProduction DateTime
   createdBy        String
   compoundName     String
-  /// Batch / lot identifier (label)
+  /// Batch / lot label
   batch            String
+  /// Calendaring assignment (same labels as fabrics), cleared for rejection/trading
+  assignTo         String?
   /// Number of batches used to compute total produced weight (total = batchCount × weightPerBatchKg)
   batchCount       Float
   /// Weight per batch (kg), weight produced

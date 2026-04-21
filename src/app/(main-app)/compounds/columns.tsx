@@ -1,9 +1,10 @@
 'use client';
 
+import * as React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Printer, Trash2 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,7 @@ export type CompoundRow = {
   weightRemainingKg: number;
   location: string;
   status: string | null;
+  assignTo?: string | null;
   _count?: { history: number };
 };
 
@@ -47,6 +49,14 @@ function CompoundRowActions({
 }) {
   const isDeleting = meta.isDeletingId === row.id;
 
+  const handlePrintQr = React.useCallback(() => {
+    const baseUrl = (process.env.NEXT_PUBLIC_API_URL ?? window.location.origin).replace(
+      /\/$/,
+      ''
+    );
+    window.open(`${baseUrl}/api/compounds/${row.id}/qrcode`, '_blank', 'noopener,noreferrer');
+  }, [row.id]);
+
   return (
     <div className="flex items-center justify-end gap-1">
       <Tooltip>
@@ -64,6 +74,23 @@ function CompoundRowActions({
         </TooltipTrigger>
         <TooltipContent>
           <p>View compound</p>
+        </TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+            onClick={handlePrintQr}
+            disabled={isDeleting}
+            aria-label="Open compound QR code"
+          >
+            <Printer className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Open QR code</p>
         </TooltipContent>
       </Tooltip>
       <Tooltip>
@@ -175,6 +202,15 @@ export const columns: ColumnDef<CompoundRow>[] = [
     cell: ({ row }) => (
       <span className="text-muted-foreground truncate max-w-[140px] block">
         {row.original.location || '—'}
+      </span>
+    ),
+  },
+  {
+    accessorKey: 'assignTo',
+    header: 'Assigned to',
+    cell: ({ row }) => (
+      <span className="text-muted-foreground">
+        {row.original.assignTo ?? '—'}
       </span>
     ),
   },

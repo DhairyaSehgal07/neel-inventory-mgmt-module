@@ -14,6 +14,7 @@ export function filterCompoundsBySearch(rows: CompoundRow[], query: string): Com
       row.batch,
       row.location,
       row.createdBy,
+      row.assignTo ?? '',
       row.status ?? '',
       String(row.id),
     ]
