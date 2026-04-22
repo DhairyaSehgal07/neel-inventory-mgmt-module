@@ -4,6 +4,7 @@ import * as React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import QRCode from 'qrcode';
 import { Eye, Pencil, Printer, Trash2 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +15,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  getSingleCompoundPdfBlob,
+  type SingleCompoundPdfParams,
+} from '@/components/pdf/Single-Compound-Pdf';
 import { getCompoundStatusBadgeVariant } from './utils';
 
 export type CompoundRow = {
@@ -47,15 +52,39 @@ function CompoundRowActions({
   row: CompoundRow;
   meta: CompoundRowActionsMeta;
 }) {
+  const [isPrinting, setIsPrinting] = React.useState(false);
   const isDeleting = meta.isDeletingId === row.id;
 
-  const handlePrintQr = React.useCallback(() => {
-    const baseUrl = (process.env.NEXT_PUBLIC_API_URL ?? window.location.origin).replace(
-      /\/$/,
-      ''
-    );
-    window.open(`${baseUrl}/api/compounds/${row.id}/qrcode`, '_blank', 'noopener,noreferrer');
-  }, [row.id]);
+  const handlePrintQr = React.useCallback(async () => {
+    setIsPrinting(true);
+    try {
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL ?? window.location.origin).replace(
+        /\/$/,
+        ''
+      );
+      const productUrl = `${baseUrl}/compounds/${row.id}`;
+      const qrDataUrl = await QRCode.toDataURL(productUrl, {
+        type: 'image/png',
+        margin: 2,
+        width: 256,
+      });
+      const params: SingleCompoundPdfParams = {
+        productUrl,
+        qrDataUrl,
+        id: row.id,
+        compoundCode: row.compoundCode,
+        compoundName: row.compoundName,
+        dateOfProduction: row.dateOfProduction,
+        status: row.status,
+      };
+      const blob = await getSingleCompoundPdfBlob(params);
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } finally {
+      setIsPrinting(false);
+    }
+  }, [row]);
 
   return (
     <div className="flex items-center justify-end gap-1">
@@ -83,14 +112,14 @@ function CompoundRowActions({
             size="icon"
             className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
             onClick={handlePrintQr}
-            disabled={isDeleting}
-            aria-label="Open compound QR code"
+            disabled={isDeleting || isPrinting}
+            aria-label="Print compound"
           >
-            <Printer className="h-4 w-4" />
+            {isPrinting ? <Spinner className="h-4 w-4" /> : <Printer className="h-4 w-4" />}
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Open QR code</p>
+          <p>Print compound</p>
         </TooltipContent>
       </Tooltip>
       <Tooltip>
