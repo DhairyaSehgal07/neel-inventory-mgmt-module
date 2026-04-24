@@ -189,10 +189,10 @@ export const columns: ColumnDef<CompoundRow>[] = [
     ),
   },
   {
-    accessorKey: 'batch',
+    accessorKey: 'batchCount',
     header: 'Batch',
     cell: ({ row }) => (
-      <span className="text-muted-foreground">{row.original.batch}</span>
+      <span className="text-muted-foreground">{row.original.batchCount ?? '—'}</span>
     ),
   },
   {

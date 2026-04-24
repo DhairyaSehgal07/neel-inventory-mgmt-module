@@ -11,7 +11,7 @@ export function filterCompoundsBySearch(rows: CompoundRow[], query: string): Com
     const hay = [
       row.compoundCode,
       row.compoundName,
-      row.batch,
+      String(row.batchCount),
       row.location,
       row.createdBy,
       row.assignTo ?? '',

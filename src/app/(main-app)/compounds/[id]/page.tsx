@@ -99,10 +99,6 @@ export default async function CompoundDetailPage({ params }: Props) {
               <dd className="mt-1 text-sm">{compound.createdBy}</dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-muted-foreground">Batch / lot</dt>
-              <dd className="mt-1 text-sm">{compound.batch}</dd>
-            </div>
-            <div>
               <dt className="text-sm font-medium text-muted-foreground">Batch count</dt>
               <dd className="mt-1 text-sm">{compound.batchCount}</dd>
             </div>
