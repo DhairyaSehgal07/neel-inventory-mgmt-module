@@ -92,11 +92,11 @@ export function AssignCompoundDialog({
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>Assign compound</Button>
+      <Button onClick={() => setOpen(true)}>Assign Compound</Button>
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Assign compound</DialogTitle>
+            <DialogTitle>Assign Compound</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <FieldGroup>

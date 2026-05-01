@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import prisma from '@/lib/prisma';
 import dbConnect from '@/lib/dbConnect';
 import { format, formatDistanceToNow } from 'date-fns';
-import { ArrowLeft, ArrowRight, FlaskConical, GitBranch, Scale, UserPlus } from 'lucide-react';
+import { ArrowLeft, ArrowRight, GitBranch, Scale, UserPlus } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -18,6 +18,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { getCompoundStatusBadgeVariant } from '../utils';
 import { AssignCompoundDialog } from './assign-compound-dialog';
+import { UpdateCompoundBalanceDialog } from './update-compound-balance-dialog';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -57,42 +58,41 @@ export default async function CompoundDetailPage({ params }: Props) {
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Compound #{compound.id}</h1>
             <p className="text-muted-foreground text-sm">
-              Scanned from QR code · {compound.compoundName}
+              Scanned from QR code · Product details
             </p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {compound.status !== 'REJECTED' &&
             compound.status !== 'TRADED' &&
-            (compound.assignTo != null && compound.assignTo !== '' ? null : (
+            (compound.assignTo != null && compound.assignTo !== '' ? (
+              <UpdateCompoundBalanceDialog
+                compoundId={compound.id}
+                currentBalance={compound.weightRemainingKg}
+              />
+            ) : (
               <AssignCompoundDialog
                 compoundId={compound.id}
                 assignTo={compound.assignTo}
               />
             ))}
-          <Button variant="outline" size="sm" asChild>
-            <Link href={`/compounds/${compound.id}/edit`}>Edit</Link>
-          </Button>
         </div>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FlaskConical className="h-5 w-5" />
-            Batch details
-          </CardTitle>
+          <CardTitle>Product information</CardTitle>
           <CardDescription>Compound inventory entry</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <dt className="text-sm font-medium text-muted-foreground">Compound code</dt>
-              <dd className="mt-1 text-sm font-mono break-all">{compound.compoundCode}</dd>
+              <dt className="text-sm font-medium text-muted-foreground">Date</dt>
+              <dd className="mt-1 text-sm">{format(new Date(compound.dateOfProduction), 'PPP')}</dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-muted-foreground">Date of production</dt>
-              <dd className="mt-1 text-sm">{format(new Date(compound.dateOfProduction), 'PPP')}</dd>
+              <dt className="text-sm font-medium text-muted-foreground">Compound code</dt>
+              <dd className="mt-1 text-sm font-mono break-all">{compound.compoundCode}</dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-muted-foreground">Created by</dt>
