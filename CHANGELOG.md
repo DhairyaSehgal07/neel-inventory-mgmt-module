@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.17](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.16...v0.3.17) (2026-05-01)
+
+
+### Features
+
+* Compound basic functionalities ([b166b58](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/commit/b166b587fd786b6b5120192812974fb33e4e56f5))
+* **compounds:** align detail flow with fabrics ([9322251](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/commit/93222514c09bd6c45d76d0a18573977bf17f2ae0))
+
+
+### Bug Fixes
+
+* Qr code generation ([8bcea6d](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/commit/8bcea6db423b2cb811aaf992446f72134d219cf0))
+
+
+### Miscellaneous Chores
+
+* Show compound batches and fix date issue ([a0c0167](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/commit/a0c01679bf5519db178329e0bfabe6a7d8200278))
+
 ### [0.3.16](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.15...v0.3.16) (2026-04-18)
 
 ### Added
