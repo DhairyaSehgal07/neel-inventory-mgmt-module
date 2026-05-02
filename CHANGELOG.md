@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.18](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.17...v0.3.18) (2026-05-02)
+
+### Added
+
+* **Compound analytics** – `GET /api/compounds/analytics/summary` with filters (location, compound name, date range, day/week/month granularity, slow-stock days), RBAC `COMPOUND_BATCH_VIEW`, and server-side aggregation from batches and balance history.
+* **`compoundAnalytics.ts`** – Shared types and `computeCompoundAnalyticsSummary` (by-name rollups, production timeline, location share, comparison inputs, slow-stock hints) using produced, remaining, and consumed weights from stored fields.
+* **Compound analytics UI** – `/analytics/compounds` renders `CompoundAnalyticsDashboard` (filters, production/consumption/comparison panels, Recharts visualizations, sortable summary table).
+
+### Changed
+
+* **Compounds list** – Status tabs no longer include `ASSIGNED` (tabs align with remaining lifecycle statuses).
+
+### Documentation
+
+* **`docs/compounds/README.md`** – Compounds module overview and analytics behavior.
+
 ### [0.3.17](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.16...v0.3.17) (2026-05-01)
 
 

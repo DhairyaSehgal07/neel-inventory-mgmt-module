@@ -32,7 +32,6 @@ import { filterCompoundsBySearch } from './search-utils';
 const COMPOUND_STATUSES = [
   'IN_USE',
   'PACKED',
-  'ASSIGNED',
   'CONSUMED',
   'TRADED',
   'REJECTED',
