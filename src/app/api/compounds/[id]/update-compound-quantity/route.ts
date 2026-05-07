@@ -17,7 +17,9 @@ type RouteParams = { params: Promise<{ id: string }> };
 /**
  * POST /api/compounds/[id]/update-compound-quantity
  * Update compound remaining quantity and status.
- * If quantity > 0: status = PACKED. If quantity === 0: status = CONSUMED.
+ * Mirrors fabrics update behavior:
+ * - quantity > 0   -> OPEN
+ * - quantity === 0 -> CONSUMED
  * Requires COMPOUND_BATCH_UPDATE.
  */
 export async function POST(request: NextRequest, { params }: RouteParams) {
@@ -79,7 +81,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         );
       }
 
-      const status = quantity > 0 ? 'PACKED' : 'CONSUMED';
+      const status = quantity > 0 ? 'OPEN' : 'CONSUMED';
       const consumed = existing.totalWeightProducedKg - quantity;
 
       const [updated] = await prisma.$transaction([
@@ -89,7 +91,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             weightRemainingKg: quantity,
             weightConsumedKg: consumed,
             status,
-            ...(status === 'PACKED' && { assignTo: null }),
+            ...(status === 'OPEN' && { assignTo: null }),
           },
         }),
         prisma.compoundHistory.create({

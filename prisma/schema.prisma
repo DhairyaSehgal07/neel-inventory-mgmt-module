@@ -37,6 +37,7 @@ enum FabricHistoryAction {
 enum CompoundStatus {
   IN_USE
   PACKED
+  OPEN
   ASSIGNED
   CONSUMED
   TRADED

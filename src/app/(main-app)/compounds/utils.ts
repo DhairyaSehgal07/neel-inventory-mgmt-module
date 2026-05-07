@@ -18,6 +18,8 @@ export function getCompoundStatusBadgeVariant(
   if (status == null || status === '' || status === '—') return 'outline';
   const s = status.toUpperCase().trim();
   switch (s) {
+    case 'OPEN':
+      return 'warning';
     case 'PACKED':
       return 'success';
     case 'IN_USE':

@@ -30,6 +30,7 @@ import { columns, type CompoundRow } from './columns';
 import { filterCompoundsBySearch } from './search-utils';
 
 const COMPOUND_STATUSES = [
+  'OPEN',
   'IN_USE',
   'PACKED',
   'CONSUMED',

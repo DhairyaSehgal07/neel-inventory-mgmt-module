@@ -4,6 +4,7 @@ import dbConnect from '@/lib/dbConnect';
 import { withRBAC } from '@/lib/rbac';
 import { Permission } from '@/lib/rbac/permissions';
 import { createCompoundSchema } from '@/schemas/compoundSchema';
+import type { Compound, CompoundStatus } from '@/generated/prisma/client';
 
 function isPrismaKnownRequestError(
   err: unknown
@@ -18,6 +19,24 @@ function isPrismaKnownRequestError(
 }
 
 const TOTAL_TOLERANCE = 1e-6;
+
+function deriveCompoundDisplayStatus(compound: Compound): string {
+  // Keep terminal states explicit.
+  if (compound.status === 'REJECTED') return 'REJECTED';
+  if (compound.status === 'TRADED') return 'TRADED';
+  if (compound.status === 'CONSUMED') return 'CONSUMED';
+  if (compound.status === 'IN_USE') return 'IN_USE';
+
+  // Quantity-based status derivation mirrors fabrics:
+  // - partially consumed inventory appears as OPEN
+  // - untouched inventory appears as PACKED
+  if (compound.weightRemainingKg <= 0) return 'CONSUMED';
+  if (compound.weightRemainingKg < compound.totalWeightProducedKg) return 'OPEN';
+
+  // Backward compatibility for historical enum values.
+  if (compound.status === 'ASSIGNED') return 'OPEN';
+  return (compound.status ?? 'PACKED') as CompoundStatus | 'PACKED';
+}
 
 function computeTotals(
   batchCount: number,
@@ -71,7 +90,11 @@ export async function GET(request: NextRequest) {
         },
         orderBy: { dateOfProduction: 'desc' },
       });
-      return NextResponse.json({ success: true, data: items });
+      const data = items.map((item) => ({
+        ...item,
+        status: deriveCompoundDisplayStatus(item),
+      }));
+      return NextResponse.json({ success: true, data });
     } catch (error) {
       console.error('GET /api/compounds error:', error);
       return NextResponse.json(
