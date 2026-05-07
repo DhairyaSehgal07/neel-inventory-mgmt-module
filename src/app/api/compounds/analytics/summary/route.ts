@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
       const compoundWhere: Prisma.CompoundWhereInput = {};
       const loc = q.location?.trim();
       if (loc && loc.toLowerCase() !== 'all') {
-        compoundWhere.location = { contains: loc, mode: 'insensitive' };
+        compoundWhere.location = { equals: loc, mode: 'insensitive' };
       }
       const nameQ = q.compound?.trim();
       if (nameQ) {

@@ -437,7 +437,20 @@ export function parseOptionalDateBoundary(
   end: boolean
 ): Date | null {
   if (value == null || value.trim() === '') return null;
-  const d = new Date(value);
+  const v = value.trim();
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
+  const d = m
+    ? new Date(
+        Number(m[1]),
+        Number(m[2]) - 1,
+        Number(m[3]),
+        end ? 23 : 0,
+        end ? 59 : 0,
+        end ? 59 : 0,
+        end ? 999 : 0
+      )
+    : new Date(v);
   if (Number.isNaN(d.getTime())) return null;
+  if (m) return d;
   return end ? endOfDay(d) : startOfDay(d);
 }
