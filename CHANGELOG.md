@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.19](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.18...v0.3.19) (2026-05-07)
+
+
+### Features
+
+* **compounds:** add OPEN status for partially consumed batches ([deb31bc](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/commit/deb31bc3440c461c75f88bed0fc4f3c0f44fc26a))
+
+
+### Bug Fixes
+
+* Honour filters in Compound analytics ([af270a6](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/commit/af270a6387e66a2adb2e49065b1f60a065db15b7))
+
 ### [0.3.18](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.17...v0.3.18) (2026-05-02)
 
 ### Added
