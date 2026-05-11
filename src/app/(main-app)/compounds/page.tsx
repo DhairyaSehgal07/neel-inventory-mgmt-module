@@ -26,6 +26,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { CompoundsDataTable } from './data-table';
+import { GetReportsDialog } from './get-reports-dialog';
 import { columns, type CompoundRow } from './columns';
 import { filterCompoundsBySearch } from './search-utils';
 
@@ -82,6 +83,7 @@ export default function CompoundsPage() {
   const [deleteTarget, setDeleteTarget] = React.useState<CompoundRow | null>(null);
   const [isDeletingId, setIsDeletingId] = React.useState<number | null>(null);
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [reportsOpen, setReportsOpen] = React.useState(false);
 
   const filteredData = React.useMemo(() => {
     let rows = data;
@@ -239,11 +241,18 @@ export default function CompoundsPage() {
                 onEdit={handleEdit}
                 onDelete={(row) => setDeleteTarget(row)}
                 isDeletingId={isDeletingId}
+                onGetReports={() => setReportsOpen(true)}
               />
             </>
           )}
         </CardContent>
       </Card>
+
+      <GetReportsDialog
+        open={reportsOpen}
+        onOpenChange={setReportsOpen}
+        compounds={data}
+      />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
