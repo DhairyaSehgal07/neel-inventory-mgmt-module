@@ -30,6 +30,8 @@ import type {
 } from "@/lib/fabricAnalytics"
 import { cn } from "@/lib/utils"
 
+import { useFabricAnalyticsFilters } from "./fabrics/fabric-analytics-filters-context"
+
 type ApiData = {
   granularity: ConsumptionTrendGranularity
   split: ConsumptionTrendSplit
@@ -70,18 +72,8 @@ function getErrorMessage(
   return fallback
 }
 
-async function fetchTrend(params: {
-  granularity: ConsumptionTrendGranularity
-  split: ConsumptionTrendSplit
-  from: string | null
-  to: string | null
-}): Promise<ApiData> {
-  const sp = new URLSearchParams()
-  sp.set("granularity", params.granularity)
-  sp.set("split", params.split)
-  if (params.from) sp.set("from", params.from)
-  if (params.to) sp.set("to", params.to)
-  const res = await fetch(`/api/fabrics/analytics/consumption-trend?${sp.toString()}`)
+async function fetchTrend(url: string): Promise<ApiData> {
+  const res = await fetch(url)
   const json = (await res.json().catch(() => ({}))) as {
     success?: boolean
     message?: string
@@ -91,6 +83,18 @@ async function fetchTrend(params: {
     throw new Error(getErrorMessage(res, json, "Failed to load consumption trend"))
   }
   return json.data
+}
+
+function buildTrendUrl(
+  appendSharedQueryParams: (sp: URLSearchParams) => void,
+  granularity: string,
+  split: string
+): string {
+  const sp = new URLSearchParams()
+  appendSharedQueryParams(sp)
+  sp.set("granularity", granularity)
+  sp.set("split", split)
+  return `/api/fabrics/analytics/consumption-trend?${sp.toString()}`
 }
 
 function buildStackRows(buckets: ConsumptionTrendBucket[]) {
@@ -117,32 +121,29 @@ function buildStackRows(buckets: ConsumptionTrendBucket[]) {
 }
 
 export function ConsumptionTrendChart() {
-  const [granularity, setGranularity] =
-    React.useState<ConsumptionTrendGranularity>("month")
+  const {
+    granularity,
+    from,
+    to,
+    appendSharedQueryParams,
+    refreshNonce,
+  } = useFabricAnalyticsFilters()
   /** Default to width so line + stacked bar both appear without an extra click. */
   const [split, setSplit] = React.useState<ConsumptionTrendSplit>("width")
-  const [from, setFrom] = React.useState<string>("")
-  const [to, setTo] = React.useState<string>("")
 
-  const fromParam = from || null
-  const toParam = to || null
+  const queryUrl = React.useMemo(
+    () => buildTrendUrl(appendSharedQueryParams, granularity, split),
+    [appendSharedQueryParams, granularity, split]
+  )
 
   const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: [
       "fabric-analytics",
       "consumption-trend",
-      granularity,
-      split,
-      fromParam,
-      toParam,
+      queryUrl,
+      refreshNonce,
     ],
-    queryFn: () =>
-      fetchTrend({
-        granularity,
-        split,
-        from: fromParam,
-        to: toParam,
-      }),
+    queryFn: () => fetchTrend(queryUrl),
   })
 
   const buckets = data?.buckets
@@ -171,6 +172,11 @@ export function ConsumptionTrendChart() {
     ? `${new Date(data.from).toLocaleDateString(undefined, { dateStyle: "medium" })} — ${new Date(data.to).toLocaleDateString(undefined, { dateStyle: "medium" })}`
     : ""
 
+  const rangeHint =
+    from || to
+      ? "Range follows From / To in the filters above."
+      : "No From / To set — using the last six months through today (see range below)."
+
   return (
     <Card className="border-border/80 shadow-sm">
       <CardHeader className="border-b pb-4">
@@ -180,28 +186,15 @@ export function ConsumptionTrendChart() {
             <CardDescription>
               Meters consumed from balance updates where length decreases (
               <span className="text-foreground font-medium">old − new</span> per event).
-              The <span className="text-foreground font-medium">line chart</span> shows
+              Timeline bucket is set in <span className="text-foreground font-medium">Filters</span>{" "}
+              above. The <span className="text-foreground font-medium">line chart</span> shows
               total usage over time; the{" "}
               <span className="text-foreground font-medium">stacked bar chart</span> shows
               how that usage splits by width, strength, or assigned machine / section in
-              each time bucket (demand drivers).
+              each time bucket (demand drivers). {rangeHint}
             </CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <label className="text-muted-foreground flex items-center gap-1.5 text-xs">
-              <span className="whitespace-nowrap">Bucket</span>
-              <select
-                value={granularity}
-                onChange={(e) =>
-                  setGranularity(e.target.value as ConsumptionTrendGranularity)
-                }
-                className="border-input bg-background text-foreground rounded-md border px-2 py-1.5 text-sm"
-              >
-                <option value="day">Day</option>
-                <option value="week">Week</option>
-                <option value="month">Month</option>
-              </select>
-            </label>
             <label className="text-muted-foreground flex items-center gap-1.5 text-xs">
               <span className="whitespace-nowrap">Split</span>
               <select
@@ -217,42 +210,12 @@ export function ConsumptionTrendChart() {
             </label>
             <button
               type="button"
-              onClick={() => refetch()}
+              onClick={() => void refetch()}
               className="text-muted-foreground hover:text-foreground text-sm font-medium underline-offset-4 hover:underline"
             >
               {isFetching ? "Refreshing…" : "Refresh"}
             </button>
           </div>
-        </div>
-        <div className="text-muted-foreground flex flex-wrap items-end gap-3 text-sm">
-          <label className="flex flex-col gap-1">
-            <span className="text-xs">From</span>
-            <input
-              type="date"
-              value={from}
-              onChange={(e) => setFrom(e.target.value)}
-              className="border-input bg-background rounded-md border px-2 py-1.5 text-sm"
-            />
-          </label>
-          <label className="flex flex-col gap-1">
-            <span className="text-xs">To</span>
-            <input
-              type="date"
-              value={to}
-              onChange={(e) => setTo(e.target.value)}
-              className="border-input bg-background rounded-md border px-2 py-1.5 text-sm"
-            />
-          </label>
-          <button
-            type="button"
-            className="text-primary text-xs font-medium hover:underline"
-            onClick={() => {
-              setFrom("")
-              setTo("")
-            }}
-          >
-            Reset range
-          </button>
         </div>
         {data && (
           <p className="text-muted-foreground text-sm">

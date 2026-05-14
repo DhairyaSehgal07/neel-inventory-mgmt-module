@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.20](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.19...v0.3.20) (2026-05-14)
+
+### Added
+
+* **Fabric analytics – dashboard and filters** – `/analytics/fabrics` wraps charts in `FabricAnalyticsDashboard` with a compounds-style filters card (location, fabric code contains, from/to dates, day/week/month timeline bucket, refresh). `FabricAnalyticsFiltersProvider` shares filter state across charts.
+* **`GET /api/fabrics/analytics/filter-options`** – Distinct fabric locations (`area|floor` value and display label) for the location filter, RBAC `FABRIC_VIEW`.
+* **`fabricAnalyticsQuery.ts`** – Shared `parseFabricAnalyticsFilters`, `parseFabricAnalyticsDateRange`, `buildFabricAnalyticsPrismaWhere`, and `fabricAnalyticsFabricFiltersSql` for API routes.
+* **Width × strength consumption matrix** – `GET /api/fabrics/analytics/width-strength-consumption-matrix` aggregates meters consumed from balance-decreasing `BALANCE_UPDATE` events by width × strength (same axes as the stock matrix) with optional location/fabric-code filters and the same default date window as consumption trend. `WidthStrengthConsumptionMatrix` on the analytics page.
+* **Partial roll drilldown** – `GET /api/fabrics/analytics/partial-roll-remnant?bucket=…` returns per-roll rows (fabric id/code, width cm, strength, location string, remaining m) for a histogram bucket; summary response unchanged when `bucket` is omitted.
+
+### Changed
+
+* **Fabric analytics APIs** – `width-strength-matrix`, `consumption-trend`, `open-in-use-aging`, and `partial-roll-remnant` accept `location`, `fabricCode`, `from`, and `to` query params consistent with the dashboard.
+* **`ConsumptionTrendChart`** – Uses shared filters for dates and granularity; split control remains on the chart.
+* **`WidthStrengthStockMatrix`**, **`OpenInUseAgingChart`**, **`PartialRollRemnantChart`** – Fetch URLs include shared filter query params.
+* **Analytics section order** – Consumption trend, consumption matrix, stock matrix, partial roll / remnant, then open / in-use aging.
+
+### Removed
+
+* **Stock cover by SKU** – Removed `StockCoverBySkuChart`, `GET /api/fabrics/analytics/stock-cover-by-sku`, and the `StockCoverBySkuItem` type from fabric analytics.
+
 ### [0.3.19](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.18...v0.3.19) (2026-05-07)
 
 

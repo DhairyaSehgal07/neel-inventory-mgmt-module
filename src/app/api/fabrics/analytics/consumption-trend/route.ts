@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { endOfDay, format, parseISO, startOfDay, subMonths } from 'date-fns';
+import { format } from 'date-fns';
 import prisma from '@/lib/prisma';
 import dbConnect from '@/lib/dbConnect';
 import {
@@ -8,6 +8,11 @@ import {
   type ConsumptionTrendSegment,
   type ConsumptionTrendSplit,
 } from '@/lib/fabricAnalytics';
+import {
+  fabricAnalyticsFabricFiltersSql,
+  parseFabricAnalyticsDateRange,
+  parseFabricAnalyticsFilters,
+} from '@/lib/fabricAnalyticsQuery';
 import { withRBAC } from '@/lib/rbac';
 import { Permission } from '@/lib/rbac/permissions';
 import { Prisma } from '@/generated/prisma/client';
@@ -39,38 +44,6 @@ function parseGranularity(v: string | null): ConsumptionTrendGranularity {
 function parseSplit(v: string | null): ConsumptionTrendSplit {
   if (v === 'width' || v === 'strength' || v === 'assign') return v;
   return 'none';
-}
-
-function parseDateRange(searchParams: URLSearchParams): { from: Date; to: Date } {
-  const defaultTo = endOfDay(new Date());
-  const defaultFrom = startOfDay(subMonths(defaultTo, 6));
-
-  const fromStr = searchParams.get('from');
-  const toStr = searchParams.get('to');
-
-  let from = defaultFrom;
-  let to = defaultTo;
-
-  if (fromStr) {
-    try {
-      from = startOfDay(parseISO(fromStr));
-    } catch {
-      /* keep default */
-    }
-  }
-  if (toStr) {
-    try {
-      to = endOfDay(parseISO(toStr));
-    } catch {
-      /* keep default */
-    }
-  }
-
-  if (from > to) {
-    return { from: defaultFrom, to: defaultTo };
-  }
-
-  return { from, to };
 }
 
 type TotalRow = { period_start: Date; consumption_m: number };
@@ -184,7 +157,10 @@ export async function GET(request: NextRequest) {
       const { searchParams } = request.nextUrl;
       const granularity = parseGranularity(searchParams.get('granularity'));
       const split = parseSplit(searchParams.get('split'));
-      const { from, to } = parseDateRange(searchParams);
+      const { from, to } = parseFabricAnalyticsDateRange(searchParams);
+      const fabricFilterSql = fabricAnalyticsFabricFiltersSql(
+        parseFabricAnalyticsFilters(searchParams)
+      );
 
       const trunc = grainTruncSql(granularity);
 
@@ -193,12 +169,14 @@ export async function GET(request: NextRequest) {
           SELECT (${trunc})::timestamptz AS period_start,
             SUM(GREATEST(0, COALESCE(h."lengthBefore", 0) - COALESCE(h."lengthAfter", 0)))::float AS consumption_m
           FROM fabric_histories h
+          INNER JOIN fabrics f ON f.id = h."fabricId"
           WHERE h."actionType" = 'BALANCE_UPDATE'::"FabricHistoryAction"
             AND h."lengthBefore" IS NOT NULL
             AND h."lengthAfter" IS NOT NULL
             AND h."lengthBefore" > h."lengthAfter"
             AND h."createdAt" >= ${from}
             AND h."createdAt" <= ${to}
+            AND (${fabricFilterSql})
           GROUP BY 1
           ORDER BY 1 ASC
         `;
@@ -241,6 +219,7 @@ export async function GET(request: NextRequest) {
             AND h."lengthBefore" > h."lengthAfter"
             AND h."createdAt" >= ${from}
             AND h."createdAt" <= ${to}
+            AND (${fabricFilterSql})
           GROUP BY 1, f."fabricWidthId", w.value
           ORDER BY 1 ASC, 2 ASC
         `;
@@ -259,6 +238,7 @@ export async function GET(request: NextRequest) {
             AND h."lengthBefore" > h."lengthAfter"
             AND h."createdAt" >= ${from}
             AND h."createdAt" <= ${to}
+            AND (${fabricFilterSql})
           GROUP BY 1, f."fabricStrengthId", s.name
           ORDER BY 1 ASC, 2 ASC
         `;
@@ -276,6 +256,7 @@ export async function GET(request: NextRequest) {
             AND h."lengthBefore" > h."lengthAfter"
             AND h."createdAt" >= ${from}
             AND h."createdAt" <= ${to}
+            AND (${fabricFilterSql})
           GROUP BY 1, COALESCE(NULLIF(TRIM(f."assignTo"), ''), '(Unassigned)')
           ORDER BY 1 ASC, 2 ASC
         `;

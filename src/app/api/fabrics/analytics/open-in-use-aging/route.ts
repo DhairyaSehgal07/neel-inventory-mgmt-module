@@ -5,6 +5,10 @@ import dbConnect from '@/lib/dbConnect';
 import { withRBAC } from '@/lib/rbac';
 import { Permission } from '@/lib/rbac/permissions';
 import type { OpenInUseAgingItem } from '@/lib/fabricAnalytics';
+import {
+  buildFabricAnalyticsPrismaWhere,
+  parseFabricAnalyticsFilters,
+} from '@/lib/fabricAnalyticsQuery';
 import { FabricStatus } from '@/generated/prisma/client';
 
 /**
@@ -24,10 +28,16 @@ export async function GET(request: NextRequest) {
     try {
       await dbConnect();
 
+      const filters = parseFabricAnalyticsFilters(request.nextUrl.searchParams);
+      const analyticsWhere = buildFabricAnalyticsPrismaWhere(filters);
+      const statusWhere = { status: { in: [FabricStatus.OPEN, FabricStatus.IN_USE] } };
+      const where =
+        Object.keys(analyticsWhere).length === 0
+          ? statusWhere
+          : { AND: [statusWhere, analyticsWhere] };
+
       const fabrics = await prisma.fabric.findMany({
-        where: {
-          status: { in: [FabricStatus.OPEN, FabricStatus.IN_USE] },
-        },
+        where,
         select: {
           id: true,
           fabricCode: true,

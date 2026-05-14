@@ -24,6 +24,8 @@ import { ChartContainer, type ChartConfig } from "@/components/ui/chart"
 import type { OpenInUseAgingItem } from "@/lib/fabricAnalytics"
 import { cn } from "@/lib/utils"
 
+import { useFabricAnalyticsFilters } from "./fabrics/fabric-analytics-filters-context"
+
 type ApiData = {
   asOf: string
   items: OpenInUseAgingItem[]
@@ -70,8 +72,15 @@ function getErrorMessage(
   return fallback
 }
 
-async function fetchAging(): Promise<ApiData> {
-  const res = await fetch("/api/fabrics/analytics/open-in-use-aging")
+function buildAgingUrl(appendSharedQueryParams: (sp: URLSearchParams) => void) {
+  const sp = new URLSearchParams()
+  appendSharedQueryParams(sp)
+  const q = sp.toString()
+  return `/api/fabrics/analytics/open-in-use-aging${q ? `?${q}` : ""}`
+}
+
+async function fetchAging(url: string): Promise<ApiData> {
+  const res = await fetch(url)
   const json = (await res.json().catch(() => ({}))) as {
     success?: boolean
     message?: string
@@ -84,9 +93,16 @@ async function fetchAging(): Promise<ApiData> {
 }
 
 export function OpenInUseAgingChart() {
+  const { appendSharedQueryParams, refreshNonce } = useFabricAnalyticsFilters()
+
+  const queryUrl = React.useMemo(
+    () => buildAgingUrl(appendSharedQueryParams),
+    [appendSharedQueryParams]
+  )
+
   const { data, isLoading, error, refetch, isFetching } = useQuery({
-    queryKey: ["fabric-analytics", "open-in-use-aging"],
-    queryFn: fetchAging,
+    queryKey: ["fabric-analytics", "open-in-use-aging", queryUrl, refreshNonce],
+    queryFn: () => fetchAging(queryUrl),
   })
 
   const items = data?.items

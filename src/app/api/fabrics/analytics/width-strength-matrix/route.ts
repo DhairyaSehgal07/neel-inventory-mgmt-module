@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import dbConnect from '@/lib/dbConnect';
 import { liveFabricStockWhere } from '@/lib/fabricAnalytics';
+import {
+  buildFabricAnalyticsPrismaWhere,
+  parseFabricAnalyticsFilters,
+} from '@/lib/fabricAnalyticsQuery';
 import { withRBAC } from '@/lib/rbac';
 import { Permission } from '@/lib/rbac/permissions';
 
@@ -19,7 +23,12 @@ export async function GET(request: NextRequest) {
     try {
       await dbConnect();
 
-      const stockWhere = liveFabricStockWhere();
+      const filters = parseFabricAnalyticsFilters(request.nextUrl.searchParams);
+      const analyticsWhere = buildFabricAnalyticsPrismaWhere(filters);
+      const stockWhere =
+        Object.keys(analyticsWhere).length === 0
+          ? liveFabricStockWhere()
+          : { AND: [liveFabricStockWhere(), analyticsWhere] };
 
       const [widths, strengths, grouped] = await Promise.all([
         prisma.fabricWidth.findMany({

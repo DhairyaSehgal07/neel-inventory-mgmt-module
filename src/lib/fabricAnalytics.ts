@@ -14,17 +14,6 @@ export function liveFabricStockWhere(): Prisma.FabricWhereInput {
   };
 }
 
-/** Stock cover row for `/api/fabrics/analytics/stock-cover-by-sku`. */
-export type StockCoverBySkuItem = {
-  fabricId: number;
-  fabricCode: string;
-  currentBalanceM: number;
-  totalConsumptionM: number;
-  averageMonthlyConsumptionM: number;
-  stockCoverMonths: number | null;
-};
-
-/** Open / in-use aging row for `/api/fabrics/analytics/open-in-use-aging`. */
 export type OpenInUseAgingItem = {
   fabricId: number;
   fabricCode: string;
@@ -59,4 +48,14 @@ export type PartialRollRemnantBucket = {
   rollCount: number;
   /** Sum of `fabricLengthCurrent` for rolls in this bucket (m). */
   totalRemainingM: number;
+};
+
+/** Roll row for partial-roll drilldown (`?bucket=`). */
+export type PartialRollDrilldownItem = {
+  fabricId: number;
+  fabricCode: string;
+  widthValueCm: number;
+  strengthName: string;
+  locationDisplay: string;
+  remainingM: number;
 };
