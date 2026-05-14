@@ -36,6 +36,11 @@ export enum Permission {
   COMPOUND_BATCH_UPDATE = 'compound_batch:update',
   COMPOUND_BATCH_DELETE = 'compound_batch:delete',
 
+  RAW_MATERIAL_BATCH_VIEW = 'raw_material_batch:view',
+  RAW_MATERIAL_BATCH_CREATE = 'raw_material_batch:create',
+  RAW_MATERIAL_BATCH_UPDATE = 'raw_material_batch:update',
+  RAW_MATERIAL_BATCH_DELETE = 'raw_material_batch:delete',
+
   // Rating permissions
   RATING_VIEW = 'rating:view',
   RATING_CREATE = 'rating:create',
@@ -101,6 +106,12 @@ export const PermissionGroups = {
     Permission.COMPOUND_BATCH_CREATE,
     Permission.COMPOUND_BATCH_UPDATE,
     Permission.COMPOUND_BATCH_DELETE,
+  ],
+  RAW_MATERIAL_BATCH: [
+    Permission.RAW_MATERIAL_BATCH_VIEW,
+    Permission.RAW_MATERIAL_BATCH_CREATE,
+    Permission.RAW_MATERIAL_BATCH_UPDATE,
+    Permission.RAW_MATERIAL_BATCH_DELETE,
   ],
   RATING: [
     Permission.RATING_VIEW,

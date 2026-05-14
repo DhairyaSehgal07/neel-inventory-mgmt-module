@@ -58,17 +58,17 @@ enum CompoundMachinery {
 }
 
 model User {
-  id           Int       @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
   name         String
   mobileNumber String   @unique
   password     String
   role         Role     @default(Worker)
   permissions  String[] @default([])
   isActive     Boolean  @default(true)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  fabricHistories  FabricHistory[]
+  fabricHistories   FabricHistory[]
   compoundHistories CompoundHistory[]
 
   @@map("users")
@@ -98,7 +98,7 @@ model FabricStrength {
 
 model FabricWidth {
   id        Int      @id @default(autoincrement())
-  value     Float    // width value (e.g. in meters or inches)
+  value     Float // width value (e.g. in meters or inches)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -108,30 +108,30 @@ model FabricWidth {
 }
 
 model Fabric {
-  id               Int             @id @default(autoincrement())
-  date             DateTime
-  fabricDate       String
-  fabricCode       String   @unique
-  fabricTypeId     Int
-  fabricStrengthId Int
+  id                  Int           @id @default(autoincrement())
+  date                DateTime
+  fabricDate          String
+  fabricCode          String        @unique
+  fabricTypeId        Int
+  fabricStrengthId    Int
   fabricWidthId       Int
   fabricLengthInitial Float
   fabricLengthCurrent Float
   fabricWidthInitial  Float
   fabricWidthCurrent  Float
   nameOfVendor        String
-  gsmObserved      Float
-  qrCode           String
-  netWeight        Float
-  gsmCalculated    Float
-  status           FabricStatus?
-  assignTo         String?
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+  gsmObserved         Float
+  qrCode              String
+  netWeight           Float
+  gsmCalculated       Float
+  status              FabricStatus?
+  assignTo            String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
 
-  fabricType     FabricType     @relation(fields: [fabricTypeId], references: [id])
-  fabricStrength FabricStrength @relation(fields: [fabricStrengthId], references: [id])
-  fabricWidth    FabricWidth    @relation(fields: [fabricWidthId], references: [id])
+  fabricType     FabricType      @relation(fields: [fabricTypeId], references: [id])
+  fabricStrength FabricStrength  @relation(fields: [fabricStrengthId], references: [id])
+  fabricWidth    FabricWidth     @relation(fields: [fabricWidthId], references: [id])
   history        FabricHistory[]
   locations      Location[]
 
@@ -171,54 +171,85 @@ model FabricHistory {
   lengthBefore Float?
   lengthAfter  Float?
 
-  fabric    Fabric @relation(fields: [fabricId], references: [id], onDelete: Cascade)
-  performedBy User  @relation(fields: [performedById], references: [id])
+  fabric      Fabric @relation(fields: [fabricId], references: [id], onDelete: Cascade)
+  performedBy User   @relation(fields: [performedById], references: [id])
 
   @@map("fabric_histories")
 }
 
+enum RawMaterialStatus {
+  IN_USE
+  ASSIGNED
+  OPEN
+  PACKED
+  CONSUMED
+  REJECTED
+  TRADED
+}
+
 model RawMaterial {
-  id           Int      @id @default(autoincrement())
-  materialCode String
+  id Int @id @default(autoincrement())
+
+  // Basic Info
+  materialCode String   @unique
   date         DateTime
   createdBy    String
-  material     String
-  grade        String
-  vendor       String
-  quantity     Float
-  units        String
-  weight       Float
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
 
+  // Material Details
+  rawMaterial String
+  grade       String?
+  vendor      String?
+
+  // Unit Configuration
+  units         String // Kg, Bag, Drum, etc.
+  weightPerUnit Float // Weight of one bag/unit in Kg
+
+  // Inventory
+  availableBags Float @default(0)
+  purchasedBags Float @default(0)
+
+  // Computed / Stored Totals
+  availableWeightKg Float @default(0)
+  purchasedWeightKg Float @default(0)
+
+  // Optional warehouse/location support
+  location String?
+
+  status RawMaterialStatus @default(OPEN)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([rawMaterial])
+  @@index([vendor])
   @@map("raw_materials")
 }
 
 model Compound {
-  id     Int    @id @default(autoincrement())
-  compoundCode String @unique
+  id                    Int             @id @default(autoincrement())
+  compoundCode          String          @unique
   /// Date of production
-  dateOfProduction DateTime
-  createdBy        String
-  compoundName     String
+  dateOfProduction      DateTime
+  createdBy             String
+  compoundName          String
   /// Batch / lot label
-  batch            String
+  batch                 String
   /// Calendaring assignment (same labels as fabrics), cleared for rejection/trading
-  assignTo         String?
+  assignTo              String?
   /// Number of batches used to compute total produced weight (total = batchCount × weightPerBatchKg)
-  batchCount       Float
+  batchCount            Float
   /// Weight per batch (kg), weight produced
-  weightPerBatchKg Float
+  weightPerBatchKg      Float
   /// batchCount × weightPerBatchKg — set by application on create/update (same as DB-side generated total)
   totalWeightProducedKg Float
   /// Cumulative weight consumed (kg)
-  weightConsumedKg      Float @default(0)
+  weightConsumedKg      Float           @default(0)
   /// totalWeightProducedKg − weightConsumedKg — maintain in app when consuming (for analytics/queries)
   weightRemainingKg     Float
   location              String
   status                CompoundStatus?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
 
   history CompoundHistory[]
 
@@ -233,9 +264,9 @@ model CompoundHistory {
   createdAt     DateTime              @default(now())
 
   // Assign (machinery step): qty, cal line, belt#
-  assignedQtyKg    Float?
+  assignedQtyKg     Float?
   assignedMachinery CompoundMachinery?
-  beltNumber       String?
+  beltNumber        String?
 
   assignToBefore String?
   assignToAfter  String?

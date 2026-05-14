@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.21](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.20...v0.3.21) (2026-05-14)
+
+### Added
+
+* **Raw materials – inventory model** – `RawMaterial` aligned for batch-style tracking: unique `materialCode`, `rawMaterial` name, optional `grade`/`vendor`, `units` and `weightPerUnit`, `purchasedBags` / `availableBags` with derived `purchasedWeightKg` / `availableWeightKg`, optional `location`, and `RawMaterialStatus` (`IN_USE`, `ASSIGNED`, `OPEN`, `PACKED`, `CONSUMED`, `REJECTED`, `TRADED`). Prisma migration `20260514120000_raw_materials_schema_update`.
+* **Raw materials API** – `GET` / `POST` `/api/raw-materials` and `GET` / `PATCH` / `DELETE` `/api/raw-materials/[id]` with Zod (`rawMaterialSchema`), bag/weight consistency checks, and RBAC `RAW_MATERIAL_BATCH_*`. `POST` `/api/raw-materials/[id]/update-available` and `GET` `/api/raw-materials/[id]/qrcode`.
+* **Raw materials UI** – `/raw-materials` list (TanStack table, search), `/raw-materials/new`, `/raw-materials/[id]` detail, `/raw-materials/[id]/edit`, layout, update-available dialog, and **Get reports** PDF/Excel (shared column prep like fabrics). Client PDF for a single raw material (`Single-Raw-Material-Pdf`).
+* **`rawMaterialDisplay.ts`** – Display status derivation for list/detail.
+* **Navigation** – Sidebar **Raw materials** section with Overview and Settings (alongside Fabrics and Compounds collapsible groups).
+
+### Changed
+
+* **New/edit raw material forms** – Submit flows and fields match the new schema and APIs.
+* **Settings → Raw materials** – Page updated for the new module entry points.
+* **RBAC** – `RAW_MATERIAL_BATCH_VIEW` / `_CREATE` / `_UPDATE` / `_DELETE` on `Permission` enum, groups, and role defaults.
+
+### Documentation
+
+* **`docs/compounds/COMPOUND_MODULE_FLOW.md`** – End-to-end compounds module flow (master data, batches, consumption, analytics touchpoints).
+
 ### [0.3.20](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.19...v0.3.20) (2026-05-14)
 
 ### Added

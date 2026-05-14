@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronRight, FlaskConical, Layers } from 'lucide-react';
+import { ChevronRight, FlaskConical, Layers, Package } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -26,6 +26,22 @@ const fabricSubItems = [
   { name: 'Analytics', href: '/analytics/fabrics' },
   { name: 'Settings', href: '/settings/fabrics' },
 ] as const;
+
+const rawMaterialSubItems = [
+  { name: 'Overview', href: '/raw-materials' },
+  { name: 'Settings', href: '/settings/raw-materials' },
+] as const;
+
+function isInRawMaterialNavSection(pathname: string) {
+  return (
+    pathname.startsWith('/raw-materials') || pathname.startsWith('/settings/raw-materials')
+  );
+}
+
+function isRawMaterialSubActive(pathname: string, href: string) {
+  if (href === '/raw-materials') return pathname.startsWith('/raw-materials');
+  return pathname.startsWith(href);
+}
 
 const compoundSubItems = [
   { name: 'Overview', href: '/compounds' },
@@ -76,6 +92,16 @@ const AppSidebar = () => {
   React.useEffect(() => {
     if (isInCompoundNavSection(pathname)) setCompoundsOpen(true);
   }, [pathname]);
+
+  const [rawMaterialsOpen, setRawMaterialsOpen] = React.useState(() =>
+    isInRawMaterialNavSection(pathname)
+  );
+
+  React.useEffect(() => {
+    if (isInRawMaterialNavSection(pathname)) setRawMaterialsOpen(true);
+  }, [pathname]);
+
+  const rawMaterialsSectionActive = isInRawMaterialNavSection(pathname);
 
   const fabricsSectionActive = isInFabricNavSection(pathname);
   const compoundsSectionActive = isInCompoundNavSection(pathname);
@@ -152,6 +178,41 @@ const AppSidebar = () => {
                         <SidebarMenuSubButton
                           asChild
                           isActive={isCompoundSubActive(pathname, sub.href)}
+                          size="md"
+                        >
+                          <Link href={sub.href}>
+                            <span>{sub.name}</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                ) : null}
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  type="button"
+                  onClick={() => setRawMaterialsOpen((o) => !o)}
+                  isActive={rawMaterialsSectionActive}
+                  tooltip="Raw materials"
+                  className="cursor-pointer"
+                >
+                  <Package className="h-4 w-4" />
+                  <span>Raw materials</span>
+                  <ChevronRight
+                    className={cn(
+                      'ml-auto size-4 shrink-0 transition-transform',
+                      rawMaterialsOpen && 'rotate-90'
+                    )}
+                  />
+                </SidebarMenuButton>
+                {rawMaterialsOpen ? (
+                  <SidebarMenuSub>
+                    {rawMaterialSubItems.map((sub) => (
+                      <SidebarMenuSubItem key={`rm-${sub.href}-${sub.name}`}>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={isRawMaterialSubActive(pathname, sub.href)}
                           size="md"
                         >
                           <Link href={sub.href}>
