@@ -21,17 +21,17 @@ import {
 } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
 import { ChartContainer, type ChartConfig } from "@/components/ui/chart"
-import type { OpenInUseAgingItem } from "@/lib/fabricAnalytics"
+import type { FabricAgingItem } from "@/lib/fabricAnalytics"
 import { cn } from "@/lib/utils"
 
 import { useFabricAnalyticsFilters } from "./fabrics/fabric-analytics-filters-context"
 
 type ApiData = {
   asOf: string
-  items: OpenInUseAgingItem[]
+  items: FabricAgingItem[]
 }
 
-type ChartRow = OpenInUseAgingItem
+type ChartRow = FabricAgingItem
 
 const chartConfig = {
   agingDays: {
@@ -72,14 +72,26 @@ function getErrorMessage(
   return fallback
 }
 
-function buildAgingUrl(appendSharedQueryParams: (sp: URLSearchParams) => void) {
+type FabricAgingChartConfig = {
+  title: string
+  description: React.ReactNode
+  apiPath: string
+  queryKey: string
+  emptyMessage: string
+  loadErrorFallback: string
+}
+
+function buildAgingUrl(
+  apiPath: string,
+  appendSharedQueryParams: (sp: URLSearchParams) => void
+) {
   const sp = new URLSearchParams()
   appendSharedQueryParams(sp)
   const q = sp.toString()
-  return `/api/fabrics/analytics/open-in-use-aging${q ? `?${q}` : ""}`
+  return `${apiPath}${q ? `?${q}` : ""}`
 }
 
-async function fetchAging(url: string): Promise<ApiData> {
+async function fetchAging(url: string, loadErrorFallback: string): Promise<ApiData> {
   const res = await fetch(url)
   const json = (await res.json().catch(() => ({}))) as {
     success?: boolean
@@ -87,22 +99,22 @@ async function fetchAging(url: string): Promise<ApiData> {
     data?: ApiData
   }
   if (!res.ok || !json.success || !json.data) {
-    throw new Error(getErrorMessage(res, json, "Failed to load aging data"))
+    throw new Error(getErrorMessage(res, json, loadErrorFallback))
   }
   return json.data
 }
 
-export function OpenInUseAgingChart() {
+function FabricAgingChart({ config }: { config: FabricAgingChartConfig }) {
   const { appendSharedQueryParams, refreshNonce } = useFabricAnalyticsFilters()
 
   const queryUrl = React.useMemo(
-    () => buildAgingUrl(appendSharedQueryParams),
-    [appendSharedQueryParams]
+    () => buildAgingUrl(config.apiPath, appendSharedQueryParams),
+    [config.apiPath, appendSharedQueryParams]
   )
 
   const { data, isLoading, error, refetch, isFetching } = useQuery({
-    queryKey: ["fabric-analytics", "open-in-use-aging", queryUrl, refreshNonce],
-    queryFn: () => fetchAging(queryUrl),
+    queryKey: ["fabric-analytics", config.queryKey, queryUrl, refreshNonce],
+    queryFn: () => fetchAging(queryUrl, config.loadErrorFallback),
   })
 
   const items = data?.items
@@ -123,14 +135,8 @@ export function OpenInUseAgingChart() {
       <CardHeader className="border-b pb-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-1.5">
-            <CardTitle className="text-lg">Open / in-use aging</CardTitle>
-            <CardDescription>
-              Calendar days since the last history event (assignment or balance update —
-              status changes are recorded there). Only rolls with status{" "}
-              <span className="text-foreground font-medium">OPEN</span> or{" "}
-              <span className="text-foreground font-medium">IN_USE</span>. Longer bars
-              mean slower movement or forgotten rolls.
-            </CardDescription>
+            <CardTitle className="text-lg">{config.title}</CardTitle>
+            <CardDescription>{config.description}</CardDescription>
           </div>
           <button
             type="button"
@@ -167,9 +173,7 @@ export function OpenInUseAgingChart() {
           </div>
         )}
         {!isLoading && !error && data && chartRows.length === 0 && (
-          <p className="text-muted-foreground text-sm">
-            No rolls are currently OPEN or IN_USE — nothing to show.
-          </p>
+          <p className="text-muted-foreground text-sm">{config.emptyMessage}</p>
         )}
         {!isLoading && !error && chartRows.length > 0 && (
           <div className="space-y-4">
@@ -306,4 +310,45 @@ export function OpenInUseAgingChart() {
       </CardContent>
     </Card>
   )
+}
+
+const OPEN_IN_USE_CONFIG: FabricAgingChartConfig = {
+  title: "Open / in-use aging",
+  description: (
+    <>
+      Calendar days since the last history event (assignment or balance update — status
+      changes are recorded there). Only rolls with status{" "}
+      <span className="text-foreground font-medium">OPEN</span> or{" "}
+      <span className="text-foreground font-medium">IN_USE</span>. Longer bars mean slower
+      movement or forgotten rolls.
+    </>
+  ),
+  apiPath: "/api/fabrics/analytics/open-in-use-aging",
+  queryKey: "open-in-use-aging",
+  emptyMessage: "No rolls are currently OPEN or IN_USE — nothing to show.",
+  loadErrorFallback: "Failed to load aging data",
+}
+
+const PACKED_CONFIG: FabricAgingChartConfig = {
+  title: "Packed aging",
+  description: (
+    <>
+      Calendar days since the last history event (assignment or balance update — status
+      changes are recorded there). Only rolls with status{" "}
+      <span className="text-foreground font-medium">PACKED</span>. Longer bars highlight
+      inventory sitting in storage without movement.
+    </>
+  ),
+  apiPath: "/api/fabrics/analytics/packed-aging",
+  queryKey: "packed-aging",
+  emptyMessage: "No rolls are currently PACKED — nothing to show.",
+  loadErrorFallback: "Failed to load packed aging data",
+}
+
+export function OpenInUseAgingChart() {
+  return <FabricAgingChart config={OPEN_IN_USE_CONFIG} />
+}
+
+export function PackedAgingChart() {
+  return <FabricAgingChart config={PACKED_CONFIG} />
 }

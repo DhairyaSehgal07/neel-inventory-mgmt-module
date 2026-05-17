@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.22](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.21...v0.3.22) (2026-05-18)
+
+### Added
+
+* **Fabric analytics – packed aging** – `GET /api/fabrics/analytics/packed-aging` for rolls with status `PACKED` (same aging rules as open / in-use). `PackedAgingChart` on the fabric analytics dashboard with shared location, fabric code, and date filters.
+* **`fabricAging.ts`** – Shared `getFabricAgingByStatus` helper used by open-in-use and packed aging API routes.
+
+### Changed
+
+* **Open / in-use aging** – API route delegates to `getFabricAgingByStatus`; chart refactored to a configurable `FabricAgingChart` shared with packed aging.
+* **`fabricAnalytics.ts`** – `FabricAgingItem` base type; `OpenInUseAgingItem` and `PackedAgingItem` as status-narrowed aliases.
+* **Single raw material PDF** – Label shows QR code and raw material name only (removed material code, status, date, and detail grid).
+
 ### [0.3.21](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.20...v0.3.21) (2026-05-14)
 
 ### Added

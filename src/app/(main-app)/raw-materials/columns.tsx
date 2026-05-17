@@ -69,13 +69,8 @@ function RawMaterialRowActions({
         width: 256,
       });
       const params: SingleRawMaterialPdfParams = {
-        productUrl,
         qrDataUrl,
-        id: row.id,
-        materialCode: row.materialCode,
         rawMaterial: row.rawMaterial,
-        date: row.date,
-        status: row.status,
       };
       const blob = await getSingleRawMaterialPdfBlob(params);
       const url = URL.createObjectURL(blob);

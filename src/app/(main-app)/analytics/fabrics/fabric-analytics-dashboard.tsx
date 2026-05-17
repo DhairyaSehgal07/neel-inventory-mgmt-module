@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/select';
 
 import { ConsumptionTrendChart } from '../consumption-trend-chart';
-import { OpenInUseAgingChart } from '../open-in-use-aging-chart';
+import { OpenInUseAgingChart, PackedAgingChart } from '../open-in-use-aging-chart';
 import { PartialRollRemnantChart } from '../partial-roll-remnant-chart';
 import { WidthStrengthConsumptionMatrix } from '../width-strength-consumption-matrix';
 import { WidthStrengthStockMatrix } from '../width-strength-stock-matrix';
@@ -146,6 +146,7 @@ function FabricAnalyticsCharts() {
       <WidthStrengthStockMatrix />
       <PartialRollRemnantChart />
       <OpenInUseAgingChart />
+      <PackedAgingChart />
     </div>
   );
 }

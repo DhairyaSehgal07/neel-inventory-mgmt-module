@@ -14,15 +14,19 @@ export function liveFabricStockWhere(): Prisma.FabricWhereInput {
   };
 }
 
-export type OpenInUseAgingItem = {
+export type FabricAgingItem = {
   fabricId: number;
   fabricCode: string;
-  status: 'OPEN' | 'IN_USE';
+  status: string;
   lastActivityAt: string;
   agingDays: number;
   /** False when no history exists and `updatedAt` was used for last activity. */
   usedHistory: boolean;
 };
+
+export type OpenInUseAgingItem = FabricAgingItem & { status: 'OPEN' | 'IN_USE' };
+
+export type PackedAgingItem = FabricAgingItem & { status: 'PACKED' };
 
 export type ConsumptionTrendGranularity = 'day' | 'week' | 'month';
 

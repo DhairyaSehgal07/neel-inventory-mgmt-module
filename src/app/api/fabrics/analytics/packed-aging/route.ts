@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 import dbConnect from '@/lib/dbConnect';
 import { withRBAC } from '@/lib/rbac';
 import { Permission } from '@/lib/rbac/permissions';
-import type { OpenInUseAgingItem } from '@/lib/fabricAnalytics';
+import type { PackedAgingItem } from '@/lib/fabricAnalytics';
 import { getFabricAgingByStatus } from '@/lib/fabricAging';
 import {
   buildFabricAnalyticsPrismaWhere,
@@ -12,14 +12,9 @@ import {
 import { FabricStatus } from '@/generated/prisma/client';
 
 /**
- * GET /api/fabrics/analytics/open-in-use-aging
+ * GET /api/fabrics/analytics/packed-aging
  *
- * Rolls with status OPEN or IN_USE only. Aging (calendar days) = today − last activity.
- * Last activity = latest `fabric_histories.createdAt` for that roll (covers ASSIGN,
- * BALANCE_UPDATE, and any status/assignment fields on those events). If a roll has no
- * history rows, `fabric.updatedAt` is used as a fallback.
- *
- * Sorted descending by aging days (oldest / most stale first).
+ * Rolls with status PACKED only. Same aging rules as open-in-use-aging.
  *
  * Requires FABRIC_VIEW.
  */
@@ -31,27 +26,23 @@ export async function GET(request: NextRequest) {
       const filters = parseFabricAnalyticsFilters(request.nextUrl.searchParams);
       const analyticsWhere = buildFabricAnalyticsPrismaWhere(filters);
 
-      const { asOf, items } = await getFabricAgingByStatus(
-        prisma,
-        [FabricStatus.OPEN, FabricStatus.IN_USE],
-        analyticsWhere
-      );
+      const { asOf, items } = await getFabricAgingByStatus(prisma, [FabricStatus.PACKED], analyticsWhere);
 
       return NextResponse.json({
         success: true,
         data: {
           asOf: asOf.toISOString(),
-          items: items as OpenInUseAgingItem[],
+          items: items as PackedAgingItem[],
         },
       });
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error('GET /api/fabrics/analytics/open-in-use-aging error:', err);
+      console.error('GET /api/fabrics/analytics/packed-aging error:', err);
       const isDev = process.env.NODE_ENV === 'development';
       const message =
         isDev && err.message
-          ? `Failed to load open / in-use aging: ${err.message}`
-          : 'Failed to load open / in-use aging';
+          ? `Failed to load packed aging: ${err.message}`
+          : 'Failed to load packed aging';
       return NextResponse.json({ success: false, message }, { status: 500 });
     }
   });
