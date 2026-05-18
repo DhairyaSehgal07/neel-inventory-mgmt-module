@@ -16,6 +16,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  SidebarMenuAction,
   SidebarHeader,
 } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
@@ -121,21 +122,28 @@ const AppSidebar = () => {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
-                  type="button"
-                  onClick={() => setFabricsOpen((o) => !o)}
+                  asChild
                   isActive={fabricsSectionActive}
                   tooltip="Fabrics"
-                  className="cursor-pointer"
                 >
-                  <Layers className="h-4 w-4" />
-                  <span>Fabrics</span>
+                  <Link href="/fabrics" onClick={() => setFabricsOpen(true)}>
+                    <Layers className="h-4 w-4" />
+                    <span>Fabrics</span>
+                  </Link>
+                </SidebarMenuButton>
+                <SidebarMenuAction
+                  type="button"
+                  onClick={() => setFabricsOpen((o) => !o)}
+                  aria-label={fabricsOpen ? 'Collapse Fabrics menu' : 'Expand Fabrics menu'}
+                  aria-expanded={fabricsOpen}
+                >
                   <ChevronRight
                     className={cn(
-                      'ml-auto size-4 shrink-0 transition-transform',
+                      'size-4 transition-transform',
                       fabricsOpen && 'rotate-90'
                     )}
                   />
-                </SidebarMenuButton>
+                </SidebarMenuAction>
                 {fabricsOpen ? (
                   <SidebarMenuSub>
                     {fabricSubItems.map((sub) => (
@@ -156,21 +164,28 @@ const AppSidebar = () => {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
-                  type="button"
-                  onClick={() => setCompoundsOpen((o) => !o)}
+                  asChild
                   isActive={compoundsSectionActive}
                   tooltip="Compounds"
-                  className="cursor-pointer"
                 >
-                  <FlaskConical className="h-4 w-4" />
-                  <span>Compounds</span>
+                  <Link href="/compounds" onClick={() => setCompoundsOpen(true)}>
+                    <FlaskConical className="h-4 w-4" />
+                    <span>Compounds</span>
+                  </Link>
+                </SidebarMenuButton>
+                <SidebarMenuAction
+                  type="button"
+                  onClick={() => setCompoundsOpen((o) => !o)}
+                  aria-label={compoundsOpen ? 'Collapse Compounds menu' : 'Expand Compounds menu'}
+                  aria-expanded={compoundsOpen}
+                >
                   <ChevronRight
                     className={cn(
-                      'ml-auto size-4 shrink-0 transition-transform',
+                      'size-4 transition-transform',
                       compoundsOpen && 'rotate-90'
                     )}
                   />
-                </SidebarMenuButton>
+                </SidebarMenuAction>
                 {compoundsOpen ? (
                   <SidebarMenuSub>
                     {compoundSubItems.map((sub) => (
@@ -191,21 +206,30 @@ const AppSidebar = () => {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
-                  type="button"
-                  onClick={() => setRawMaterialsOpen((o) => !o)}
+                  asChild
                   isActive={rawMaterialsSectionActive}
                   tooltip="Raw materials"
-                  className="cursor-pointer"
                 >
-                  <Package className="h-4 w-4" />
-                  <span>Raw materials</span>
+                  <Link href="/raw-materials" onClick={() => setRawMaterialsOpen(true)}>
+                    <Package className="h-4 w-4" />
+                    <span>Raw materials</span>
+                  </Link>
+                </SidebarMenuButton>
+                <SidebarMenuAction
+                  type="button"
+                  onClick={() => setRawMaterialsOpen((o) => !o)}
+                  aria-label={
+                    rawMaterialsOpen ? 'Collapse Raw materials menu' : 'Expand Raw materials menu'
+                  }
+                  aria-expanded={rawMaterialsOpen}
+                >
                   <ChevronRight
                     className={cn(
-                      'ml-auto size-4 shrink-0 transition-transform',
+                      'size-4 transition-transform',
                       rawMaterialsOpen && 'rotate-90'
                     )}
                   />
-                </SidebarMenuButton>
+                </SidebarMenuAction>
                 {rawMaterialsOpen ? (
                   <SidebarMenuSub>
                     {rawMaterialSubItems.map((sub) => (

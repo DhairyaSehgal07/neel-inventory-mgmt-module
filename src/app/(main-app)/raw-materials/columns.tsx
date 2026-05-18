@@ -70,7 +70,9 @@ function RawMaterialRowActions({
       });
       const params: SingleRawMaterialPdfParams = {
         qrDataUrl,
-        rawMaterial: row.rawMaterial,
+        rawMaterialName: row.rawMaterial,
+        date: row.date,
+        status: row.status,
       };
       const blob = await getSingleRawMaterialPdfBlob(params);
       const url = URL.createObjectURL(blob);
@@ -181,6 +183,15 @@ export const columns: ColumnDef<RawMaterialRow>[] = [
     header: 'Material',
     cell: ({ row }) => (
       <span className="truncate max-w-[160px] block">{row.original.rawMaterial}</span>
+    ),
+  },
+  {
+    accessorKey: 'grade',
+    header: 'Grade',
+    cell: ({ row }) => (
+      <span className="text-muted-foreground truncate max-w-[100px] block">
+        {row.original.grade || '—'}
+      </span>
     ),
   },
   {

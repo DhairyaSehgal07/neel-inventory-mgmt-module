@@ -10,6 +10,16 @@ import {
   pdf,
 } from '@react-pdf/renderer';
 
+function formatProductionDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value || '—';
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 const MM_TO_PT = 72 / 25.4;
 const PAGE_SIZE: [number, number] = [199.6 * MM_TO_PT, 143.5 * MM_TO_PT];
 
@@ -28,22 +38,48 @@ const styles = StyleSheet.create({
   qrSection: {
     width: '100%',
     alignItems: 'center',
-    marginBottom: 8,
-  },
-  nameText: {
-    width: '100%',
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  nameBold: {
-    fontSize: 22,
-    fontWeight: 700,
-    color: '#111827',
-    textAlign: 'center',
+    marginBottom: 14,
   },
   qrImage: {
     width: 180,
     height: 180,
+  },
+  divider: {
+    width: '100%',
+    height: 1,
+    backgroundColor: '#e5e7eb',
+    marginBottom: 14,
+  },
+  infoSection: {
+    width: '100%',
+    textAlign: 'center',
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  gridCell: {
+    width: '32%',
+    marginBottom: 14,
+  },
+  label: {
+    fontSize: 22,
+    color: '#6b7280',
+    letterSpacing: 0.5,
+    marginBottom: 3,
+  },
+  value: {
+    fontSize: 24,
+    fontWeight: 600,
+    color: '#111827',
+  },
+  statusBadge: {
+    fontSize: 19,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    backgroundColor: '#f3f4f6',
+    borderRadius: 4,
   },
   placeholder: {
     fontSize: 22,
@@ -54,7 +90,9 @@ const styles = StyleSheet.create({
 
 export type SingleRawMaterialPdfParams = {
   qrDataUrl: string;
-  rawMaterial: string;
+  rawMaterialName: string;
+  date: string;
+  status: string | null | undefined;
 };
 
 export const SingleRawMaterialPdfPageContent = (props: SingleRawMaterialPdfParams) => (
@@ -64,8 +102,25 @@ export const SingleRawMaterialPdfPageContent = (props: SingleRawMaterialPdfParam
       <Image src={props.qrDataUrl} style={styles.qrImage} />
     </View>
 
-    <View style={styles.nameText}>
-      <Text style={styles.nameBold}>{props.rawMaterial || '—'}</Text>
+    <View style={styles.divider} />
+
+    <View style={styles.infoSection}>
+      <View style={styles.grid}>
+        <View style={styles.gridCell}>
+          <Text style={styles.label}>NAME</Text>
+          <Text style={styles.value}>{props.rawMaterialName || '—'}</Text>
+        </View>
+
+        <View style={styles.gridCell}>
+          <Text style={styles.label}>STATUS</Text>
+          <Text style={styles.statusBadge}>{props.status ?? '—'}</Text>
+        </View>
+
+        <View style={styles.gridCell}>
+          <Text style={styles.label}>DATE</Text>
+          <Text style={styles.value}>{formatProductionDate(props.date)}</Text>
+        </View>
+      </View>
     </View>
   </View>
 );

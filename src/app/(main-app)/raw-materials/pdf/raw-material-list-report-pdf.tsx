@@ -69,15 +69,16 @@ const styles = StyleSheet.create({
 });
 
 const PDF_COL_WIDTH: Record<RawMaterialReportColumnKey, string> = {
-  materialCode: '10%',
-  rawMaterial: '14%',
-  date: '9%',
-  availableBags: '8%',
-  purchasedBags: '8%',
-  availableKg: '9%',
-  purchasedKg: '9%',
-  location: '14%',
-  status: '10%',
+  materialCode: '9%',
+  rawMaterial: '11%',
+  vendor: '11%',
+  date: '8%',
+  availableBags: '7.5%',
+  purchasedBags: '7.5%',
+  availableKg: '8%',
+  purchasedKg: '8%',
+  location: '11%',
+  status: '9%',
 };
 
 type RawMaterialListReportPdfProps = {

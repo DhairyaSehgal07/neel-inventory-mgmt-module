@@ -5,6 +5,7 @@ import type { RawMaterialRow } from './columns';
 export const RAW_MATERIAL_REPORT_COLUMNS = [
   { key: 'materialCode', header: 'Code' },
   { key: 'rawMaterial', header: 'Material' },
+  { key: 'vendor', header: 'Vendor' },
   { key: 'date', header: 'Date' },
   { key: 'availableBags', header: 'Avail. bags' },
   { key: 'purchasedBags', header: 'Purch. bags' },
@@ -37,6 +38,7 @@ export function buildRawMaterialReportCellValues(
   return {
     materialCode: r.materialCode || '—',
     rawMaterial: truncate(r.rawMaterial ?? '—', 28),
+    vendor: truncate((r.vendor || '—').trim() || '—', 20),
     date: dateStr,
     availableBags: fmt(r.availableBags),
     purchasedBags: fmt(r.purchasedBags),
