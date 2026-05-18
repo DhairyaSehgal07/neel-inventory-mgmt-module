@@ -19,3 +19,5 @@ export {
   DEFAULT_PERMISSIONS_BY_ROLE,
   getDefaultPermissionsForRole,
 } from './role-defaults';
+
+export { withRawMaterialBatchPermissions } from './raw-material-permissions';

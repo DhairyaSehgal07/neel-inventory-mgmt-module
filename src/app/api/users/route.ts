@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import dbConnect from '@/lib/dbConnect';
-import { withRBAC } from '@/lib/rbac';
+import { withRBAC, getDefaultPermissionsForRole, withRawMaterialBatchPermissions } from '@/lib/rbac';
 import { Permission } from '@/lib/rbac/permissions';
+import type { Role } from '@/model/User';
 import { toUserResponse } from '@/lib/api/user-response';
 import { createUserSchema } from '@/schemas/userSchema';
 import bcrypt from 'bcryptjs';
@@ -65,7 +66,11 @@ export async function POST(request: NextRequest) {
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      const permissionStrings = permissions.map((p) => String(p));
+      const basePermissions =
+        permissions.length > 0 ? permissions : getDefaultPermissionsForRole(role as Role);
+      const permissionStrings = withRawMaterialBatchPermissions(
+        basePermissions.map((p) => String(p))
+      );
 
       const user = await prisma.user.create({
         data: {

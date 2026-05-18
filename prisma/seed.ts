@@ -2,11 +2,32 @@ import 'dotenv/config';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../src/lib/prisma';
 import { ALL_PERMISSIONS } from '../src/lib/rbac/permissions';
+import { withRawMaterialBatchPermissions } from '../src/lib/rbac/raw-material-permissions';
+
+async function syncExistingUserPermissions(
+  user: { id: number; permissions: string[] },
+  permissions: string[]
+) {
+  const next = withRawMaterialBatchPermissions(permissions);
+  const changed =
+    next.length !== user.permissions.length ||
+    next.some((p) => !user.permissions.includes(p));
+
+  if (!changed) return;
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { permissions: next },
+  });
+  console.log(`🔄 Synced permissions for user #${user.id}`);
+}
 
 export async function main() {
   try {
     const hashedPassword = await bcrypt.hash('123456', 10);
-    const permissions = ALL_PERMISSIONS.map((p) => String(p));
+    const permissions = withRawMaterialBatchPermissions(
+      ALL_PERMISSIONS.map((p) => String(p))
+    );
 
     // Seed Aseem (Admin)
     const aseemMobile = '8437702351';
@@ -16,6 +37,7 @@ export async function main() {
 
     if (existingAseem) {
       console.log('✅ User Aseem already exists');
+      await syncExistingUserPermissions(existingAseem, permissions);
     } else {
       await prisma.user.create({
         data: {
@@ -38,6 +60,7 @@ export async function main() {
 
     if (existingOffice) {
       console.log('✅ User office already exists');
+      await syncExistingUserPermissions(existingOffice, permissions);
     } else {
       await prisma.user.create({
         data: {
@@ -60,6 +83,7 @@ export async function main() {
 
     if (existingStores) {
       console.log('✅ User Stores already exists');
+      await syncExistingUserPermissions(existingStores, permissions);
     } else {
       await prisma.user.create({
         data: {

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import dbConnect from '@/lib/dbConnect';
 import { withRBACParams } from '@/lib/rbac/rbac-params';
-import { Permission, hasPermission } from '@/lib/rbac';
+import { Permission, hasPermission, withRawMaterialBatchPermissions } from '@/lib/rbac';
 import { auth } from '@/auth';
 import { toUserResponse } from '@/lib/api/user-response';
 import { updateUserSchema } from '@/schemas/userSchema';
@@ -132,7 +132,9 @@ export async function PATCH(
       }
       if (parsed.data.role !== undefined) updateData.role = parsed.data.role;
       if (parsed.data.permissions !== undefined) {
-        updateData.permissions = parsed.data.permissions.map((p) => String(p));
+        updateData.permissions = withRawMaterialBatchPermissions(
+          parsed.data.permissions.map((p) => String(p))
+        );
       }
       if (parsed.data.isActive !== undefined) updateData.isActive = parsed.data.isActive;
 
