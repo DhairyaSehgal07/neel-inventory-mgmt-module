@@ -68,8 +68,9 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  fabricHistories   FabricHistory[]
-  compoundHistories CompoundHistory[]
+  fabricHistories      FabricHistory[]
+  compoundHistories    CompoundHistory[]
+  rawMaterialHistories RawMaterialHistory[]
 
   @@map("users")
 }
@@ -187,6 +188,11 @@ enum RawMaterialStatus {
   TRADED
 }
 
+enum RawMaterialHistoryAction {
+  BALANCE_UPDATE
+  STATUS_CHANGE
+}
+
 model RawMaterial {
   id Int @id @default(autoincrement())
 
@@ -217,12 +223,39 @@ model RawMaterial {
 
   status RawMaterialStatus @default(OPEN)
 
+  /// Set when batch is fully packed (available ≈ purchased); cleared when opened/consumed.
+  packedAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  history RawMaterialHistory[]
+
   @@index([rawMaterial])
   @@index([vendor])
+  @@index([status])
   @@map("raw_materials")
+}
+
+model RawMaterialHistory {
+  id            Int                      @id @default(autoincrement())
+  rawMaterialId Int
+  actionType    RawMaterialHistoryAction
+  performedById Int?
+  createdAt     DateTime                 @default(now())
+
+  availableBagsBefore     Float?
+  availableBagsAfter      Float?
+  availableWeightKgBefore Float?
+  availableWeightKgAfter  Float?
+  statusBefore            RawMaterialStatus?
+  statusAfter             RawMaterialStatus?
+
+  rawMaterial RawMaterial @relation(fields: [rawMaterialId], references: [id], onDelete: Cascade)
+  performedBy User?       @relation(fields: [performedById], references: [id])
+
+  @@index([rawMaterialId, createdAt])
+  @@map("raw_material_histories")
 }
 
 model Compound {

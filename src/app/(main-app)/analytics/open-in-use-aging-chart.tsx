@@ -22,6 +22,7 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import { ChartContainer, type ChartConfig } from "@/components/ui/chart"
 import type { FabricAgingItem } from "@/lib/fabricAnalytics"
+import { analyticsChartCssVar } from "@/lib/analyticsChartColors"
 import { cn } from "@/lib/utils"
 
 import { useFabricAnalyticsFilters } from "./fabrics/fabric-analytics-filters-context"
@@ -36,29 +37,52 @@ type ChartRow = FabricAgingItem
 const chartConfig = {
   agingDays: {
     label: "Days since last activity",
-    color: "var(--chart-2)",
+    color: analyticsChartCssVar(0),
   },
 } satisfies ChartConfig
 
-const AGING_TIERS = [
-  { id: "fresh", label: "0–6 d", color: "var(--chart-2)" },
-  { id: "recent", label: "7–20 d", color: "var(--chart-4)" },
-  { id: "stale", label: "21–44 d", color: "var(--chart-5)" },
-  { id: "stuck", label: "45+ d", color: "var(--destructive)" },
-] as const
+type AgingTier = { id: string; label: string; color: string }
 
-function barFillForAging(days: number): string {
-  if (days >= 45) return AGING_TIERS[3].color
-  if (days >= 21) return AGING_TIERS[2].color
-  if (days >= 7) return AGING_TIERS[1].color
-  return AGING_TIERS[0].color
+const OPEN_IN_USE_AGING_TIERS: AgingTier[] = [
+  { id: "fresh", label: "0–6 d", color: analyticsChartCssVar(0) },
+  { id: "recent", label: "7–20 d", color: analyticsChartCssVar(2) },
+  { id: "stale", label: "21–44 d", color: analyticsChartCssVar(4) },
+  { id: "stuck", label: "45+ d", color: analyticsChartCssVar(6) },
+]
+
+const PACKED_AGING_TIERS: AgingTier[] = [
+  { id: "0-60", label: "0–60 d", color: analyticsChartCssVar(1) },
+  { id: "61-120", label: "61–120 d", color: analyticsChartCssVar(3) },
+  { id: "121-180", label: "121–180 d", color: analyticsChartCssVar(5) },
+  { id: "180+", label: "180+ d", color: analyticsChartCssVar(7) },
+]
+
+function barFillForOpenInUseAging(days: number): string {
+  if (days >= 45) return OPEN_IN_USE_AGING_TIERS[3].color
+  if (days >= 21) return OPEN_IN_USE_AGING_TIERS[2].color
+  if (days >= 7) return OPEN_IN_USE_AGING_TIERS[1].color
+  return OPEN_IN_USE_AGING_TIERS[0].color
 }
 
-function tierLabelForAging(days: number): string {
+function tierLabelForOpenInUseAging(days: number): string {
   if (days >= 45) return "Very stale — 45+ days without activity"
   if (days >= 21) return "Stale — three weeks or more"
   if (days >= 7) return "Worth watching — over a week"
   return "Recently active — within a week"
+}
+
+function barFillForPackedAging(days: number): string {
+  if (days >= 180) return PACKED_AGING_TIERS[3].color
+  if (days >= 121) return PACKED_AGING_TIERS[2].color
+  if (days >= 61) return PACKED_AGING_TIERS[1].color
+  return PACKED_AGING_TIERS[0].color
+}
+
+function tierLabelForPackedAging(days: number): string {
+  if (days >= 180) return "180+ days in packed storage"
+  if (days >= 121) return "121–180 days in packed storage"
+  if (days >= 61) return "61–120 days in packed storage"
+  return "0–60 days in packed storage"
 }
 
 function getErrorMessage(
@@ -79,6 +103,9 @@ type FabricAgingChartConfig = {
   queryKey: string
   emptyMessage: string
   loadErrorFallback: string
+  agingTiers: AgingTier[]
+  barFillForAging: (days: number) => string
+  tierLabelForAging: (days: number) => string
 }
 
 function buildAgingUrl(
@@ -105,6 +132,7 @@ async function fetchAging(url: string, loadErrorFallback: string): Promise<ApiDa
 }
 
 function FabricAgingChart({ config }: { config: FabricAgingChartConfig }) {
+  const { agingTiers, barFillForAging, tierLabelForAging } = config
   const { appendSharedQueryParams, refreshNonce } = useFabricAnalyticsFilters()
 
   const queryUrl = React.useMemo(
@@ -292,7 +320,7 @@ function FabricAgingChart({ config }: { config: FabricAgingChartConfig }) {
             </div>
 
             <div className="text-muted-foreground grid gap-2 text-xs sm:grid-cols-2 lg:grid-cols-4">
-              {AGING_TIERS.map((tier) => (
+              {agingTiers.map((tier) => (
                 <span
                   key={tier.id}
                   className="bg-card border-border/70 inline-flex min-w-0 items-center gap-2 rounded-full border px-2.5 py-1 shadow-sm"
@@ -327,6 +355,9 @@ const OPEN_IN_USE_CONFIG: FabricAgingChartConfig = {
   queryKey: "open-in-use-aging",
   emptyMessage: "No rolls are currently OPEN or IN_USE — nothing to show.",
   loadErrorFallback: "Failed to load aging data",
+  agingTiers: OPEN_IN_USE_AGING_TIERS,
+  barFillForAging: barFillForOpenInUseAging,
+  tierLabelForAging: tierLabelForOpenInUseAging,
 }
 
 const PACKED_CONFIG: FabricAgingChartConfig = {
@@ -343,6 +374,9 @@ const PACKED_CONFIG: FabricAgingChartConfig = {
   queryKey: "packed-aging",
   emptyMessage: "No rolls are currently PACKED — nothing to show.",
   loadErrorFallback: "Failed to load packed aging data",
+  agingTiers: PACKED_AGING_TIERS,
+  barFillForAging: barFillForPackedAging,
+  tierLabelForAging: tierLabelForPackedAging,
 }
 
 export function OpenInUseAgingChart() {

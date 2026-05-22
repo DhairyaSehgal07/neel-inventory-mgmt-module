@@ -6,6 +6,8 @@ import {
   startOfWeek,
 } from 'date-fns';
 
+import { analyticsChartHex } from '@/lib/analyticsChartColors';
+
 /** Brief §6.2 — extend `FALLBACK_COMPOUND_COLORS` for names not in this map. */
 export const COMPOUND_BRAND_COLORS: Record<string, string> = {
   'NK-7': '#378ADD',
@@ -14,17 +16,6 @@ export const COMPOUND_BRAND_COLORS: Record<string, string> = {
   'DVR-15': '#BA7517',
   'TOT-15': '#7F77DD',
 };
-
-const FALLBACK_COMPOUND_COLORS = [
-  '#6366f1',
-  '#db2777',
-  '#0891b2',
-  '#ca8a04',
-  '#4f46e5',
-  '#0d9488',
-  '#ea580c',
-  '#9333ea',
-] as const;
 
 export type CompoundAnalyticsGranularity = 'day' | 'week' | 'month';
 
@@ -131,7 +122,7 @@ export function getCompoundChartColor(compoundName: string): string {
   for (let i = 0; i < key.length; i += 1) {
     h = (h * 31 + key.charCodeAt(i)) >>> 0;
   }
-  return FALLBACK_COMPOUND_COLORS[h % FALLBACK_COMPOUND_COLORS.length];
+  return analyticsChartHex(h);
 }
 
 /** e.g. 20400 → "20.4k" for axis labels. */

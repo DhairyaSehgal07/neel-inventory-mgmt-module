@@ -28,6 +28,7 @@ import type {
   ConsumptionTrendGranularity,
   ConsumptionTrendSplit,
 } from "@/lib/fabricAnalytics"
+import { ANALYTICS_CHART_CSS_VARS, analyticsChartCssVar } from "@/lib/analyticsChartColors"
 import { cn } from "@/lib/utils"
 
 import { useFabricAnalyticsFilters } from "./fabrics/fabric-analytics-filters-context"
@@ -43,19 +44,11 @@ type ApiData = {
 const chartConfig = {
   totalM: {
     label: "Consumption (m)",
-    color: "var(--chart-2)",
+    color: analyticsChartCssVar(0),
   },
 } satisfies ChartConfig
 
-const STACK_COLORS = [
-  "var(--chart-1)",
-  "var(--chart-2)",
-  "var(--chart-3)",
-  "var(--chart-4)",
-  "var(--chart-5)",
-  "var(--primary)",
-  "var(--destructive)",
-] as const
+const STACK_COLORS = [...ANALYTICS_CHART_CSS_VARS]
 
 function sanitizeDataKey(segmentKey: string): string {
   return `seg_${segmentKey.replace(/[^a-zA-Z0-9]/g, "_")}`
@@ -304,9 +297,9 @@ export function ConsumptionTrendChart() {
                     <Line
                       type="monotone"
                       dataKey="totalM"
-                      stroke="var(--chart-2)"
+                      stroke={analyticsChartCssVar(0)}
                       strokeWidth={2}
-                      dot={{ r: 3, fill: "var(--chart-2)" }}
+                      dot={{ r: 3, fill: analyticsChartCssVar(0) }}
                       activeDot={{ r: 4 }}
                     />
                   </LineChart>

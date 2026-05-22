@@ -30,17 +30,24 @@ const fabricSubItems = [
 
 const rawMaterialSubItems = [
   { name: 'Overview', href: '/raw-materials' },
+  { name: 'Analytics', href: '/analytics/raw-materials' },
   { name: 'Settings', href: '/settings/raw-materials' },
 ] as const;
 
 function isInRawMaterialNavSection(pathname: string) {
   return (
-    pathname.startsWith('/raw-materials') || pathname.startsWith('/settings/raw-materials')
+    pathname.startsWith('/raw-materials') ||
+    pathname.startsWith('/analytics/raw-materials') ||
+    pathname.startsWith('/settings/raw-materials')
   );
 }
 
 function isRawMaterialSubActive(pathname: string, href: string) {
-  if (href === '/raw-materials') return pathname.startsWith('/raw-materials');
+  if (href === '/raw-materials') {
+    return (
+      pathname.startsWith('/raw-materials') && !pathname.startsWith('/analytics/raw-materials')
+    );
+  }
   return pathname.startsWith(href);
 }
 

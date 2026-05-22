@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.23](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.22...v0.3.23) (2026-05-23)
+
+### Added
+
+* **Raw materials analytics** – `/analytics/raw-materials` dashboard with consumption by material/grade (timeline + table/bar toggle), master comparison (sortable, CSV export), packed-batch aging (fresh/aging/overdue), low-stock alerts, location utilisation, and consumption forecast. APIs under `/api/raw-materials/analytics/*` with shared filters; RBAC `RAW_MATERIAL_BATCH_VIEW`.
+* **`RawMaterialHistory`** – Balance-update audit log and optional `packedAt` on batches (migration `20260523120000_raw_material_history_packed_at`). History written on create, PATCH, and `update-available`.
+* **`rawMaterialAnalytics.ts`**, **`rawMaterialBalance.ts`**, **`rawMaterialAnalyticsQuery.ts`** – Aggregation and query helpers for analytics routes.
+* **Navigation** – Sidebar **Raw materials → Analytics** entry.
+
+### Changed
+
+* **Analytics chart palette** – Extended theme tokens (`--chart-6`–`--chart-10`) and shared `analyticsChartColors.ts` helpers; fabric, compound, and raw-material charts use the unified palette for better contrast across series.
+
 ### [0.3.22](https://github.com/DhairyaSehgal07/neel-inventory-mgmt-module/compare/v0.3.21...v0.3.22) (2026-05-18)
 
 ### Added

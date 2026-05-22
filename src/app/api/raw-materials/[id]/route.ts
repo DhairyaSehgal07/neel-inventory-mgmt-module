@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
 import prisma from '@/lib/prisma';
 import dbConnect from '@/lib/dbConnect';
 import { withRBAC } from '@/lib/rbac';
 import { Permission } from '@/lib/rbac/permissions';
 import { updateRawMaterialSchema } from '@/schemas/rawMaterialSchema';
+import {
+  computeBagWeights,
+  nextStatusFromBags,
+  resolvePackedAt,
+} from '@/lib/rawMaterialBalance';
+import { logRawMaterialBalanceUpdate } from '@/lib/rawMaterialHistoryWrite';
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -17,26 +24,6 @@ function isPrismaKnownRequestError(
     typeof (err as { code: string }).code === 'string' &&
     (err as { code: string }).code.startsWith('P')
   );
-}
-
-const BAG_TOLERANCE = 1e-6;
-
-function computeBagWeights(
-  purchasedBags: number,
-  availableBags: number,
-  weightPerUnit: number
-): { ok: true; purchasedWeightKg: number; availableWeightKg: number } | { ok: false; message: string } {
-  if (availableBags - purchasedBags > BAG_TOLERANCE) {
-    return {
-      ok: false,
-      message: 'Available bags cannot exceed purchased bags',
-    };
-  }
-  return {
-    ok: true,
-    purchasedWeightKg: purchasedBags * weightPerUnit,
-    availableWeightKg: availableBags * weightPerUnit,
-  };
 }
 
 /**
@@ -133,24 +120,62 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         return NextResponse.json({ success: false, message: weights.message }, { status: 400 });
       }
 
-      const updated = await prisma.rawMaterial.update({
-        where: { id: rawMaterialId },
-        data: {
-          ...(p.materialCode !== undefined && { materialCode: p.materialCode }),
-          ...(p.date !== undefined && { date: new Date(p.date) }),
-          ...(p.createdBy !== undefined && { createdBy: p.createdBy }),
-          ...(p.rawMaterial !== undefined && { rawMaterial: p.rawMaterial }),
-          ...(p.grade !== undefined && { grade: p.grade }),
-          ...(p.vendor !== undefined && { vendor: p.vendor }),
-          ...(p.units !== undefined && { units: p.units }),
-          ...(p.weightPerUnit !== undefined && { weightPerUnit: p.weightPerUnit }),
-          ...(p.purchasedBags !== undefined && { purchasedBags: p.purchasedBags }),
-          ...(p.availableBags !== undefined && { availableBags: p.availableBags }),
-          purchasedWeightKg: weights.purchasedWeightKg,
-          availableWeightKg: weights.availableWeightKg,
-          ...(p.location !== undefined && { location: p.location }),
-          ...(p.status !== undefined && { status: p.status }),
-        },
+      const status =
+        p.status ?? nextStatusFromBags(availableBags, purchasedBags);
+      const packedAt = resolvePackedAt(
+        availableBags,
+        purchasedBags,
+        existing.packedAt
+      );
+
+      const session = await auth();
+      let performedById: number | null = null;
+      const userIdStr = session?.user?.id;
+      if (userIdStr) {
+        const id = parseInt(String(userIdStr), 10);
+        if (!Number.isNaN(id)) performedById = id;
+      }
+
+      const bagsChanged =
+        Math.abs(availableBags - existing.availableBags) > 1e-6 ||
+        Math.abs(weights.availableWeightKg - existing.availableWeightKg) > 1e-6;
+
+      const updated = await prisma.$transaction(async (tx) => {
+        const row = await tx.rawMaterial.update({
+          where: { id: rawMaterialId },
+          data: {
+            ...(p.materialCode !== undefined && { materialCode: p.materialCode }),
+            ...(p.date !== undefined && { date: new Date(p.date) }),
+            ...(p.createdBy !== undefined && { createdBy: p.createdBy }),
+            ...(p.rawMaterial !== undefined && { rawMaterial: p.rawMaterial }),
+            ...(p.grade !== undefined && { grade: p.grade }),
+            ...(p.vendor !== undefined && { vendor: p.vendor }),
+            ...(p.units !== undefined && { units: p.units }),
+            ...(p.weightPerUnit !== undefined && { weightPerUnit: p.weightPerUnit }),
+            ...(p.purchasedBags !== undefined && { purchasedBags: p.purchasedBags }),
+            ...(p.availableBags !== undefined && { availableBags: p.availableBags }),
+            purchasedWeightKg: weights.purchasedWeightKg,
+            availableWeightKg: weights.availableWeightKg,
+            ...(p.location !== undefined && { location: p.location }),
+            status,
+            packedAt,
+          },
+        });
+
+        if (bagsChanged) {
+          await logRawMaterialBalanceUpdate(tx, {
+            rawMaterialId,
+            performedById,
+            availableBagsBefore: existing.availableBags,
+            availableBagsAfter: availableBags,
+            availableWeightKgBefore: existing.availableWeightKg,
+            availableWeightKgAfter: weights.availableWeightKg,
+            statusBefore: existing.status,
+            statusAfter: status,
+          });
+        }
+
+        return row;
       });
 
       return NextResponse.json({

@@ -54,6 +54,7 @@ import {
   formatKgCompact,
   getCompoundChartColor,
 } from '@/lib/compoundAnalytics';
+import { analyticsChartCssVar } from '@/lib/analyticsChartColors';
 import { cn } from '@/lib/utils';
 
 type PanelId = 'production' | 'consumption' | 'comparison';
@@ -520,7 +521,7 @@ export function CompoundAnalyticsDashboard() {
                 </CardHeader>
                 <CardContent className="h-[320px] min-h-0 overflow-hidden">
                   <ChartContainer
-                    config={{ produced: { label: 'Produced (kg)', color: 'var(--chart-1)' } }}
+                    config={{ produced: { label: 'Produced (kg)', color: analyticsChartCssVar(0) } }}
                     className="aspect-auto h-full w-full min-h-0"
                   >
                     <BarChart data={productionBarData} margin={{ top: 8, right: 8, bottom: 48, left: 8 }}>
@@ -615,7 +616,7 @@ export function CompoundAnalyticsDashboard() {
                             {data.locationBreakdown.map((s, i) => (
                               <Cell
                                 key={s.location}
-                                fill={['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)'][i % 4]}
+                                fill={analyticsChartCssVar(i)}
                               />
                             ))}
                           </Pie>
@@ -639,7 +640,7 @@ export function CompoundAnalyticsDashboard() {
                 </CardHeader>
                 <CardContent className="h-[280px] min-h-0 overflow-hidden">
                   <ChartContainer
-                    config={{ totalKg: { label: 'kg', color: 'var(--chart-2)' } }}
+                    config={{ totalKg: { label: 'kg', color: analyticsChartCssVar(3) } }}
                     className="aspect-auto h-full w-full min-h-0"
                   >
                     <LineChart
@@ -653,7 +654,14 @@ export function CompoundAnalyticsDashboard() {
                       <XAxis dataKey="periodLabel" tick={{ fontSize: 10 }} />
                       <YAxis tickFormatter={(v) => formatKgCompact(Number(v))} width={44} />
                       <ChartTooltip content={<ChartTooltipContent />} />
-                      <Line type="monotone" dataKey="totalKg" stroke="var(--chart-2)" strokeWidth={2} dot name="Total kg" />
+                      <Line
+                        type="monotone"
+                        dataKey="totalKg"
+                        stroke={analyticsChartCssVar(3)}
+                        strokeWidth={2}
+                        dot={{ fill: analyticsChartCssVar(3) }}
+                        name="Total kg"
+                      />
                     </LineChart>
                   </ChartContainer>
                 </CardContent>

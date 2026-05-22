@@ -31,6 +31,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import type { PartialRollDrilldownItem, PartialRollRemnantBucket } from "@/lib/fabricAnalytics"
+import { analyticsChartCssVar } from "@/lib/analyticsChartColors"
 import { cn } from "@/lib/utils"
 
 import { useFabricAnalyticsFilters } from "./fabrics/fabric-analytics-filters-context"
@@ -44,7 +45,7 @@ type ApiData = {
 const chartConfig = {
   rollCount: {
     label: "Rolls",
-    color: "var(--chart-2)",
+    color: analyticsChartCssVar(0),
   },
 } satisfies ChartConfig
 
@@ -306,7 +307,11 @@ export function PartialRollRemnantChart() {
                           return (
                             <Cell
                               key={row.bucketId}
-                              fill={active ? "hsl(var(--primary))" : "var(--chart-2)"}
+                              fill={
+                                active
+                                  ? "hsl(var(--primary))"
+                                  : analyticsChartCssVar(index)
+                              }
                             />
                           )
                         })}

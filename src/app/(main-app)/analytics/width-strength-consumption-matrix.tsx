@@ -79,7 +79,7 @@ function formatMetersFull(m: number): string {
   return m.toLocaleString(undefined, { maximumFractionDigits: 2 })
 }
 
-/** Consumption heatmap uses chart-3 to distinguish from stock matrix (chart-2). */
+/** Consumption heatmap uses chart-4 (orange) to distinguish from stock matrix (chart-2 teal). */
 function heatStyle(
   meters: number,
   minPos: number,
@@ -94,7 +94,7 @@ function heatStyle(
   const t = maxPos <= minPos ? 1 : (meters - minPos) / (maxPos - minPos)
   const mix = Math.round(12 + t * 88)
   return {
-    backgroundColor: `color-mix(in oklch, hsl(var(--chart-3)) ${mix}%, hsl(var(--card)))`,
+    backgroundColor: `color-mix(in oklch, var(--chart-4) ${mix}%, var(--card))`,
   }
 }
 
@@ -302,7 +302,7 @@ export function WidthStrengthConsumptionMatrix() {
                     className="h-3 w-10 rounded-sm border border-border"
                     style={{
                       background:
-                        "linear-gradient(to right, color-mix(in oklch, hsl(var(--chart-3)) 12%, hsl(var(--card))), color-mix(in oklch, hsl(var(--chart-3)) 100%, hsl(var(--card))))",
+                        "linear-gradient(to right, color-mix(in oklch, var(--chart-4) 12%, var(--card)), color-mix(in oklch, var(--chart-4) 100%, var(--card)))",
                     }}
                   />
                   Low → high consumption (within matrix)

@@ -96,7 +96,7 @@ function heatStyle(
     maxPos <= minPos ? 1 : (meters - minPos) / (maxPos - minPos)
   const mix = Math.round(12 + t * 88)
   return {
-    backgroundColor: `color-mix(in oklch, hsl(var(--chart-2)) ${mix}%, hsl(var(--card)))`,
+    backgroundColor: `color-mix(in oklch, var(--chart-2) ${mix}%, var(--card))`,
   }
 }
 
@@ -296,7 +296,7 @@ export function WidthStrengthStockMatrix() {
                     className="h-3 w-10 rounded-sm border border-border"
                     style={{
                       background:
-                        "linear-gradient(to right, color-mix(in oklch, hsl(var(--chart-2)) 12%, hsl(var(--card))), color-mix(in oklch, hsl(var(--chart-2)) 100%, hsl(var(--card))))",
+                        "linear-gradient(to right, color-mix(in oklch, var(--chart-2) 12%, var(--card)), color-mix(in oklch, var(--chart-2) 100%, var(--card)))",
                     }}
                   />
                   Low → high stock (within matrix)

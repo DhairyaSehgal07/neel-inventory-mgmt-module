@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
 import prisma from '@/lib/prisma';
 import dbConnect from '@/lib/dbConnect';
 import { withRBAC } from '@/lib/rbac';
 import { Permission } from '@/lib/rbac/permissions';
 import { createRawMaterialSchema } from '@/schemas/rawMaterialSchema';
 import { deriveRawMaterialDisplayStatus } from '@/lib/rawMaterialDisplay';
+import {
+  computeBagWeights,
+  nextStatusFromBags,
+  resolvePackedAt,
+} from '@/lib/rawMaterialBalance';
+import { logRawMaterialBalanceUpdate } from '@/lib/rawMaterialHistoryWrite';
 
 function isPrismaKnownRequestError(
   err: unknown
@@ -18,24 +25,12 @@ function isPrismaKnownRequestError(
   );
 }
 
-const BAG_TOLERANCE = 1e-6;
-
-function computeBagWeights(
-  purchasedBags: number,
-  availableBags: number,
-  weightPerUnit: number
-): { ok: true; purchasedWeightKg: number; availableWeightKg: number } | { ok: false; message: string } {
-  if (availableBags - purchasedBags > BAG_TOLERANCE) {
-    return {
-      ok: false,
-      message: 'Available bags cannot exceed purchased bags',
-    };
-  }
-  return {
-    ok: true,
-    purchasedWeightKg: purchasedBags * weightPerUnit,
-    availableWeightKg: availableBags * weightPerUnit,
-  };
+async function optionalPerformedById(): Promise<number | null> {
+  const session = await auth();
+  const userIdStr = session?.user?.id;
+  if (!userIdStr) return null;
+  const id = parseInt(String(userIdStr), 10);
+  return Number.isNaN(id) ? null : id;
 }
 
 /**
@@ -90,23 +85,46 @@ export async function POST(request: NextRequest) {
 
       await dbConnect();
 
-      const created = await prisma.rawMaterial.create({
-        data: {
-          materialCode: d.materialCode,
-          date: new Date(d.date),
-          createdBy: d.createdBy,
-          rawMaterial: d.rawMaterial,
-          grade: d.grade ?? undefined,
-          vendor: d.vendor ?? undefined,
-          units: d.units,
-          weightPerUnit: d.weightPerUnit,
-          purchasedBags,
-          availableBags,
-          purchasedWeightKg: weights.purchasedWeightKg,
-          availableWeightKg: weights.availableWeightKg,
-          location: d.location ?? undefined,
-          status: d.status ?? undefined,
-        },
+      const now = new Date();
+      const status = d.status ?? nextStatusFromBags(availableBags, purchasedBags);
+      const packedAt = resolvePackedAt(availableBags, purchasedBags, null, now);
+      const performedById = await optionalPerformedById();
+
+      const created = await prisma.$transaction(async (tx) => {
+        const row = await tx.rawMaterial.create({
+          data: {
+            materialCode: d.materialCode,
+            date: new Date(d.date),
+            createdBy: d.createdBy,
+            rawMaterial: d.rawMaterial,
+            grade: d.grade ?? undefined,
+            vendor: d.vendor ?? undefined,
+            units: d.units,
+            weightPerUnit: d.weightPerUnit,
+            purchasedBags,
+            availableBags,
+            purchasedWeightKg: weights.purchasedWeightKg,
+            availableWeightKg: weights.availableWeightKg,
+            location: d.location ?? undefined,
+            status,
+            packedAt,
+          },
+        });
+
+        if (availableBags < purchasedBags - 1e-6) {
+          await logRawMaterialBalanceUpdate(tx, {
+            rawMaterialId: row.id,
+            performedById,
+            availableBagsBefore: purchasedBags,
+            availableBagsAfter: availableBags,
+            availableWeightKgBefore: weights.purchasedWeightKg,
+            availableWeightKgAfter: weights.availableWeightKg,
+            statusBefore: 'PACKED',
+            statusAfter: status,
+          });
+        }
+
+        return row;
       });
 
       return NextResponse.json({
