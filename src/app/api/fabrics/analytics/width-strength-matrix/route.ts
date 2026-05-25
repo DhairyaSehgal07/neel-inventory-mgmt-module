@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import dbConnect from '@/lib/dbConnect';
-import { liveFabricStockWhere } from '@/lib/fabricAnalytics';
+import { openFabricStockWhere } from '@/lib/fabricAnalytics';
 import {
   buildFabricAnalyticsPrismaWhere,
   parseFabricAnalyticsFilters,
@@ -12,7 +12,7 @@ import { Permission } from '@/lib/rbac/permissions';
 /**
  * GET /api/fabrics/analytics/width-strength-matrix
  *
- * Aggregates live `fabricLengthCurrent` (sum) and roll count by fabric width × strength,
+ * Aggregates OPEN `fabricLengthCurrent` (sum) and roll count by fabric width × strength,
  * over the full Cartesian product of master widths and strengths so the client can
  * render a heatmap (including zeros for missing combinations).
  *
@@ -27,8 +27,8 @@ export async function GET(request: NextRequest) {
       const analyticsWhere = buildFabricAnalyticsPrismaWhere(filters);
       const stockWhere =
         Object.keys(analyticsWhere).length === 0
-          ? liveFabricStockWhere()
-          : { AND: [liveFabricStockWhere(), analyticsWhere] };
+          ? openFabricStockWhere()
+          : { AND: [openFabricStockWhere(), analyticsWhere] };
 
       const [widths, strengths, grouped] = await Promise.all([
         prisma.fabricWidth.findMany({
@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
           widths,
           /** Columns follow `strengths` order (by strength name ascending). */
           strengths,
-          /** `totalLengthMByWidthRow[row][col]` — live balance (m) for that width × strength. */
+          /** `totalLengthMByWidthRow[row][col]` — OPEN balance (m) for that width × strength. */
           totalLengthMByWidthRow,
           /** Roll counts per cell, same indexing as `totalLengthMByWidthRow`. */
           fabricCountByWidthRow,

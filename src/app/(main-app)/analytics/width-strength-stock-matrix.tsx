@@ -155,11 +155,11 @@ export function WidthStrengthStockMatrix() {
       <CardHeader className="border-b pb-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-1.5">
-            <CardTitle className="text-lg">Width × strength stock matrix</CardTitle>
+            <CardTitle className="text-lg">Width × strength open stock matrix</CardTitle>
             <CardDescription>
-              Live balance (meters) for every width and strength. Darker cells hold more
-              stock; hatched cells are gaps (no meters). Row and column totals help spot
-              where inventory piles up or is thin.
+              OPEN balance (meters) for every width and strength, matching the OPEN
+              status on the fabrics dashboard. Darker cells hold more open stock; hatched
+              cells are gaps (no meters).
             </CardDescription>
           </div>
           <button
@@ -172,7 +172,7 @@ export function WidthStrengthStockMatrix() {
         </div>
         {data && (
           <p className="text-muted-foreground text-sm">
-            Total live balance:{" "}
+            Total OPEN balance:{" "}
             <span className="text-foreground font-medium tabular-nums">
               {data.stats.grandTotalLengthM.toLocaleString(undefined, {
                 maximumFractionDigits: 1,
@@ -314,7 +314,8 @@ export function WidthStrengthStockMatrix() {
               </div>
               <p className="max-w-md text-[11px] leading-snug">
                 Compare row and column totals to see strengths or widths that are
-                over- or under-represented. Hover a cell for exact meters and roll count.
+                over- or under-represented in OPEN stock. Hover a cell for exact meters
+                and roll count.
               </p>
             </div>
           </div>

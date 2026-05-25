@@ -572,7 +572,7 @@ function ComparisonPanel({
   };
 
   const exportCsv = () => {
-    downloadCsv('raw-material-comparison.csv', 
+    downloadCsv('raw-material-comparison.csv',
       [
         'Material',
         'Grade',

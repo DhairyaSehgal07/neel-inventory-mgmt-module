@@ -14,6 +14,17 @@ export function liveFabricStockWhere(): Prisma.FabricWhereInput {
   };
 }
 
+/**
+ * OPEN fabric balance should match the `/fabrics` dashboard OPEN tab:
+ * positive remaining length and persisted status OPEN.
+ */
+export function openFabricStockWhere(): Prisma.FabricWhereInput {
+  return {
+    fabricLengthCurrent: { gt: 0 },
+    status: FabricStatus.OPEN,
+  };
+}
+
 export type FabricAgingItem = {
   fabricId: number;
   fabricCode: string;
