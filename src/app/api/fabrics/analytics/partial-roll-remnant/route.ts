@@ -19,17 +19,16 @@ const BUCKET_META: Array<Pick<PartialRollRemnantBucket, 'id' | 'label'>> = [
 
 const BUCKET_IDS = new Set(BUCKET_META.map((b) => b.id));
 
-/**
- * Partial rolls: remaining length &gt; 0, still below original length (remnants).
- * Excludes REJECTED / TRADED so counts align with usable inventory.
- */
-const PARTIAL_BASE = Prisma.sql`
+/** OPEN stock uses the same persisted status rule as the `/fabrics` OPEN tab. */
+const OPEN_STOCK_BASE = Prisma.sql`
   f."fabricLengthCurrent" > 0
+  AND f.status = 'OPEN'::"FabricStatus"
+`;
+
+/** OPEN partial rolls: remaining length is below the original put-up length. */
+const PARTIAL_BASE = Prisma.sql`
+  (${OPEN_STOCK_BASE})
   AND f."fabricLengthCurrent" < f."fabricLengthInitial"
-  AND (
-    f.status IS NULL
-    OR f.status NOT IN ('REJECTED'::"FabricStatus", 'TRADED'::"FabricStatus")
-  )
 `;
 
 function bucketPredicateSql(bucketId: string): Prisma.Sql {
@@ -74,6 +73,7 @@ export async function GET(request: NextRequest) {
       const fabricExtra = fabricAnalyticsFabricFiltersSql(filters);
       const bucketParam = searchParams.get('bucket')?.trim();
 
+      const openWhere = Prisma.sql`(${OPEN_STOCK_BASE}) AND (${fabricExtra})`;
       const partialWhere = Prisma.sql`(${PARTIAL_BASE}) AND (${fabricExtra})`;
 
       if (bucketParam && BUCKET_IDS.has(bucketParam as PartialRollRemnantBucket['id'])) {
@@ -126,17 +126,30 @@ export async function GET(request: NextRequest) {
         });
       }
 
-      const summary = await prisma.$queryRaw<[{ c: bigint; t: number }]>`
-        SELECT
-          COUNT(*)::bigint AS c,
-          COALESCE(SUM(f."fabricLengthCurrent"), 0)::float AS t
-        FROM fabrics f
-        WHERE ${partialWhere}
-      `;
+      const [openSummary, partialSummary] = await Promise.all([
+        prisma.$queryRaw<[{ c: bigint; t: number }]>`
+          SELECT
+            COUNT(*)::bigint AS c,
+            COALESCE(SUM(f."fabricLengthCurrent"), 0)::float AS t
+          FROM fabrics f
+          WHERE ${openWhere}
+        `,
+        prisma.$queryRaw<[{ c: bigint; t: number }]>`
+          SELECT
+            COUNT(*)::bigint AS c,
+            COALESCE(SUM(f."fabricLengthCurrent"), 0)::float AS t
+          FROM fabrics f
+          WHERE ${partialWhere}
+        `,
+      ]);
 
-      const row = summary[0];
-      const partialRollCount = Number(row?.c ?? 0);
-      const totalRemainingM = Number(row?.t ?? 0);
+      const openRow = openSummary[0];
+      const openRollCount = Number(openRow?.c ?? 0);
+      const totalOpenRemainingM = Number(openRow?.t ?? 0);
+
+      const partialRow = partialSummary[0];
+      const partialRollCount = Number(partialRow?.c ?? 0);
+      const totalPartialRemainingM = Number(partialRow?.t ?? 0);
 
       const bucketAgg = await prisma.$queryRaw<
         { bucket_id: string; roll_count: bigint; total_m: number }[]
@@ -185,8 +198,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: {
+          openRollCount,
+          totalOpenRemainingM,
           partialRollCount,
-          totalRemainingM,
+          totalPartialRemainingM,
+          /** Backward-compatible alias; prefer `totalOpenRemainingM`. */
+          totalRemainingM: totalOpenRemainingM,
           buckets,
         },
       });

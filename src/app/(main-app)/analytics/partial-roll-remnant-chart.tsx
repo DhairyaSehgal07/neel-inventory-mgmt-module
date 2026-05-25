@@ -37,8 +37,12 @@ import { cn } from "@/lib/utils"
 import { useFabricAnalyticsFilters } from "./fabrics/fabric-analytics-filters-context"
 
 type ApiData = {
+  openRollCount: number
+  totalOpenRemainingM: number
   partialRollCount: number
-  totalRemainingM: number
+  totalPartialRemainingM: number
+  /** Deprecated alias from older responses. */
+  totalRemainingM?: number
   buckets: PartialRollRemnantBucket[]
 }
 
@@ -154,9 +158,8 @@ export function PartialRollRemnantChart() {
           <div className="space-y-1.5">
             <CardTitle className="text-lg">Partial roll / remnant analysis</CardTitle>
             <CardDescription>
-              Rolls with some length left but less than the original put-up length — good
-              candidates to use before slitting new stock. Based on current fabric rows
-              (latest balance); excludes rejected and traded rolls.{" "}
+              OPEN balance matches the Fabrics dashboard OPEN tab. The histogram focuses on
+              OPEN rolls with some length left but less than the original put-up length.{" "}
               <span className="text-foreground font-medium">Click a bar</span> to list fabric
               code, width, strength, and location for that remaining-length bucket.
             </CardDescription>
@@ -184,36 +187,49 @@ export function PartialRollRemnantChart() {
         )}
         {!isLoading && !error && data && (
           <>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <div className="bg-muted/30 rounded-xl border border-border/60 px-4 py-3">
                 <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                  Partial rolls
+                  Open rolls
                 </p>
                 <p className="text-foreground mt-1 text-2xl font-semibold tabular-nums">
-                  {data.partialRollCount.toLocaleString()}
+                  {data.openRollCount.toLocaleString()}
                 </p>
-                <p className="text-muted-foreground mt-0.5 text-xs">Count of matching rolls</p>
+                <p className="text-muted-foreground mt-0.5 text-xs">Count of OPEN rows</p>
               </div>
               <div className="bg-muted/30 rounded-xl border border-border/60 px-4 py-3">
                 <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                  Total remaining
+                  Total OPEN remaining
                 </p>
                 <p className="text-foreground mt-1 text-2xl font-semibold tabular-nums">
-                  {data.totalRemainingM.toLocaleString(undefined, {
+                  {data.totalOpenRemainingM.toLocaleString(undefined, {
                     maximumFractionDigits: 1,
                   })}{" "}
                   <span className="text-lg font-normal text-muted-foreground">m</span>
                 </p>
                 <p className="text-muted-foreground mt-0.5 text-xs">
-                  Sum of current balance on those rolls
+                  Sum of current balance on OPEN rows
+                </p>
+              </div>
+              <div className="bg-muted/30 rounded-xl border border-border/60 px-4 py-3">
+                <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                  Partial-roll remaining
+                </p>
+                <p className="text-foreground mt-1 text-2xl font-semibold tabular-nums">
+                  {data.totalPartialRemainingM.toLocaleString(undefined, {
+                    maximumFractionDigits: 1,
+                  })}{" "}
+                  <span className="text-lg font-normal text-muted-foreground">m</span>
+                </p>
+                <p className="text-muted-foreground mt-0.5 text-xs">
+                  OPEN rolls below original length
                 </p>
               </div>
             </div>
 
             {data.partialRollCount === 0 ? (
               <p className="text-muted-foreground text-sm">
-                No partial rolls right now — every positive-length roll matches its original
-                length, or only full / rejected / traded rolls remain.
+                No OPEN partial rolls right now — every OPEN roll matches its original length.
               </p>
             ) : (
               <div className="space-y-2">
