@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { FabricStatus, type Prisma } from '@/generated/prisma/client';
 import prisma from '@/lib/prisma';
 import dbConnect from '@/lib/dbConnect';
-import { openFabricStockWhere } from '@/lib/fabricAnalytics';
 import {
   buildFabricAnalyticsPrismaWhere,
   parseFabricAnalyticsFilters,
@@ -12,7 +12,8 @@ import { Permission } from '@/lib/rbac/permissions';
 /**
  * GET /api/fabrics/analytics/width-strength-matrix
  *
- * Aggregates OPEN `fabricLengthCurrent` (sum) and roll count by fabric width × strength,
+ * Aggregates PACKED + OPEN `fabricLengthCurrent` (sum) and roll count by
+ * fabric width × strength,
  * over the full Cartesian product of master widths and strengths so the client can
  * render a heatmap (including zeros for missing combinations).
  *
@@ -25,10 +26,14 @@ export async function GET(request: NextRequest) {
 
       const filters = parseFabricAnalyticsFilters(request.nextUrl.searchParams);
       const analyticsWhere = buildFabricAnalyticsPrismaWhere(filters);
-      const stockWhere =
+      const packedOpenWhere: Prisma.FabricWhereInput = {
+        fabricLengthCurrent: { gt: 0 },
+        status: { in: [FabricStatus.PACKED, FabricStatus.OPEN] },
+      };
+      const stockWhere: Prisma.FabricWhereInput =
         Object.keys(analyticsWhere).length === 0
-          ? openFabricStockWhere()
-          : { AND: [openFabricStockWhere(), analyticsWhere] };
+          ? packedOpenWhere
+          : { AND: [packedOpenWhere, analyticsWhere] };
 
       const [widths, strengths, grouped] = await Promise.all([
         prisma.fabricWidth.findMany({
@@ -113,7 +118,7 @@ export async function GET(request: NextRequest) {
           widths,
           /** Columns follow `strengths` order (by strength name ascending). */
           strengths,
-          /** `totalLengthMByWidthRow[row][col]` — OPEN balance (m) for that width × strength. */
+          /** `totalLengthMByWidthRow[row][col]` — PACKED + OPEN balance (m) for width × strength. */
           totalLengthMByWidthRow,
           /** Roll counts per cell, same indexing as `totalLengthMByWidthRow`. */
           fabricCountByWidthRow,
