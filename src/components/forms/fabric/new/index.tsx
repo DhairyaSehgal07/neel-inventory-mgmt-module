@@ -135,6 +135,10 @@ export function FabricNewForm() {
         toast.error('Please enter a valid width (cm)');
         return;
       }
+      if (!Number.isInteger(widthValueNum)) {
+        toast.error('Width must be a whole number (no decimals)');
+        return;
+      }
 
       const gsmObserved = parseFloat(value.gsmObserved) || 0;
       const gsmCalculated = parseFloat(value.gsmCalculated) || 0;
@@ -326,9 +330,9 @@ export function FabricNewForm() {
               <FieldLabel>Width (cm)</FieldLabel>
               <Input
                 type="number"
-                min={0}
-                step={0.01}
-                placeholder="e.g. 1.6"
+                min={1}
+                step={1}
+                placeholder="e.g. 122"
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}

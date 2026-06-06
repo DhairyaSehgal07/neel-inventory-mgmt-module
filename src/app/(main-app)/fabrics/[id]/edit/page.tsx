@@ -157,7 +157,7 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
   const defaultValues = React.useMemo(() => {
     const date = typeof fabric.date === 'string' ? parseISO(fabric.date) : new Date(fabric.date);
     // Width is stored in meters in DB; display and edit in cm
-    const widthCm = fabric.fabricWidth?.value != null ? fabric.fabricWidth.value * 100 : '';
+    const widthCm = fabric.fabricWidth?.value != null ? fabric.fabricWidth.value : '';
     const firstLocation = fabric.locations?.[0];
     return {
       fabricType: String(fabric.fabricTypeId),
@@ -186,13 +186,17 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
       }
       const fabricTypeId = parseInt(value.fabricType, 10);
       const fabricStrengthId = parseInt(value.fabricStrength, 10);
-      const fabricWidthValueM = parseFloat(value.fabricWidthCm) / 100;
+      const fabricWidthValue = parseFloat(value.fabricWidthCm);
       if (Number.isNaN(fabricTypeId) || Number.isNaN(fabricStrengthId)) {
         toast.error('Please select fabric type and strength');
         return;
       }
-      if (Number.isNaN(fabricWidthValueM) || fabricWidthValueM < 0) {
+      if (Number.isNaN(fabricWidthValue) || fabricWidthValue < 0) {
         toast.error('Please enter a valid width (cm)');
+        return;
+      }
+      if (!Number.isInteger(fabricWidthValue)) {
+        toast.error('Width must be a whole number (no decimals)');
         return;
       }
       const gsmObserved = parseFloat(value.gsmObserved) || 0;
@@ -201,6 +205,13 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
       const fabricLengthCurrent = parseFloat(value.fabricLengthCurrent) || 0;
       const fabricWidthInitial = parseFloat(value.fabricWidthInitial) || 0;
       const fabricWidthCurrent = parseFloat(value.fabricWidthCurrent) || 0;
+      if (
+        !Number.isInteger(fabricWidthInitial) ||
+        !Number.isInteger(fabricWidthCurrent)
+      ) {
+        toast.error('Width initial and current must be whole numbers (no decimals)');
+        return;
+      }
       const netWeight = parseFloat(value.netWeight) || 0;
       const locationArea = (value.locationArea ?? '').trim();
       const locationFloor = (value.locationFloor ?? '').trim();
@@ -217,7 +228,7 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
             date: format(value.date, 'yyyy-MM-dd'),
             fabricTypeId,
             fabricStrengthId,
-            fabricWidthValue: fabricWidthValueM,
+            fabricWidthValue,
             fabricLengthInitial,
             fabricLengthCurrent,
             fabricWidthInitial,
@@ -312,9 +323,9 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
                     <FieldLabel>Width (cm)</FieldLabel>
                     <Input
                       type="number"
-                      min={0}
-                      step={0.1}
-                      placeholder="e.g. 140"
+                      min={1}
+                      step={1}
+                      placeholder="e.g. 122"
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
@@ -421,7 +432,7 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
                     <Input
                       type="number"
                       min={0}
-                      step={0.01}
+                      step={1}
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
@@ -436,7 +447,7 @@ function FabricEditForm({ fabric, fabricId }: { fabric: Fabric; fabricId: string
                     <Input
                       type="number"
                       min={0}
-                      step={0.01}
+                      step={1}
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}

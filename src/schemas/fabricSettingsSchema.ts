@@ -34,12 +34,18 @@ export const updateFabricStrengthSchema = z.object({
     .optional(),
 });
 
+/** Master fabric width (cm) — whole numbers only. */
+export const fabricWidthMasterValueSchema = z
+  .number()
+  .positive('Value must be positive')
+  .refine((v) => Number.isInteger(v), 'Width must be a whole number (no decimals)');
+
 export const createFabricWidthSchema = z.object({
-  value: z.number().positive('Value must be positive'),
+  value: fabricWidthMasterValueSchema,
 });
 
 export const updateFabricWidthSchema = z.object({
-  value: z.number().positive('Value must be positive').optional(),
+  value: fabricWidthMasterValueSchema.optional(),
 });
 
 export type CreateFabricTypeInput = z.infer<typeof createFabricTypeSchema>;

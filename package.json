@@ -6,6 +6,7 @@
     "dev": "next dev",
     "truncate-fabrics": "tsx scripts/truncate-fabrics.ts",
     "normalize-fabric-codes": "tsx scripts/normalize-fabric-codes.ts",
+    "cleanup-decimal-fabric-widths": "tsx scripts/cleanup-decimal-fabric-widths.ts",
     "sync-raw-material-permissions": "tsx scripts/sync-raw-material-permissions.ts",
     "build": "next build",
     "start": "next start",

@@ -28,7 +28,15 @@ const formSchema = z.object({
   value: z
     .union([z.string(), z.number()])
     .transform((v) => (typeof v === "string" ? parseFloat(v) : v))
-    .pipe(z.number().positive("Value must be a positive number")),
+    .pipe(
+      z
+        .number()
+        .positive("Value must be a positive number")
+        .refine(
+          (n) => Number.isInteger(n),
+          "Width must be a whole number (no decimals)"
+        )
+    ),
 })
 
 interface FabricWidthFormProps {
@@ -108,8 +116,8 @@ export function FabricWidthForm({
                       id={field.name}
                       name={field.name}
                       type="number"
-                      step="any"
-                      min={0}
+                      step={1}
+                      min={1}
                       value={displayValue}
                       onBlur={field.handleBlur}
                       onChange={(e) => {
@@ -117,11 +125,11 @@ export function FabricWidthForm({
                         field.handleChange(v === "" ? "" : parseFloat(v) || v)
                       }}
                       aria-invalid={isInvalid}
-                      placeholder="e.g., 1.5, 2, 3"
+                      placeholder="e.g., 122, 132"
                       autoComplete="off"
                     />
                     <FieldDescription>
-                      Enter the width value (positive number).
+                      Enter the width in cm (whole numbers only).
                     </FieldDescription>
                     {isInvalid && <FieldError errors={field.state.meta.errors} />}
                   </Field>
