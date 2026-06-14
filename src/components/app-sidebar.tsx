@@ -3,7 +3,8 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronRight, FlaskConical, Layers, Package } from 'lucide-react';
+import { ChevronRight, FlaskConical, Layers, Package, Shield } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 import {
   Sidebar,
   SidebarContent,
@@ -86,6 +87,8 @@ function isCompoundSubActive(pathname: string, href: string) {
 
 const AppSidebar = () => {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === 'Admin';
   const [fabricsOpen, setFabricsOpen] = React.useState(() =>
     isInFabricNavSection(pathname)
   );
@@ -255,6 +258,20 @@ const AppSidebar = () => {
                   </SidebarMenuSub>
                 ) : null}
               </SidebarMenuItem>
+              {isAdmin ? (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname.startsWith('/admin-panel')}
+                    tooltip="Admin Panel"
+                  >
+                    <Link href="/admin-panel">
+                      <Shield className="h-4 w-4" />
+                      <span>Admin Panel</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ) : null}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

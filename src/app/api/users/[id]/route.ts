@@ -112,6 +112,24 @@ export async function PATCH(
         );
       }
 
+      const currentUserId = session?.user?.id;
+      const isSelfUpdate = String(id) === currentUserId;
+
+      if (isSelfUpdate) {
+        if (parsed.data.role !== undefined && parsed.data.role !== user.role) {
+          return NextResponse.json(
+            { success: false, message: 'You cannot change your own role' },
+            { status: 400 }
+          );
+        }
+        if (parsed.data.isActive === false) {
+          return NextResponse.json(
+            { success: false, message: 'You cannot deactivate your own account' },
+            { status: 400 }
+          );
+        }
+      }
+
       const updateData: UserUpdateInput = {};
 
       if (parsed.data.name !== undefined) updateData.name = parsed.data.name;
