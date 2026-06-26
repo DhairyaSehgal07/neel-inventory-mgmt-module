@@ -1,14 +1,5 @@
 import React from 'react';
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  Image,
-  StyleSheet,
-  PDFViewer,
-  pdf,
-} from '@react-pdf/renderer';
+import { Document, Page, Text, View, Image, StyleSheet, PDFViewer, pdf } from '@react-pdf/renderer';
 
 function formatProductionDate(value: string) {
   const date = new Date(value);
@@ -43,6 +34,20 @@ const styles = StyleSheet.create({
   qrImage: {
     width: 180,
     height: 180,
+  },
+  qrCodeLabel: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginTop: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  qrCodeValue: {
+    fontSize: 18,
+    fontWeight: 700,
+    color: '#111827',
+    marginTop: 2,
+    fontFamily: 'Helvetica',
   },
   divider: {
     width: '100%',
@@ -90,6 +95,7 @@ const styles = StyleSheet.create({
 
 export type SingleRawMaterialPdfParams = {
   qrDataUrl: string;
+  materialCode: string;
   rawMaterialName: string;
   date: string;
   status: string | null | undefined;
@@ -100,6 +106,8 @@ export const SingleRawMaterialPdfPageContent = (props: SingleRawMaterialPdfParam
     <View style={styles.qrSection}>
       {/* eslint-disable-next-line jsx-a11y/alt-text -- PDF Image has no alt prop */}
       <Image src={props.qrDataUrl} style={styles.qrImage} />
+      <Text style={styles.qrCodeLabel}>MATERIAL CODE</Text>
+      <Text style={styles.qrCodeValue}>{props.materialCode || '—'}</Text>
     </View>
 
     <View style={styles.divider} />

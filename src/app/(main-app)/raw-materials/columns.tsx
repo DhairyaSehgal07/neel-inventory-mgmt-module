@@ -10,11 +10,7 @@ import { Eye, Pencil, Printer, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   getSingleRawMaterialPdfBlob,
   type SingleRawMaterialPdfParams,
@@ -70,6 +66,7 @@ function RawMaterialRowActions({
       });
       const params: SingleRawMaterialPdfParams = {
         qrDataUrl,
+        materialCode: row.materialCode,
         rawMaterialName: row.rawMaterial,
         date: row.date,
         status: row.status,
@@ -145,11 +142,7 @@ function RawMaterialRowActions({
             onClick={() => meta.onDelete?.(row)}
             disabled={isDeleting}
           >
-            {isDeleting ? (
-              <Spinner className="h-4 w-4" />
-            ) : (
-              <Trash2 className="h-4 w-4" />
-            )}
+            {isDeleting ? <Spinner className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
             <span className="sr-only">Delete</span>
           </Button>
         </TooltipTrigger>
@@ -174,9 +167,7 @@ export const columns: ColumnDef<RawMaterialRow>[] = [
   {
     accessorKey: 'materialCode',
     header: 'Code',
-    cell: ({ row }) => (
-      <span className="font-mono text-sm">{row.original.materialCode}</span>
-    ),
+    cell: ({ row }) => <span className="font-mono text-sm">{row.original.materialCode}</span>,
   },
   {
     accessorKey: 'rawMaterial',
