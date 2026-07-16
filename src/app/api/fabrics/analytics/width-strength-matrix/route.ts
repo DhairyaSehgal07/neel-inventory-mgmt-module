@@ -17,10 +17,10 @@ import { Permission } from '@/lib/rbac/permissions';
  * over the full Cartesian product of master widths and strengths so the client can
  * render a heatmap (including zeros for missing combinations).
  *
- * Requires FABRIC_VIEW.
+ * Requires FABRIC_REPORTS.
  */
 export async function GET(request: NextRequest) {
-  return withRBAC(request, Permission.FABRIC_VIEW, async () => {
+  return withRBAC(request, Permission.FABRIC_REPORTS, async () => {
     try {
       await dbConnect();
 

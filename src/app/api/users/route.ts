@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import dbConnect from '@/lib/dbConnect';
-import { withRBAC, getDefaultPermissionsForRole, withRawMaterialBatchPermissions } from '@/lib/rbac';
-import { Permission } from '@/lib/rbac/permissions';
+import { requireAdmin, getDefaultPermissionsForRole, normalizePermissions } from '@/lib/rbac';
 import type { Role } from '@/model/User';
 import { toUserResponse } from '@/lib/api/user-response';
 import { createUserSchema } from '@/schemas/userSchema';
@@ -10,10 +9,10 @@ import bcrypt from 'bcryptjs';
 
 /**
  * GET /api/users
- * List users. Requires USER_VIEW.
+ * List users. Admin only.
  */
 export async function GET(request: NextRequest) {
-  return withRBAC(request, Permission.USER_VIEW, async () => {
+  return requireAdmin(request, async () => {
     try {
       await dbConnect();
       const users = await prisma.user.findMany({
@@ -33,10 +32,10 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/users
- * Create user. Requires USER_CREATE.
+ * Create user. Admin only.
  */
 export async function POST(request: NextRequest) {
-  return withRBAC(request, Permission.USER_CREATE, async () => {
+  return requireAdmin(request, async () => {
     try {
       const body = await request.json();
       const parsed = createUserSchema.safeParse(body);
@@ -68,9 +67,7 @@ export async function POST(request: NextRequest) {
       const hashedPassword = await bcrypt.hash(password, 10);
       const basePermissions =
         permissions.length > 0 ? permissions : getDefaultPermissionsForRole(role as Role);
-      const permissionStrings = withRawMaterialBatchPermissions(
-        basePermissions.map((p) => String(p))
-      );
+      const permissionStrings = normalizePermissions(basePermissions.map((p) => String(p)));
 
       const user = await prisma.user.create({
         data: {

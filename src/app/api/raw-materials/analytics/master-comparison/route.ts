@@ -10,7 +10,7 @@ import { loadRawMaterialAnalyticsData } from '@/lib/rawMaterialAnalyticsLoad';
  * View 2: procurement vs stock vs consumption by material and grade.
  */
 export async function GET(request: NextRequest) {
-  return withRBAC(request, Permission.RAW_MATERIAL_BATCH_VIEW, async () => {
+  return withRBAC(request, Permission.RAW_MATERIAL_REPORTS, async () => {
     try {
       await dbConnect();
       const { query, batches, history } = await loadRawMaterialAnalyticsData(

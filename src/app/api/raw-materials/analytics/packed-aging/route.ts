@@ -10,7 +10,7 @@ import { loadRawMaterialAnalyticsData } from '@/lib/rawMaterialAnalyticsLoad';
  * View 3: packed batch aging buckets and detail list.
  */
 export async function GET(request: NextRequest) {
-  return withRBAC(request, Permission.RAW_MATERIAL_BATCH_VIEW, async () => {
+  return withRBAC(request, Permission.RAW_MATERIAL_REPORTS, async () => {
     try {
       await dbConnect();
       const { query, batches } = await loadRawMaterialAnalyticsData(

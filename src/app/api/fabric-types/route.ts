@@ -7,10 +7,10 @@ import { createFabricTypeSchema } from '@/schemas/fabricSettingsSchema';
 
 /**
  * GET /api/fabric-types
- * List fabric types. Requires FABRIC_TYPE_VIEW.
+ * List fabric types. Requires FABRIC_READ.
  */
 export async function GET(request: NextRequest) {
-  return withRBAC(request, Permission.FABRIC_TYPE_VIEW, async () => {
+  return withRBAC(request, Permission.FABRIC_READ, async () => {
     try {
       await dbConnect();
       const items = await prisma.fabricType.findMany({
@@ -29,10 +29,10 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/fabric-types
- * Create fabric type. Requires FABRIC_TYPE_CREATE.
+ * Create fabric type. Requires FABRIC_CREATE.
  */
 export async function POST(request: NextRequest) {
-  return withRBAC(request, Permission.FABRIC_TYPE_CREATE, async () => {
+  return withRBAC(request, Permission.FABRIC_CREATE, async () => {
     try {
       const body = await request.json();
       const parsed = createFabricTypeSchema.safeParse(body);

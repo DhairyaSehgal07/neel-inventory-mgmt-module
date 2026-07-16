@@ -8,51 +8,26 @@ import {
 /**
  * Default permissions per role (for seeding or new user creation).
  * Admin has all permissions at runtime and does not need to store them.
- * Other roles can be assigned these defaults; Admin can override per user.
+ * User management / admin panel is Admin-only (role check).
  */
 export const DEFAULT_PERMISSIONS_BY_ROLE: Record<Exclude<Role, 'Admin'>, Permission[]> = {
   Manager: [
-    ...PermissionGroups.USER,
-    ...PermissionGroups.DASHBOARD,
-    ...PermissionGroups.REPORTS,
-    ...PermissionGroups.BELT,
-    ...PermissionGroups.COMPOUND_TYPE,
-    ...PermissionGroups.COMPOUND_BATCH,
-    ...PermissionGroups.RAW_MATERIAL_BATCH,
-    ...PermissionGroups.RATING,
-    ...PermissionGroups.FABRIC_TYPE,
-    ...PermissionGroups.FABRIC_STRENGTH,
-    ...PermissionGroups.FABRIC_WIDTH,
     ...PermissionGroups.FABRIC,
+    ...PermissionGroups.COMPOUND,
+    ...PermissionGroups.RAW_MATERIAL,
   ],
   Supervisor: [
-    Permission.USER_VIEW,
-    Permission.DASHBOARD_VIEW,
-    Permission.DASHBOARD_REVERSE_TRACKING,
-    Permission.REPORTS_VIEW,
-    ...PermissionGroups.BELT,
-    ...PermissionGroups.COMPOUND_TYPE,
-    ...PermissionGroups.COMPOUND_BATCH,
-    ...PermissionGroups.RAW_MATERIAL_BATCH,
-    ...PermissionGroups.RATING,
-    ...PermissionGroups.FABRIC_TYPE,
-    ...PermissionGroups.FABRIC_STRENGTH,
-    ...PermissionGroups.FABRIC_WIDTH,
     ...PermissionGroups.FABRIC,
+    ...PermissionGroups.COMPOUND,
+    ...PermissionGroups.RAW_MATERIAL,
   ],
   Worker: [
-    Permission.BELT_VIEW,
-    Permission.BELT_UPDATE,
-    Permission.DASHBOARD_VIEW,
-    Permission.COMPOUND_MASTER_VIEW,
-    Permission.COMPOUND_BATCH_VIEW,
-    Permission.COMPOUND_BATCH_UPDATE,
-    Permission.RAW_MATERIAL_BATCH_VIEW,
-    Permission.RAW_MATERIAL_BATCH_UPDATE,
-    Permission.RATING_VIEW,
-    Permission.RATING_CREATE,
-    Permission.RATING_UPDATE,
-    Permission.FABRIC_VIEW,
+    Permission.FABRIC_READ,
+    Permission.FABRIC_UPDATE,
+    Permission.COMPOUND_READ,
+    Permission.COMPOUND_UPDATE,
+    Permission.RAW_MATERIAL_READ,
+    Permission.RAW_MATERIAL_UPDATE,
   ],
 };
 

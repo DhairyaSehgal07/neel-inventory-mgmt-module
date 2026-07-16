@@ -78,10 +78,10 @@ function computeTotals(
 /**
  * GET /api/compounds
  * List compounds (counts only; use GET /api/compounds/[id] for full history).
- * Requires COMPOUND_BATCH_VIEW.
+ * Requires COMPOUND_READ.
  */
 export async function GET(request: NextRequest) {
-  return withRBAC(request, Permission.COMPOUND_BATCH_VIEW, async () => {
+  return withRBAC(request, Permission.COMPOUND_READ, async () => {
     try {
       await dbConnect();
       const items = await prisma.compound.findMany({
@@ -108,10 +108,10 @@ export async function GET(request: NextRequest) {
 /**
  * POST /api/compounds
  * Create a compound. Computes total produced and remaining weights.
- * Requires COMPOUND_BATCH_CREATE.
+ * Requires COMPOUND_CREATE.
  */
 export async function POST(request: NextRequest) {
-  return withRBAC(request, Permission.COMPOUND_BATCH_CREATE, async () => {
+  return withRBAC(request, Permission.COMPOUND_CREATE, async () => {
     try {
       const body = await request.json();
       const parsed = createCompoundSchema.safeParse(body);

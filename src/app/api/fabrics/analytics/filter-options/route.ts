@@ -12,7 +12,7 @@ type LocationOption = { value: string; label: string };
  * Distinct fabric locations for analytics filters (area|floor value, display label).
  */
 export async function GET(request: NextRequest) {
-  return withRBAC(request, Permission.FABRIC_VIEW, async () => {
+  return withRBAC(request, Permission.FABRIC_REPORTS, async () => {
     try {
       await dbConnect();
 

@@ -34,10 +34,10 @@ const compoundIncludeDetail = {
 
 /**
  * GET /api/compounds/[id]
- * Get one compound with full history. Requires COMPOUND_BATCH_VIEW.
+ * Get one compound with full history. Requires COMPOUND_READ.
  */
 export async function GET(_request: NextRequest, { params }: RouteParams) {
-  return withRBAC(_request, Permission.COMPOUND_BATCH_VIEW, async () => {
+  return withRBAC(_request, Permission.COMPOUND_READ, async () => {
     try {
       const { id } = await params;
       const compoundId = parseInt(id, 10);
@@ -76,10 +76,10 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 /**
  * PATCH /api/compounds/[id]
  * Update a compound; recomputes total/remaining when batch or weight fields change.
- * Requires COMPOUND_BATCH_UPDATE.
+ * Requires COMPOUND_UPDATE.
  */
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
-  return withRBAC(request, Permission.COMPOUND_BATCH_UPDATE, async () => {
+  return withRBAC(request, Permission.COMPOUND_UPDATE, async () => {
     try {
       const { id } = await params;
       const compoundId = parseInt(id, 10);
@@ -219,13 +219,13 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
 /**
  * DELETE /api/compounds/[id]
- * Requires COMPOUND_BATCH_DELETE.
+ * Requires COMPOUND_DELETE.
  */
 export async function DELETE(
   _request: NextRequest,
   { params }: RouteParams
 ) {
-  return withRBAC(_request, Permission.COMPOUND_BATCH_DELETE, async () => {
+  return withRBAC(_request, Permission.COMPOUND_DELETE, async () => {
     try {
       const { id } = await params;
       const compoundId = parseInt(id, 10);

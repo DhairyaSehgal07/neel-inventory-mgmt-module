@@ -147,10 +147,10 @@ function mergeSplitRowsToBuckets(
  * When split is set, only the top segment values by total volume are shown per period;
  * the rest are rolled into "Other".
  *
- * Requires FABRIC_VIEW.
+ * Requires FABRIC_REPORTS.
  */
 export async function GET(request: NextRequest) {
-  return withRBAC(request, Permission.FABRIC_VIEW, async () => {
+  return withRBAC(request, Permission.FABRIC_REPORTS, async () => {
     try {
       await dbConnect();
 

@@ -7,13 +7,13 @@ import { updateFabricStrengthSchema } from '@/schemas/fabricSettingsSchema';
 
 /**
  * GET /api/fabric-strengths/[id]
- * Get one fabric strength. Requires FABRIC_STRENGTH_VIEW.
+ * Get one fabric strength. Requires FABRIC_READ.
  */
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  return withRBACParams(request, context.params, Permission.FABRIC_STRENGTH_VIEW, async (_, { params }) => {
+  return withRBACParams(request, context.params, Permission.FABRIC_READ, async (_, { params }) => {
     try {
       const resolved = await params;
       const id = Number(resolved.id);
@@ -46,13 +46,13 @@ export async function GET(
 
 /**
  * PATCH /api/fabric-strengths/[id]
- * Update fabric strength. Requires FABRIC_STRENGTH_UPDATE.
+ * Update fabric strength. Requires FABRIC_UPDATE.
  */
 export async function PATCH(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  return withRBACParams(request, context.params, Permission.FABRIC_STRENGTH_UPDATE, async (req, { params }) => {
+  return withRBACParams(request, context.params, Permission.FABRIC_UPDATE, async (req, { params }) => {
     try {
       const resolved = await params;
       const id = Number(resolved.id);
@@ -119,13 +119,13 @@ export async function PATCH(
 
 /**
  * DELETE /api/fabric-strengths/[id]
- * Delete fabric strength. Requires FABRIC_STRENGTH_DELETE.
+ * Delete fabric strength. Requires FABRIC_DELETE.
  */
 export async function DELETE(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  return withRBACParams(request, context.params, Permission.FABRIC_STRENGTH_DELETE, async (_, { params }) => {
+  return withRBACParams(request, context.params, Permission.FABRIC_DELETE, async (_, { params }) => {
     try {
       const resolved = await params;
       const id = Number(resolved.id);

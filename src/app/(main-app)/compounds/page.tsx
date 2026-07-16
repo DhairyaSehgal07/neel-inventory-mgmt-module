@@ -29,6 +29,10 @@ import { CompoundsDataTable } from './data-table';
 import { GetReportsDialog } from './get-reports-dialog';
 import { columns, type CompoundRow } from './columns';
 import { filterCompoundsBySearch } from './search-utils';
+import {
+  StatusMultiFilter,
+  effectiveStatuses,
+} from '@/components/status-multi-filter';
 
 const COMPOUND_STATUSES = [
   'OPEN',
@@ -77,6 +81,9 @@ function normalizeRow(raw: Record<string, unknown>): CompoundRow {
 export default function CompoundsPage() {
   const router = useRouter();
   const [statusTab, setStatusTab] = React.useState<StatusTabId>('all');
+  const [selectedStatuses, setSelectedStatuses] = React.useState<
+    Array<(typeof COMPOUND_STATUSES)[number]>
+  >([]);
   const [data, setData] = React.useState<CompoundRow[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [fetchError, setFetchError] = React.useState<string | null>(null);
@@ -85,10 +92,16 @@ export default function CompoundsPage() {
   const [searchQuery, setSearchQuery] = React.useState('');
   const [reportsOpen, setReportsOpen] = React.useState(false);
 
+  const statusAllowList = React.useMemo(
+    () => effectiveStatuses(statusTab, selectedStatuses),
+    [statusTab, selectedStatuses]
+  );
+
   const filteredData = React.useMemo(() => {
     let rows = data;
-    if (statusTab !== 'all') {
-      rows = rows.filter((r) => (r.status ?? '') === statusTab);
+    if (statusAllowList) {
+      const allowed = new Set<string>(statusAllowList);
+      rows = rows.filter((r) => allowed.has(r.status ?? ''));
     }
     return [...rows].sort((a, b) => {
       const ta = Date.parse(a.dateOfProduction);
@@ -96,7 +109,7 @@ export default function CompoundsPage() {
       if (!Number.isNaN(ta) && !Number.isNaN(tb) && ta !== tb) return tb - ta;
       return b.id - a.id;
     });
-  }, [data, statusTab]);
+  }, [data, statusAllowList]);
 
   const searchFilteredData = React.useMemo(
     () => filterCompoundsBySearch(filteredData, searchQuery),
@@ -206,7 +219,7 @@ export default function CompoundsPage() {
             </div>
           ) : (
             <>
-              <div className="border-b border-border mb-4">
+              <div className="mb-4 flex flex-wrap items-end justify-between gap-3 border-b border-border">
                 <nav className="flex flex-wrap gap-1" aria-label="Status filter">
                   {(['all', ...COMPOUND_STATUSES] as const).map((tabId) => (
                     <Button
@@ -224,6 +237,13 @@ export default function CompoundsPage() {
                     </Button>
                   ))}
                 </nav>
+                <StatusMultiFilter
+                  options={COMPOUND_STATUSES}
+                  value={selectedStatuses}
+                  onChange={setSelectedStatuses}
+                  disabled={statusTab !== 'all'}
+                  className="mb-1"
+                />
               </div>
               <div className="mb-4 flex flex-wrap items-center justify-end gap-3">
                 <div className="rounded-full border border-border bg-muted/40 px-6 py-1.5 text-sm">
@@ -252,6 +272,7 @@ export default function CompoundsPage() {
         open={reportsOpen}
         onOpenChange={setReportsOpen}
         compounds={data}
+        statusFilter={statusAllowList}
       />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>

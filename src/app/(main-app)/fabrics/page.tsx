@@ -36,6 +36,10 @@ import { FabricsDataTable } from "./data-table"
 import { GetReportsDialog } from "./get-reports-dialog"
 import { columns, type FabricRow } from "./columns"
 import { filterFabricsBySearch } from "./search-utils"
+import {
+  StatusMultiFilter,
+  effectiveStatuses,
+} from "@/components/status-multi-filter"
 
 function getErrorMessage(
   res: Response,
@@ -83,6 +87,9 @@ function getFabricTimestamp(fabric: FabricRow): number {
 export default function FabricsPage() {
   const router = useRouter()
   const [statusTab, setStatusTab] = React.useState<StatusTabId>("all")
+  const [selectedStatuses, setSelectedStatuses] = React.useState<
+    Array<(typeof FABRIC_STATUSES)[number]>
+  >([])
   const [data, setData] = React.useState<FabricRow[]>([])
   const [isLoading, setIsLoading] = React.useState(true)
   const [fetchError, setFetchError] = React.useState<string | null>(null)
@@ -133,10 +140,16 @@ export default function FabricsPage() {
       .map(([value, label]) => ({ value, label }))
   }, [data])
 
+  const statusAllowList = React.useMemo(
+    () => effectiveStatuses(statusTab, selectedStatuses),
+    [statusTab, selectedStatuses]
+  )
+
   const filteredData = React.useMemo(() => {
     let result = data
-    if (statusTab !== "all") {
-      result = result.filter((f) => (f.status ?? "") === statusTab)
+    if (statusAllowList) {
+      const allowed = new Set<string>(statusAllowList)
+      result = result.filter((f) => allowed.has(f.status ?? ""))
     }
     if (strengthFilter !== "all") {
       result = result.filter((f) => f.fabricStrength?.name === strengthFilter)
@@ -164,7 +177,14 @@ export default function FabricsPage() {
       if (timeDiff !== 0) return timeDiff
       return a.id - b.id
     })
-  }, [data, statusTab, strengthFilter, widthFilter, vendorFilter, locationFilter])
+  }, [
+    data,
+    statusAllowList,
+    strengthFilter,
+    widthFilter,
+    vendorFilter,
+    locationFilter,
+  ])
 
   const searchFilteredData = React.useMemo(
     () => filterFabricsBySearch(filteredData, searchQuery),
@@ -305,7 +325,7 @@ export default function FabricsPage() {
             </div>
           ) : (
             <>
-              <div className="border-b border-border mb-4">
+              <div className="mb-4 flex flex-wrap items-end justify-between gap-3 border-b border-border">
                 <nav className="flex flex-wrap gap-1" aria-label="Status filter">
                   {(["all", ...FABRIC_STATUSES] as const).map((tabId) => (
                     <Button
@@ -323,6 +343,13 @@ export default function FabricsPage() {
                     </Button>
                   ))}
                 </nav>
+                <StatusMultiFilter
+                  options={FABRIC_STATUSES}
+                  value={selectedStatuses}
+                  onChange={setSelectedStatuses}
+                  disabled={statusTab !== "all"}
+                  className="mb-1"
+                />
               </div>
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex flex-wrap items-center gap-3">
@@ -444,6 +471,7 @@ export default function FabricsPage() {
         open={reportsOpen}
         onOpenChange={setReportsOpen}
         fabrics={data}
+        statusFilter={statusAllowList}
       />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>

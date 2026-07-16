@@ -7,10 +7,10 @@ import { gradeDisplay } from '@/lib/rawMaterialAnalyticsQuery';
 
 /**
  * GET /api/raw-materials/analytics/filter-options
- * Requires RAW_MATERIAL_BATCH_VIEW.
+ * Requires RAW_MATERIAL_REPORTS.
  */
 export async function GET(request: NextRequest) {
-  return withRBAC(request, Permission.RAW_MATERIAL_BATCH_VIEW, async () => {
+  return withRBAC(request, Permission.RAW_MATERIAL_REPORTS, async () => {
     try {
       await dbConnect();
 

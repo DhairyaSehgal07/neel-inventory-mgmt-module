@@ -1,14 +1,13 @@
 import 'dotenv/config';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../src/lib/prisma';
-import { ALL_PERMISSIONS } from '../src/lib/rbac/permissions';
-import { withRawMaterialBatchPermissions } from '../src/lib/rbac/raw-material-permissions';
+import { ALL_PERMISSIONS, normalizePermissions } from '../src/lib/rbac/permissions';
 
 async function syncExistingUserPermissions(
   user: { id: number; permissions: string[] },
   permissions: string[]
 ) {
-  const next = withRawMaterialBatchPermissions(permissions);
+  const next = normalizePermissions(permissions);
   const changed =
     next.length !== user.permissions.length ||
     next.some((p) => !user.permissions.includes(p));
@@ -25,9 +24,7 @@ async function syncExistingUserPermissions(
 export async function main() {
   try {
     const hashedPassword = await bcrypt.hash('123456', 10);
-    const permissions = withRawMaterialBatchPermissions(
-      ALL_PERMISSIONS.map((p) => String(p))
-    );
+    const permissions = [...ALL_PERMISSIONS];
 
     // Seed Aseem (Admin)
     const aseemMobile = '8437702351';
@@ -96,6 +93,27 @@ export async function main() {
         },
       });
       console.log('🌱 User Stores (Supervisor) seeded successfully with all permissions');
+    }
+
+    // Migrate all other users to the simplified permission model
+    const others = await prisma.user.findMany({
+      where: {
+        mobileNumber: { notIn: [aseemMobile, officeMobile, storesMobile] },
+      },
+      select: { id: true, name: true, permissions: true },
+    });
+
+    for (const user of others) {
+      const next = normalizePermissions(user.permissions);
+      const changed =
+        next.length !== user.permissions.length ||
+        next.some((p) => !user.permissions.includes(p));
+      if (!changed) continue;
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { permissions: next },
+      });
+      console.log(`🔄 Migrated permissions for user #${user.id} (${user.name})`);
     }
   } catch (error) {
     console.error('❌ Error seeding user:', error);

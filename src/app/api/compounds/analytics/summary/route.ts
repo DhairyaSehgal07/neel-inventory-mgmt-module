@@ -33,10 +33,10 @@ const querySchema = z.object({
  * contains), from / to (ISO dates on batch dateOfProduction), granularity (day|week|month),
  * slowDays (threshold for slow-stock alerts, default 30).
  *
- * Requires COMPOUND_BATCH_VIEW.
+ * Requires COMPOUND_REPORTS.
  */
 export async function GET(request: NextRequest) {
-  return withRBAC(request, Permission.COMPOUND_BATCH_VIEW, async () => {
+  return withRBAC(request, Permission.COMPOUND_REPORTS, async () => {
     try {
       const raw = Object.fromEntries(request.nextUrl.searchParams.entries());
       const parsed = querySchema.safeParse(raw);

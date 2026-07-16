@@ -61,11 +61,15 @@ export type RawMaterialReportCategoryId =
 
 export function prepareRawMaterialsForCategoryReport(
   rows: RawMaterialRow[],
-  categoryId: RawMaterialReportCategoryId
+  categoryId: RawMaterialReportCategoryId,
+  statusFilter?: readonly string[] | null
 ): RawMaterialRow[] {
   let result = rows;
   if (categoryId !== 'all') {
     result = result.filter((row) => (row.status ?? '') === categoryId);
+  } else if (statusFilter && statusFilter.length > 0) {
+    const allowed = new Set(statusFilter);
+    result = result.filter((row) => allowed.has(row.status ?? ''));
   }
   return [...result].sort((a, b) => {
     const ta = Date.parse(a.date);

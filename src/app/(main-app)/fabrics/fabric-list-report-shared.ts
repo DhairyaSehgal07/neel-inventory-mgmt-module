@@ -72,11 +72,15 @@ export type ReportCategoryId =
 
 export function prepareFabricsForCategoryReport(
   fabrics: FabricRow[],
-  categoryId: ReportCategoryId
+  categoryId: ReportCategoryId,
+  statusFilter?: readonly string[] | null
 ): FabricRow[] {
   let result = fabrics
   if (categoryId !== "all") {
     result = result.filter((f) => (f.status ?? "") === categoryId)
+  } else if (statusFilter && statusFilter.length > 0) {
+    const allowed = new Set(statusFilter)
+    result = result.filter((f) => allowed.has(f.status ?? ""))
   }
   return [...result].sort((a, b) => {
     const timeDiff = getFabricTimestamp(a) - getFabricTimestamp(b)

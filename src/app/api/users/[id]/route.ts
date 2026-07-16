@@ -1,26 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import dbConnect from '@/lib/dbConnect';
-import { withRBACParams } from '@/lib/rbac/rbac-params';
-import { Permission, hasPermission, withRawMaterialBatchPermissions } from '@/lib/rbac';
+import { requireAdmin, normalizePermissions } from '@/lib/rbac';
 import { auth } from '@/auth';
 import { toUserResponse } from '@/lib/api/user-response';
 import { updateUserSchema } from '@/schemas/userSchema';
 import bcrypt from 'bcryptjs';
-import type { Role } from '@/model/User';
 import type { UserUpdateInput } from '@/generated/prisma/models/User';
 
 /**
  * GET /api/users/[id]
- * Get one user. Requires USER_VIEW.
+ * Get one user. Admin only.
  */
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  return withRBACParams(request, context.params, Permission.USER_VIEW, async (_, { params }) => {
+  return requireAdmin(request, async () => {
     try {
-      const resolved = await params;
+      const resolved = await context.params;
       const id = Number(resolved.id);
       if (Number.isNaN(id)) {
         return NextResponse.json(
@@ -54,15 +52,15 @@ export async function GET(
 
 /**
  * PATCH /api/users/[id]
- * Update user. Requires USER_UPDATE. Updating `permissions` also requires USER_MANAGE_PERMISSIONS.
+ * Update user. Admin only.
  */
 export async function PATCH(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  return withRBACParams(request, context.params, Permission.USER_UPDATE, async (req, { params }) => {
+  return requireAdmin(request, async () => {
     try {
-      const resolved = await params;
+      const resolved = await context.params;
       const id = Number(resolved.id);
       if (Number.isNaN(id)) {
         return NextResponse.json(
@@ -71,7 +69,7 @@ export async function PATCH(
         );
       }
 
-      const body = await req.json();
+      const body = await request.json();
       const parsed = updateUserSchema.safeParse(body);
       if (!parsed.success) {
         const message = parsed.error.flatten().fieldErrors
@@ -84,23 +82,6 @@ export async function PATCH(
       }
 
       const session = await auth();
-      const userRole = (session?.user?.role as Role) ?? undefined;
-      const userPermissions = (session?.user?.permissions as Permission[]) ?? [];
-
-      // If updating permissions, require USER_MANAGE_PERMISSIONS
-      if (parsed.data.permissions !== undefined) {
-        const canManagePerms = hasPermission(
-          userRole,
-          userPermissions,
-          Permission.USER_MANAGE_PERMISSIONS
-        );
-        if (!canManagePerms) {
-          return NextResponse.json(
-            { success: false, message: 'Insufficient permissions to update user permissions' },
-            { status: 403 }
-          );
-        }
-      }
 
       await dbConnect();
 
@@ -150,7 +131,7 @@ export async function PATCH(
       }
       if (parsed.data.role !== undefined) updateData.role = parsed.data.role;
       if (parsed.data.permissions !== undefined) {
-        updateData.permissions = withRawMaterialBatchPermissions(
+        updateData.permissions = normalizePermissions(
           parsed.data.permissions.map((p) => String(p))
         );
       }
@@ -178,15 +159,15 @@ export async function PATCH(
 
 /**
  * DELETE /api/users/[id]
- * Delete user. Requires USER_DELETE.
+ * Delete user. Admin only.
  */
 export async function DELETE(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  return withRBACParams(request, context.params, Permission.USER_DELETE, async (_, { params }) => {
+  return requireAdmin(request, async () => {
     try {
-      const resolved = await params;
+      const resolved = await context.params;
       const id = Number(resolved.id);
       if (Number.isNaN(id)) {
         return NextResponse.json(

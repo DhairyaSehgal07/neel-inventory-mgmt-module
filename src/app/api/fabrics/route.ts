@@ -22,10 +22,10 @@ import { getBaseUrl } from '@/lib/base-url';
 
 /**
  * GET /api/fabrics
- * List all fabrics with type, strength, width. Requires FABRIC_VIEW.
+ * List all fabrics with type, strength, width. Requires FABRIC_READ.
  */
 export async function GET(request: NextRequest) {
-  return withRBAC(request, Permission.FABRIC_VIEW, async () => {
+  return withRBAC(request, Permission.FABRIC_READ, async () => {
     try {
       await dbConnect();
       const [fabrics, lengthSum] = await Promise.all([

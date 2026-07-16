@@ -28,10 +28,10 @@ function isPrismaKnownRequestError(
 
 /**
  * GET /api/raw-materials/[id]
- * Requires RAW_MATERIAL_BATCH_VIEW.
+ * Requires RAW_MATERIAL_READ.
  */
 export async function GET(_request: NextRequest, { params }: RouteParams) {
-  return withRBAC(_request, Permission.RAW_MATERIAL_BATCH_VIEW, async () => {
+  return withRBAC(_request, Permission.RAW_MATERIAL_READ, async () => {
     try {
       const { id } = await params;
       const rawMaterialId = parseInt(id, 10);
@@ -68,10 +68,10 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 
 /**
  * PATCH /api/raw-materials/[id]
- * Requires RAW_MATERIAL_BATCH_UPDATE.
+ * Requires RAW_MATERIAL_UPDATE.
  */
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
-  return withRBAC(request, Permission.RAW_MATERIAL_BATCH_UPDATE, async () => {
+  return withRBAC(request, Permission.RAW_MATERIAL_UPDATE, async () => {
     try {
       const { id } = await params;
       const rawMaterialId = parseInt(id, 10);
@@ -207,10 +207,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
 /**
  * DELETE /api/raw-materials/[id]
- * Requires RAW_MATERIAL_BATCH_DELETE.
+ * Requires RAW_MATERIAL_DELETE.
  */
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {
-  return withRBAC(_request, Permission.RAW_MATERIAL_BATCH_DELETE, async () => {
+  return withRBAC(_request, Permission.RAW_MATERIAL_DELETE, async () => {
     try {
       const { id } = await params;
       const rawMaterialId = parseInt(id, 10);

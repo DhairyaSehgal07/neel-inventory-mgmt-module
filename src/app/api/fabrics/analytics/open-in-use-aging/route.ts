@@ -21,10 +21,10 @@ import { FabricStatus } from '@/generated/prisma/client';
  *
  * Sorted descending by aging days (oldest / most stale first).
  *
- * Requires FABRIC_VIEW.
+ * Requires FABRIC_REPORTS.
  */
 export async function GET(request: NextRequest) {
-  return withRBAC(request, Permission.FABRIC_VIEW, async () => {
+  return withRBAC(request, Permission.FABRIC_REPORTS, async () => {
     try {
       await dbConnect();
 

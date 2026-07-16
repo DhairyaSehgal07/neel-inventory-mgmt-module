@@ -3,6 +3,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import dbConnect from '@/lib/dbConnect';
 import prisma from '@/lib/prisma';
+import { normalizePermissions } from '@/lib/rbac/permissions';
 import { signInSchema } from '@/schemas/signInSchema';
 import type { JWTCallbackParams, SessionCallbackParams } from '@/types/nextAuth';
 import type { User } from 'next-auth';
@@ -56,7 +57,7 @@ export const { auth, handlers } = NextAuth({
             name: user.name,
             mobileNumber: user.mobileNumber,
             role: user.role,
-            permissions: user.permissions || [],
+            permissions: normalizePermissions(user.permissions || []),
             isActive: user.isActive,
           } as User;
         } catch (err) {

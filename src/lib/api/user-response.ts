@@ -1,3 +1,5 @@
+import { normalizePermissions } from '@/lib/rbac/permissions';
+
 /**
  * User shape returned by API (password never included).
  */
@@ -16,5 +18,8 @@ export function toUserResponse(
   user: UserResponse & { password: string }
 ): UserResponse {
   const { password: _p, ...rest } = user;
-  return rest as UserResponse;
+  return {
+    ...rest,
+    permissions: normalizePermissions(rest.permissions ?? []),
+  };
 }

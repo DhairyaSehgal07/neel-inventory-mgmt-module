@@ -20,10 +20,10 @@ type RouteParams = { params: Promise<{ id: string }> };
  * Mirrors fabrics update behavior:
  * - quantity > 0   -> OPEN
  * - quantity === 0 -> CONSUMED
- * Requires COMPOUND_BATCH_UPDATE.
+ * Requires COMPOUND_UPDATE.
  */
 export async function POST(request: NextRequest, { params }: RouteParams) {
-  return withRBAC(request, Permission.COMPOUND_BATCH_UPDATE, async () => {
+  return withRBAC(request, Permission.COMPOUND_UPDATE, async () => {
     try {
       const { id } = await params;
       const compoundId = parseInt(id, 10);

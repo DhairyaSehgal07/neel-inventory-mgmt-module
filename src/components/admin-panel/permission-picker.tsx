@@ -9,18 +9,9 @@ import { Separator } from "@/components/ui/separator"
 import { Permission, PermissionGroups } from "@/lib/rbac/permissions"
 
 const GROUP_LABELS: Record<keyof typeof PermissionGroups, string> = {
-  BELT: "Belt",
-  USER: "User Management",
-  DASHBOARD: "Dashboard",
-  REPORTS: "Reports",
-  COMPOUND_TYPE: "Compound Master",
-  COMPOUND_BATCH: "Compound Batch",
-  RAW_MATERIAL_BATCH: "Raw Material Batch",
-  RATING: "Rating",
-  FABRIC_TYPE: "Fabric Type",
-  FABRIC_STRENGTH: "Fabric Strength",
-  FABRIC_WIDTH: "Fabric Width",
-  FABRIC: "Fabric",
+  FABRIC: "Fabrics",
+  COMPOUND: "Compounds",
+  RAW_MATERIAL: "Raw Materials",
 }
 
 function permissionLabel(permission: Permission) {

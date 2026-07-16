@@ -22,10 +22,10 @@ type AggRow = {
  * Sum of meters consumed (balance decreases) per width × strength in the date window.
  * Same master width/strength axes as the stock matrix (full Cartesian product).
  *
- * Requires FABRIC_VIEW.
+ * Requires FABRIC_REPORTS.
  */
 export async function GET(request: NextRequest) {
-  return withRBAC(request, Permission.FABRIC_VIEW, async () => {
+  return withRBAC(request, Permission.FABRIC_REPORTS, async () => {
     try {
       await dbConnect();
 

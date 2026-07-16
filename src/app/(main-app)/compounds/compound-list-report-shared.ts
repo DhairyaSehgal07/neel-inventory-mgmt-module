@@ -63,11 +63,15 @@ export type CompoundReportCategoryId =
 
 export function prepareCompoundsForCategoryReport(
   compounds: CompoundRow[],
-  categoryId: CompoundReportCategoryId
+  categoryId: CompoundReportCategoryId,
+  statusFilter?: readonly string[] | null
 ): CompoundRow[] {
   let result = compounds;
   if (categoryId !== 'all') {
     result = result.filter((row) => (row.status ?? '') === categoryId);
+  } else if (statusFilter && statusFilter.length > 0) {
+    const allowed = new Set(statusFilter);
+    result = result.filter((row) => allowed.has(row.status ?? ''));
   }
   return [...result].sort((a, b) => {
     const ta = Date.parse(a.dateOfProduction);

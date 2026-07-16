@@ -7,10 +7,10 @@ import { createFabricStrengthSchema } from '@/schemas/fabricSettingsSchema';
 
 /**
  * GET /api/fabric-strengths
- * List fabric strengths. Requires FABRIC_STRENGTH_VIEW.
+ * List fabric strengths. Requires FABRIC_READ.
  */
 export async function GET(request: NextRequest) {
-  return withRBAC(request, Permission.FABRIC_STRENGTH_VIEW, async () => {
+  return withRBAC(request, Permission.FABRIC_READ, async () => {
     try {
       await dbConnect();
       const items = await prisma.fabricStrength.findMany({
@@ -29,10 +29,10 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/fabric-strengths
- * Create fabric strength. Requires FABRIC_STRENGTH_CREATE.
+ * Create fabric strength. Requires FABRIC_CREATE.
  */
 export async function POST(request: NextRequest) {
-  return withRBAC(request, Permission.FABRIC_STRENGTH_CREATE, async () => {
+  return withRBAC(request, Permission.FABRIC_CREATE, async () => {
     try {
       const body = await request.json();
       const parsed = createFabricStrengthSchema.safeParse(body);

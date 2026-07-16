@@ -103,3 +103,62 @@ export function buildBalanceUpdateData(
     purchasedWeightKg: existing.purchasedBags * existing.weightPerUnit,
   };
 }
+
+/** Round kg values to 2 decimal places. */
+export function roundKg(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
+/**
+ * Consume weight (kg) from available stock. Derives fractional bags as
+ * remainingKg / weightPerUnit so availableWeightKg = availableBags × weightPerUnit.
+ */
+export function consumeAvailableWeightKg(
+  existing: {
+    availableBags: number;
+    availableWeightKg: number;
+    purchasedBags: number;
+    weightPerUnit: number;
+    packedAt: Date | null;
+  },
+  consumeKg: number,
+  now: Date = new Date()
+):
+  | { ok: true; balance: RawMaterialBalanceSnapshot & { purchasedWeightKg: number } }
+  | { ok: false; message: string } {
+  const consume = roundKg(consumeKg);
+  if (!(consume > BAG_TOLERANCE)) {
+    return { ok: false, message: 'Consume quantity must be greater than zero' };
+  }
+  if (existing.weightPerUnit <= BAG_TOLERANCE) {
+    return { ok: false, message: 'Invalid weight per unit' };
+  }
+  if (consume - existing.availableWeightKg > BAG_TOLERANCE) {
+    return {
+      ok: false,
+      message: `Cannot consume more than available (${roundKg(existing.availableWeightKg)} kg)`,
+    };
+  }
+
+  const availableWeightKg = roundKg(Math.max(0, existing.availableWeightKg - consume));
+  const availableBags =
+    availableWeightKg <= BAG_TOLERANCE ? 0 : availableWeightKg / existing.weightPerUnit;
+  const status = nextStatusFromBags(availableBags, existing.purchasedBags);
+  const packedAt = resolvePackedAt(
+    availableBags,
+    existing.purchasedBags,
+    existing.packedAt,
+    now
+  );
+
+  return {
+    ok: true,
+    balance: {
+      availableBags,
+      availableWeightKg,
+      status,
+      packedAt,
+      purchasedWeightKg: existing.purchasedBags * existing.weightPerUnit,
+    },
+  };
+}

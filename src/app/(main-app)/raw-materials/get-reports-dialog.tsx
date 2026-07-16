@@ -37,8 +37,16 @@ const REPORT_CATEGORY_IDS = [
   'ASSIGNED',
 ] as const;
 
-function categoryLabel(id: (typeof REPORT_CATEGORY_IDS)[number]): string {
-  if (id === 'all') return 'All';
+function categoryLabel(
+  id: (typeof REPORT_CATEGORY_IDS)[number],
+  statusFilter?: readonly string[] | null
+): string {
+  if (id === 'all') {
+    if (statusFilter && statusFilter.length > 0) {
+      return `All (${statusFilter.join(', ')})`;
+    }
+    return 'All';
+  }
   return id
     .split('_')
     .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
@@ -49,12 +57,14 @@ type GetReportsDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   rawMaterials: RawMaterialRow[];
+  statusFilter?: readonly string[] | null;
 };
 
 export function GetRawMaterialReportsDialog({
   open,
   onOpenChange,
   rawMaterials,
+  statusFilter = null,
 }: GetReportsDialogProps) {
   const [exportLoading, setExportLoading] = React.useState<{
     kind: 'pdf' | 'excel';
@@ -63,10 +73,17 @@ export function GetRawMaterialReportsDialog({
 
   const handlePdfClick = React.useCallback(
     async (categoryId: RawMaterialReportCategoryId) => {
-      const label = categoryLabel(categoryId as (typeof REPORT_CATEGORY_IDS)[number]);
+      const label = categoryLabel(
+        categoryId as (typeof REPORT_CATEGORY_IDS)[number],
+        categoryId === 'all' ? statusFilter : null
+      );
       setExportLoading({ kind: 'pdf', categoryId });
       try {
-        const rows = prepareRawMaterialsForCategoryReport(rawMaterials, categoryId);
+        const rows = prepareRawMaterialsForCategoryReport(
+          rawMaterials,
+          categoryId,
+          categoryId === 'all' ? statusFilter : null
+        );
         const title = `Raw material report — ${label}`;
         const generatedAtLabel = `Generated ${format(new Date(), 'PPpp')}`;
         const blob = await getRawMaterialListReportPdfBlob(rows, title, generatedAtLabel);
@@ -79,15 +96,22 @@ export function GetRawMaterialReportsDialog({
         setExportLoading(null);
       }
     },
-    [rawMaterials]
+    [rawMaterials, statusFilter]
   );
 
   const handleExcelClick = React.useCallback(
     async (categoryId: RawMaterialReportCategoryId) => {
-      const label = categoryLabel(categoryId as (typeof REPORT_CATEGORY_IDS)[number]);
+      const label = categoryLabel(
+        categoryId as (typeof REPORT_CATEGORY_IDS)[number],
+        categoryId === 'all' ? statusFilter : null
+      );
       setExportLoading({ kind: 'excel', categoryId });
       try {
-        const rows = prepareRawMaterialsForCategoryReport(rawMaterials, categoryId);
+        const rows = prepareRawMaterialsForCategoryReport(
+          rawMaterials,
+          categoryId,
+          categoryId === 'all' ? statusFilter : null
+        );
         const title = `Raw material report — ${label}`;
         const generatedAtLabel = `Generated ${format(new Date(), 'PPpp')}`;
         const blob = getRawMaterialListReportExcelBlob(rows, title, generatedAtLabel);
@@ -104,7 +128,7 @@ export function GetRawMaterialReportsDialog({
         setExportLoading(null);
       }
     },
-    [rawMaterials]
+    [rawMaterials, statusFilter]
   );
 
   return (
@@ -114,6 +138,7 @@ export function GetRawMaterialReportsDialog({
           <DialogTitle>Raw material reports</DialogTitle>
           <DialogDescription>
             Download a report per status. PDF and Excel are available for each category.
+            The All export respects the status filter from the overview table.
           </DialogDescription>
         </DialogHeader>
 
@@ -132,7 +157,7 @@ export function GetRawMaterialReportsDialog({
           </div>
           <div className="divide-y divide-border" role="list" aria-label="Report categories">
             {REPORT_CATEGORY_IDS.map((id) => {
-              const label = categoryLabel(id);
+              const label = categoryLabel(id, id === 'all' ? statusFilter : null);
               return (
                 <div
                   key={id}

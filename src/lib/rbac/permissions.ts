@@ -1,151 +1,143 @@
 /**
- * Available permissions in the system
- * Admin users have all permissions by default
- * Other users can be granted specific permissions by Admin
+ * Available permissions in the system.
+ * Admin users have all permissions by default (role check).
+ * Other users are granted module CRUD + reports by Admin.
  */
 export enum Permission {
-  // Belt permissions
-  BELT_VIEW = 'belt:view',
-  BELT_CREATE = 'belt:create',
-  BELT_UPDATE = 'belt:update',
-  BELT_DELETE = 'belt:delete',
-
-  // User management permissions
-  USER_VIEW = 'user:view',
-  USER_CREATE = 'user:create',
-  USER_UPDATE = 'user:update',
-  USER_DELETE = 'user:delete',
-  USER_MANAGE_PERMISSIONS = 'user:manage_permissions',
-
-  // Dashboard permissions
-  DASHBOARD_VIEW = 'dashboard:view',
-  DASHBOARD_REVERSE_TRACKING = 'dashboard:reverse_tracking',
-
-  // Reports permissions
-  REPORTS_VIEW = 'reports:view',
-  REPORTS_EXPORT = 'reports:export',
-
-  // Compound master permissions
-  COMPOUND_MASTER_VIEW = 'compound_master:view',
-  COMPOUND_MASTER_CREATE = 'compound_master:create',
-  COMPOUND_MASTER_UPDATE = 'compound_master:update',
-  COMPOUND_MASTER_DELETE = 'compound_master:delete',
-
-  COMPOUND_BATCH_VIEW = 'compound_batch:view',
-  COMPOUND_BATCH_CREATE = 'compound_batch:create',
-  COMPOUND_BATCH_UPDATE = 'compound_batch:update',
-  COMPOUND_BATCH_DELETE = 'compound_batch:delete',
-
-  RAW_MATERIAL_BATCH_VIEW = 'raw_material_batch:view',
-  RAW_MATERIAL_BATCH_CREATE = 'raw_material_batch:create',
-  RAW_MATERIAL_BATCH_UPDATE = 'raw_material_batch:update',
-  RAW_MATERIAL_BATCH_DELETE = 'raw_material_batch:delete',
-
-  // Rating permissions
-  RATING_VIEW = 'rating:view',
-  RATING_CREATE = 'rating:create',
-  RATING_UPDATE = 'rating:update',
-  RATING_DELETE = 'rating:delete',
-
-  // Fabric settings (type, strength, width)
-  FABRIC_TYPE_VIEW = 'fabric_type:view',
-  FABRIC_TYPE_CREATE = 'fabric_type:create',
-  FABRIC_TYPE_UPDATE = 'fabric_type:update',
-  FABRIC_TYPE_DELETE = 'fabric_type:delete',
-
-  FABRIC_STRENGTH_VIEW = 'fabric_strength:view',
-  FABRIC_STRENGTH_CREATE = 'fabric_strength:create',
-  FABRIC_STRENGTH_UPDATE = 'fabric_strength:update',
-  FABRIC_STRENGTH_DELETE = 'fabric_strength:delete',
-
-  FABRIC_WIDTH_VIEW = 'fabric_width:view',
-  FABRIC_WIDTH_CREATE = 'fabric_width:create',
-  FABRIC_WIDTH_UPDATE = 'fabric_width:update',
-  FABRIC_WIDTH_DELETE = 'fabric_width:delete',
-
-  // Fabric (inventory item) permissions
-  FABRIC_VIEW = 'fabric:view',
+  // Fabrics
   FABRIC_CREATE = 'fabric:create',
+  FABRIC_READ = 'fabric:read',
   FABRIC_UPDATE = 'fabric:update',
   FABRIC_DELETE = 'fabric:delete',
+  FABRIC_REPORTS = 'fabric:reports',
+
+  // Compounds
+  COMPOUND_CREATE = 'compound:create',
+  COMPOUND_READ = 'compound:read',
+  COMPOUND_UPDATE = 'compound:update',
+  COMPOUND_DELETE = 'compound:delete',
+  COMPOUND_REPORTS = 'compound:reports',
+
+  // Raw materials
+  RAW_MATERIAL_CREATE = 'raw_material:create',
+  RAW_MATERIAL_READ = 'raw_material:read',
+  RAW_MATERIAL_UPDATE = 'raw_material:update',
+  RAW_MATERIAL_DELETE = 'raw_material:delete',
+  RAW_MATERIAL_REPORTS = 'raw_material:reports',
 }
 
 /**
- * Permission groups for easier management
+ * Permission groups for the admin permission picker.
  */
 export const PermissionGroups = {
-  BELT: [
-    Permission.BELT_VIEW,
-    Permission.BELT_CREATE,
-    Permission.BELT_UPDATE,
-    Permission.BELT_DELETE,
-  ],
-  USER: [
-    Permission.USER_VIEW,
-    Permission.USER_CREATE,
-    Permission.USER_UPDATE,
-    Permission.USER_DELETE,
-    Permission.USER_MANAGE_PERMISSIONS,
-  ],
-  DASHBOARD: [
-    Permission.DASHBOARD_VIEW,
-    Permission.DASHBOARD_REVERSE_TRACKING,
-  ],
-  REPORTS: [
-    Permission.REPORTS_VIEW,
-    Permission.REPORTS_EXPORT,
-  ],
-  COMPOUND_TYPE: [
-    Permission.COMPOUND_MASTER_VIEW,
-    Permission.COMPOUND_MASTER_CREATE,
-    Permission.COMPOUND_MASTER_UPDATE,
-    Permission.COMPOUND_MASTER_DELETE,
-  ],
-  COMPOUND_BATCH: [
-    Permission.COMPOUND_BATCH_VIEW,
-    Permission.COMPOUND_BATCH_CREATE,
-    Permission.COMPOUND_BATCH_UPDATE,
-    Permission.COMPOUND_BATCH_DELETE,
-  ],
-  RAW_MATERIAL_BATCH: [
-    Permission.RAW_MATERIAL_BATCH_VIEW,
-    Permission.RAW_MATERIAL_BATCH_CREATE,
-    Permission.RAW_MATERIAL_BATCH_UPDATE,
-    Permission.RAW_MATERIAL_BATCH_DELETE,
-  ],
-  RATING: [
-    Permission.RATING_VIEW,
-    Permission.RATING_CREATE,
-    Permission.RATING_UPDATE,
-    Permission.RATING_DELETE,
-  ],
-  FABRIC_TYPE: [
-    Permission.FABRIC_TYPE_VIEW,
-    Permission.FABRIC_TYPE_CREATE,
-    Permission.FABRIC_TYPE_UPDATE,
-    Permission.FABRIC_TYPE_DELETE,
-  ],
-  FABRIC_STRENGTH: [
-    Permission.FABRIC_STRENGTH_VIEW,
-    Permission.FABRIC_STRENGTH_CREATE,
-    Permission.FABRIC_STRENGTH_UPDATE,
-    Permission.FABRIC_STRENGTH_DELETE,
-  ],
-  FABRIC_WIDTH: [
-    Permission.FABRIC_WIDTH_VIEW,
-    Permission.FABRIC_WIDTH_CREATE,
-    Permission.FABRIC_WIDTH_UPDATE,
-    Permission.FABRIC_WIDTH_DELETE,
-  ],
   FABRIC: [
-    Permission.FABRIC_VIEW,
     Permission.FABRIC_CREATE,
+    Permission.FABRIC_READ,
     Permission.FABRIC_UPDATE,
     Permission.FABRIC_DELETE,
+    Permission.FABRIC_REPORTS,
+  ],
+  COMPOUND: [
+    Permission.COMPOUND_CREATE,
+    Permission.COMPOUND_READ,
+    Permission.COMPOUND_UPDATE,
+    Permission.COMPOUND_DELETE,
+    Permission.COMPOUND_REPORTS,
+  ],
+  RAW_MATERIAL: [
+    Permission.RAW_MATERIAL_CREATE,
+    Permission.RAW_MATERIAL_READ,
+    Permission.RAW_MATERIAL_UPDATE,
+    Permission.RAW_MATERIAL_DELETE,
+    Permission.RAW_MATERIAL_REPORTS,
   ],
 } as const;
 
-/**
- * All available permissions
- */
 export const ALL_PERMISSIONS = Object.values(Permission);
+
+/**
+ * Map legacy permission strings to the simplified model.
+ * Used when migrating stored user.permissions arrays.
+ */
+const LEGACY_PERMISSION_MAP: Record<string, Permission[]> = {
+  // Fabrics (inventory)
+  'fabric:view': [Permission.FABRIC_READ],
+  'fabric:create': [Permission.FABRIC_CREATE],
+  'fabric:update': [Permission.FABRIC_UPDATE],
+  'fabric:delete': [Permission.FABRIC_DELETE],
+  'fabric:read': [Permission.FABRIC_READ],
+  'fabric:reports': [Permission.FABRIC_REPORTS],
+
+  // Fabric settings → fabric module
+  'fabric_type:view': [Permission.FABRIC_READ],
+  'fabric_type:create': [Permission.FABRIC_CREATE],
+  'fabric_type:update': [Permission.FABRIC_UPDATE],
+  'fabric_type:delete': [Permission.FABRIC_DELETE],
+  'fabric_strength:view': [Permission.FABRIC_READ],
+  'fabric_strength:create': [Permission.FABRIC_CREATE],
+  'fabric_strength:update': [Permission.FABRIC_UPDATE],
+  'fabric_strength:delete': [Permission.FABRIC_DELETE],
+  'fabric_width:view': [Permission.FABRIC_READ],
+  'fabric_width:create': [Permission.FABRIC_CREATE],
+  'fabric_width:update': [Permission.FABRIC_UPDATE],
+  'fabric_width:delete': [Permission.FABRIC_DELETE],
+
+  // Compounds
+  'compound_master:view': [Permission.COMPOUND_READ],
+  'compound_master:create': [Permission.COMPOUND_CREATE],
+  'compound_master:update': [Permission.COMPOUND_UPDATE],
+  'compound_master:delete': [Permission.COMPOUND_DELETE],
+  'compound_batch:view': [Permission.COMPOUND_READ],
+  'compound_batch:create': [Permission.COMPOUND_CREATE],
+  'compound_batch:update': [Permission.COMPOUND_UPDATE],
+  'compound_batch:delete': [Permission.COMPOUND_DELETE],
+  'compound:create': [Permission.COMPOUND_CREATE],
+  'compound:read': [Permission.COMPOUND_READ],
+  'compound:update': [Permission.COMPOUND_UPDATE],
+  'compound:delete': [Permission.COMPOUND_DELETE],
+  'compound:reports': [Permission.COMPOUND_REPORTS],
+
+  // Raw materials
+  'raw_material_batch:view': [Permission.RAW_MATERIAL_READ],
+  'raw_material_batch:create': [Permission.RAW_MATERIAL_CREATE],
+  'raw_material_batch:update': [Permission.RAW_MATERIAL_UPDATE],
+  'raw_material_batch:delete': [Permission.RAW_MATERIAL_DELETE],
+  'raw_material:create': [Permission.RAW_MATERIAL_CREATE],
+  'raw_material:read': [Permission.RAW_MATERIAL_READ],
+  'raw_material:update': [Permission.RAW_MATERIAL_UPDATE],
+  'raw_material:delete': [Permission.RAW_MATERIAL_DELETE],
+  'raw_material:reports': [Permission.RAW_MATERIAL_REPORTS],
+
+  // Global reports → all module reports
+  'reports:view': [
+    Permission.FABRIC_REPORTS,
+    Permission.COMPOUND_REPORTS,
+    Permission.RAW_MATERIAL_REPORTS,
+  ],
+  'reports:export': [
+    Permission.FABRIC_REPORTS,
+    Permission.COMPOUND_REPORTS,
+    Permission.RAW_MATERIAL_REPORTS,
+  ],
+};
+
+/**
+ * Normalize a stored permissions array to the current Permission enum.
+ * Drops unknown / obsolete values (belt, rating, user, dashboard, etc.).
+ */
+export function normalizePermissions(permissions: string[]): Permission[] {
+  const next = new Set<Permission>();
+
+  for (const raw of permissions) {
+    const mapped = LEGACY_PERMISSION_MAP[raw];
+    if (mapped) {
+      for (const p of mapped) next.add(p);
+      continue;
+    }
+    if ((ALL_PERMISSIONS as string[]).includes(raw)) {
+      next.add(raw as Permission);
+    }
+  }
+
+  return ALL_PERMISSIONS.filter((p) => next.has(p));
+}

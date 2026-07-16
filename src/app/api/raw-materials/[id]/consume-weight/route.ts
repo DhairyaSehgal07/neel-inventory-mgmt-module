@@ -5,20 +5,24 @@ import prisma from '@/lib/prisma';
 import dbConnect from '@/lib/dbConnect';
 import { withRBAC } from '@/lib/rbac';
 import { Permission } from '@/lib/rbac/permissions';
-import { buildBalanceUpdateData } from '@/lib/rawMaterialBalance';
+import { consumeAvailableWeightKg, roundKg } from '@/lib/rawMaterialBalance';
 import { logRawMaterialBalanceUpdate } from '@/lib/rawMaterialHistoryWrite';
+import { RawMaterialStatus } from '@/generated/prisma/enums';
 
-const updateAvailableSchema = z.object({
-  availableBags: z.coerce
-    .number({ message: 'Available bags must be a number' })
-    .min(0, 'Available bags must be non-negative'),
+const consumeWeightSchema = z.object({
+  consumeKg: z.coerce
+    .number({ message: 'Consume quantity must be a number' })
+    .positive('Consume quantity must be greater than zero')
+    .refine((n) => Math.abs(n - roundKg(n)) < 1e-9, {
+      message: 'Consume quantity may have at most 2 decimal places',
+    }),
 });
 
 type RouteParams = { params: Promise<{ id: string }> };
 
 /**
- * POST /api/raw-materials/[id]/update-available
- * Sets available bag count and recomputes availableWeightKg; updates status (OPEN / PACKED / CONSUMED).
+ * POST /api/raw-materials/[id]/consume-weight
+ * Consumes kg from available stock and recomputes availableBags; updates status.
  * Requires RAW_MATERIAL_UPDATE.
  */
 export async function POST(request: NextRequest, { params }: RouteParams) {
@@ -34,10 +38,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       }
 
       const body = await request.json();
-      const parsed = updateAvailableSchema.safeParse(body);
+      const parsed = consumeWeightSchema.safeParse(body);
       if (!parsed.success) {
         const message =
-          parsed.error.flatten().fieldErrors.availableBags?.join(', ') ?? 'Validation failed';
+          parsed.error.flatten().fieldErrors.consumeKg?.join(', ') ?? 'Validation failed';
         return NextResponse.json({ success: false, message }, { status: 400 });
       }
 
@@ -69,18 +73,24 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         );
       }
 
-      const availableBags = parsed.data.availableBags;
-      if (availableBags - existing.purchasedBags > 1e-6) {
+      if (
+        existing.status === RawMaterialStatus.REJECTED ||
+        existing.status === RawMaterialStatus.TRADED
+      ) {
         return NextResponse.json(
           {
             success: false,
-            message: `Available bags cannot exceed purchased bags (${existing.purchasedBags})`,
+            message: `Cannot adjust stock when status is ${existing.status}`,
           },
           { status: 400 }
         );
       }
 
-      const balance = buildBalanceUpdateData(existing, availableBags);
+      const result = consumeAvailableWeightKg(existing, parsed.data.consumeKg);
+      if (!result.ok) {
+        return NextResponse.json({ success: false, message: result.message }, { status: 400 });
+      }
+      const { balance } = result;
 
       const updated = await prisma.$transaction(async (tx) => {
         const row = await tx.rawMaterial.update({
@@ -110,12 +120,12 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({
         success: true,
         data: updated,
-        message: `Available stock updated; status ${balance.status}`,
+        message: `Consumed ${roundKg(parsed.data.consumeKg)} kg; status ${balance.status}`,
       });
     } catch (error) {
-      console.error('POST /api/raw-materials/[id]/update-available error:', error);
+      console.error('POST /api/raw-materials/[id]/consume-weight error:', error);
       const message =
-        error instanceof Error ? error.message : 'Failed to update available stock';
+        error instanceof Error ? error.message : 'Failed to consume weight';
       return NextResponse.json(
         { success: false, message: `Failed to update: ${message}` },
         { status: 500 }

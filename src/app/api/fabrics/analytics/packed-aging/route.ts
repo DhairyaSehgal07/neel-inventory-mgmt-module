@@ -16,10 +16,10 @@ import { FabricStatus } from '@/generated/prisma/client';
  *
  * Rolls with status PACKED only. Same aging rules as open-in-use-aging.
  *
- * Requires FABRIC_VIEW.
+ * Requires FABRIC_REPORTS.
  */
 export async function GET(request: NextRequest) {
-  return withRBAC(request, Permission.FABRIC_VIEW, async () => {
+  return withRBAC(request, Permission.FABRIC_REPORTS, async () => {
     try {
       await dbConnect();
 

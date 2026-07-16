@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { Permission } from "./permissions";
+import { Permission, normalizePermissions } from "./permissions";
 import { Role } from "@/model/User";
+
+function resolvedPermissions(
+  userPermissions: Permission[] | string[] | undefined
+): Permission[] {
+  return normalizePermissions((userPermissions as string[]) ?? []);
+}
 
 /**
  * Check if a user has a specific permission
@@ -9,7 +15,7 @@ import { Role } from "@/model/User";
  */
 export function hasPermission(
   userRole: Role | undefined,
-  userPermissions: Permission[] | undefined,
+  userPermissions: Permission[] | string[] | undefined,
   requiredPermission: Permission
 ): boolean {
   // Admin has access to everything
@@ -17,12 +23,7 @@ export function hasPermission(
     return true;
   }
 
-  // Check if user has the required permission
-  if (userPermissions && userPermissions.includes(requiredPermission)) {
-    return true;
-  }
-
-  return false;
+  return resolvedPermissions(userPermissions).includes(requiredPermission);
 }
 
 /**
@@ -30,7 +31,7 @@ export function hasPermission(
  */
 export function hasAnyPermission(
   userRole: Role | undefined,
-  userPermissions: Permission[] | undefined,
+  userPermissions: Permission[] | string[] | undefined,
   requiredPermissions: Permission[]
 ): boolean {
   // Admin has access to everything
@@ -38,14 +39,8 @@ export function hasAnyPermission(
     return true;
   }
 
-  // Check if user has any of the required permissions
-  if (userPermissions) {
-    return requiredPermissions.some((permission) =>
-      userPermissions.includes(permission)
-    );
-  }
-
-  return false;
+  const perms = resolvedPermissions(userPermissions);
+  return requiredPermissions.some((permission) => perms.includes(permission));
 }
 
 /**
@@ -53,7 +48,7 @@ export function hasAnyPermission(
  */
 export function hasAllPermissions(
   userRole: Role | undefined,
-  userPermissions: Permission[] | undefined,
+  userPermissions: Permission[] | string[] | undefined,
   requiredPermissions: Permission[]
 ): boolean {
   // Admin has access to everything
@@ -61,14 +56,8 @@ export function hasAllPermissions(
     return true;
   }
 
-  // Check if user has all of the required permissions
-  if (userPermissions) {
-    return requiredPermissions.every((permission) =>
-      userPermissions.includes(permission)
-    );
-  }
-
-  return false;
+  const perms = resolvedPermissions(userPermissions);
+  return requiredPermissions.every((permission) => perms.includes(permission));
 }
 
 /**
@@ -107,7 +96,7 @@ export async function withRBAC(
     }
 
     const userRole = session.user.role as Role | undefined;
-    const userPermissions = (session.user.permissions as Permission[]) || [];
+    const userPermissions = session.user.permissions || [];
 
     // Check permissions
     const permissionsArray = Array.isArray(requiredPermission)

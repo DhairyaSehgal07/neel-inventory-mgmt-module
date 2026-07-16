@@ -23,10 +23,10 @@ type RouteParams = { params: Promise<{ id: string }> };
 /**
  * POST /api/compounds/[id]/assign
  * Update compound assignTo and status; records CompoundHistory ASSIGN.
- * Requires COMPOUND_BATCH_UPDATE.
+ * Requires COMPOUND_UPDATE.
  */
 export async function POST(request: NextRequest, { params }: RouteParams) {
-  return withRBAC(request, Permission.COMPOUND_BATCH_UPDATE, async () => {
+  return withRBAC(request, Permission.COMPOUND_UPDATE, async () => {
     try {
       const { id } = await params;
       const compoundId = parseInt(id, 10);

@@ -36,8 +36,16 @@ const REPORT_CATEGORY_IDS = [
   'REJECTED',
 ] as const;
 
-function categoryLabel(id: (typeof REPORT_CATEGORY_IDS)[number]): string {
-  if (id === 'all') return 'All';
+function categoryLabel(
+  id: (typeof REPORT_CATEGORY_IDS)[number],
+  statusFilter?: readonly string[] | null
+): string {
+  if (id === 'all') {
+    if (statusFilter && statusFilter.length > 0) {
+      return `All (${statusFilter.join(', ')})`;
+    }
+    return 'All';
+  }
   return id
     .split('_')
     .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
@@ -48,9 +56,15 @@ type GetReportsDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   compounds: CompoundRow[];
+  statusFilter?: readonly string[] | null;
 };
 
-export function GetReportsDialog({ open, onOpenChange, compounds }: GetReportsDialogProps) {
+export function GetReportsDialog({
+  open,
+  onOpenChange,
+  compounds,
+  statusFilter = null,
+}: GetReportsDialogProps) {
   const [exportLoading, setExportLoading] = React.useState<{
     kind: 'pdf' | 'excel';
     categoryId: CompoundReportCategoryId;
@@ -58,10 +72,17 @@ export function GetReportsDialog({ open, onOpenChange, compounds }: GetReportsDi
 
   const handlePdfClick = React.useCallback(
     async (categoryId: CompoundReportCategoryId) => {
-      const label = categoryLabel(categoryId as (typeof REPORT_CATEGORY_IDS)[number]);
+      const label = categoryLabel(
+        categoryId as (typeof REPORT_CATEGORY_IDS)[number],
+        categoryId === 'all' ? statusFilter : null
+      );
       setExportLoading({ kind: 'pdf', categoryId });
       try {
-        const rows = prepareCompoundsForCategoryReport(compounds, categoryId);
+        const rows = prepareCompoundsForCategoryReport(
+          compounds,
+          categoryId,
+          categoryId === 'all' ? statusFilter : null
+        );
         const title = `Compound report — ${label}`;
         const generatedAtLabel = `Generated ${format(new Date(), 'PPpp')}`;
         const blob = await getCompoundListReportPdfBlob(rows, title, generatedAtLabel);
@@ -74,15 +95,22 @@ export function GetReportsDialog({ open, onOpenChange, compounds }: GetReportsDi
         setExportLoading(null);
       }
     },
-    [compounds]
+    [compounds, statusFilter]
   );
 
   const handleExcelClick = React.useCallback(
     async (categoryId: CompoundReportCategoryId) => {
-      const label = categoryLabel(categoryId as (typeof REPORT_CATEGORY_IDS)[number]);
+      const label = categoryLabel(
+        categoryId as (typeof REPORT_CATEGORY_IDS)[number],
+        categoryId === 'all' ? statusFilter : null
+      );
       setExportLoading({ kind: 'excel', categoryId });
       try {
-        const rows = prepareCompoundsForCategoryReport(compounds, categoryId);
+        const rows = prepareCompoundsForCategoryReport(
+          compounds,
+          categoryId,
+          categoryId === 'all' ? statusFilter : null
+        );
         const title = `Compound report — ${label}`;
         const generatedAtLabel = `Generated ${format(new Date(), 'PPpp')}`;
         const blob = getCompoundListReportExcelBlob(rows, title, generatedAtLabel);
@@ -99,7 +127,7 @@ export function GetReportsDialog({ open, onOpenChange, compounds }: GetReportsDi
         setExportLoading(null);
       }
     },
-    [compounds]
+    [compounds, statusFilter]
   );
 
   return (
@@ -109,7 +137,7 @@ export function GetReportsDialog({ open, onOpenChange, compounds }: GetReportsDi
           <DialogTitle>Compound reports</DialogTitle>
           <DialogDescription>
             Download a report for each status. PDF and Excel formats are available per
-            category.
+            category. The All export respects the status filter from the overview table.
           </DialogDescription>
         </DialogHeader>
 
@@ -128,7 +156,7 @@ export function GetReportsDialog({ open, onOpenChange, compounds }: GetReportsDi
           </div>
           <div className="divide-y divide-border" role="list" aria-label="Report categories">
             {REPORT_CATEGORY_IDS.map((id) => {
-              const label = categoryLabel(id);
+              const label = categoryLabel(id, id === 'all' ? statusFilter : null);
               return (
                 <div
                   key={id}

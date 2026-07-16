@@ -8,10 +8,10 @@ type RouteParams = { params: Promise<{ id: string }> };
 
 /**
  * GET /api/fabrics/[id]/history
- * Returns fabric history entries for the given fabric. Requires FABRIC_VIEW.
+ * Returns fabric history entries for the given fabric. Requires FABRIC_READ.
  */
 export async function GET(request: NextRequest, { params }: RouteParams) {
-  return withRBAC(request, Permission.FABRIC_VIEW, async () => {
+  return withRBAC(request, Permission.FABRIC_READ, async () => {
     try {
       const { id } = await params;
       const fabricId = parseInt(id, 10);

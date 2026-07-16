@@ -44,7 +44,7 @@ export async function withRBACParams<T extends Record<string, string>>(
     }
 
     const userRole = session.user.role as Role | undefined;
-    const userPermissions = (session.user.permissions as Permission[]) || [];
+    const userPermissions = session.user.permissions || [];
 
     // Check permissions
     const permissionsArray = Array.isArray(requiredPermission)

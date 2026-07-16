@@ -7,10 +7,10 @@ import { createFabricWidthSchema } from '@/schemas/fabricSettingsSchema';
 
 /**
  * GET /api/fabric-widths
- * List fabric widths. Requires FABRIC_WIDTH_VIEW.
+ * List fabric widths. Requires FABRIC_READ.
  */
 export async function GET(request: NextRequest) {
-  return withRBAC(request, Permission.FABRIC_WIDTH_VIEW, async () => {
+  return withRBAC(request, Permission.FABRIC_READ, async () => {
     try {
       await dbConnect();
       const items = await prisma.fabricWidth.findMany({
@@ -29,10 +29,10 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/fabric-widths
- * Create fabric width. Requires FABRIC_WIDTH_CREATE.
+ * Create fabric width. Requires FABRIC_CREATE.
  */
 export async function POST(request: NextRequest) {
-  return withRBAC(request, Permission.FABRIC_WIDTH_CREATE, async () => {
+  return withRBAC(request, Permission.FABRIC_CREATE, async () => {
     try {
       const body = await request.json();
       const parsed = createFabricWidthSchema.safeParse(body);

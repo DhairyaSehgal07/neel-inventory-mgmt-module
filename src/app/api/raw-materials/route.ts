@@ -35,10 +35,10 @@ async function optionalPerformedById(): Promise<number | null> {
 
 /**
  * GET /api/raw-materials
- * Requires RAW_MATERIAL_BATCH_VIEW.
+ * Requires RAW_MATERIAL_READ.
  */
 export async function GET(request: NextRequest) {
-  return withRBAC(request, Permission.RAW_MATERIAL_BATCH_VIEW, async () => {
+  return withRBAC(request, Permission.RAW_MATERIAL_READ, async () => {
     try {
       await dbConnect();
       const items = await prisma.rawMaterial.findMany({
@@ -61,10 +61,10 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/raw-materials
- * Requires RAW_MATERIAL_BATCH_CREATE.
+ * Requires RAW_MATERIAL_CREATE.
  */
 export async function POST(request: NextRequest) {
-  return withRBAC(request, Permission.RAW_MATERIAL_BATCH_CREATE, async () => {
+  return withRBAC(request, Permission.RAW_MATERIAL_CREATE, async () => {
     try {
       const body = await request.json();
       const parsed = createRawMaterialSchema.safeParse(body);

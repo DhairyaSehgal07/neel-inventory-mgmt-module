@@ -14,7 +14,7 @@ import { loadRawMaterialAnalyticsData } from '@/lib/rawMaterialAnalyticsLoad';
  * Views 4–5: low-stock alerts and location utilisation.
  */
 export async function GET(request: NextRequest) {
-  return withRBAC(request, Permission.RAW_MATERIAL_BATCH_VIEW, async () => {
+  return withRBAC(request, Permission.RAW_MATERIAL_REPORTS, async () => {
     try {
       await dbConnect();
       const { query, batches, history } = await loadRawMaterialAnalyticsData(

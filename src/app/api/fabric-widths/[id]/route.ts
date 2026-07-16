@@ -7,13 +7,13 @@ import { updateFabricWidthSchema } from '@/schemas/fabricSettingsSchema';
 
 /**
  * GET /api/fabric-widths/[id]
- * Get one fabric width. Requires FABRIC_WIDTH_VIEW.
+ * Get one fabric width. Requires FABRIC_READ.
  */
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  return withRBACParams(request, context.params, Permission.FABRIC_WIDTH_VIEW, async (_, { params }) => {
+  return withRBACParams(request, context.params, Permission.FABRIC_READ, async (_, { params }) => {
     try {
       const resolved = await params;
       const id = Number(resolved.id);
@@ -46,13 +46,13 @@ export async function GET(
 
 /**
  * PATCH /api/fabric-widths/[id]
- * Update fabric width. Requires FABRIC_WIDTH_UPDATE.
+ * Update fabric width. Requires FABRIC_UPDATE.
  */
 export async function PATCH(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  return withRBACParams(request, context.params, Permission.FABRIC_WIDTH_UPDATE, async (req, { params }) => {
+  return withRBACParams(request, context.params, Permission.FABRIC_UPDATE, async (req, { params }) => {
     try {
       const resolved = await params;
       const id = Number(resolved.id);
@@ -119,13 +119,13 @@ export async function PATCH(
 
 /**
  * DELETE /api/fabric-widths/[id]
- * Delete fabric width. Requires FABRIC_WIDTH_DELETE.
+ * Delete fabric width. Requires FABRIC_DELETE.
  */
 export async function DELETE(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  return withRBACParams(request, context.params, Permission.FABRIC_WIDTH_DELETE, async (_, { params }) => {
+  return withRBACParams(request, context.params, Permission.FABRIC_DELETE, async (_, { params }) => {
     try {
       const resolved = await params;
       const id = Number(resolved.id);

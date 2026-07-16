@@ -13,7 +13,7 @@ import { loadRawMaterialAnalyticsData } from '@/lib/rawMaterialAnalyticsLoad';
  * View 1: timeline + material/grade consumption table.
  */
 export async function GET(request: NextRequest) {
-  return withRBAC(request, Permission.RAW_MATERIAL_BATCH_VIEW, async () => {
+  return withRBAC(request, Permission.RAW_MATERIAL_REPORTS, async () => {
     try {
       await dbConnect();
       const { query, batches, history } = await loadRawMaterialAnalyticsData(
